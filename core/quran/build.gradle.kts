@@ -1,4 +1,5 @@
 plugins {
+    id("jacoco")
     id("org.jetbrains.kotlin.jvm") version "2.4.21"
 }
 
@@ -22,6 +23,17 @@ dependencies {
 tasks.withType<Test> {
     useJUnitPlatform()
 }
+
+jacoco {
+    toolVersion = "0.8.13"
+}
+
+tasks.withType<Test> {
+    extensions.configure<JacocoTaskExtension> {
+        isEnabled = true
+    }
+}
+
 
 // §6.1: core:quran is pure JVM (KMP-portable). The Tanzil asset is consumed by the
 // app module; Phase 1 adds the processed derived tables here as pure-JVM resources.

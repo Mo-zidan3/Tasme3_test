@@ -1,4 +1,5 @@
 plugins {
+    id("jacoco")
     id("org.jetbrains.kotlin.jvm") version "2.4.21"
 }
 
@@ -22,3 +23,14 @@ dependencies {
 tasks.withType<Test> {
     useJUnitPlatform()
 }
+
+jacoco {
+    toolVersion = "0.8.13"
+}
+
+tasks.withType<Test> {
+    extensions.configure<JacocoTaskExtension> {
+        isEnabled = true
+    }
+}
+

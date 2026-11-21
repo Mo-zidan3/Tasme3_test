@@ -107,3 +107,34 @@ verified against the value published by services.gradle.org for 9.9.2 (docs/VERI
 - tiny shipping policy §8.1 (badge «الوضع الخفيف» when active).
 - applicationId still `com.example.tasmee` (dev placeholder; Phase 4 Play blocker).
 - Archive location for shipped model files + license texts (asked once; local until answered).
+
+## D-011 Phase 1 decisions (2026-11-21)
+- N() (§7.4): derived VERBATIM from the model repo's own normalizer (`retrieve.py` at pinned rev
+  0c2744b…): fold table {أ/إ/آ/ٱ/ٲ/ٳ→ا, ى/ئ/ے/ی→ي, ؤ→و, ة→ه, ک→ك}; drop every non-letter
+  (harakat, 0653–0655, 0670, tatweel, 06E5/06E6, Quranic marks 06D6–06ED). NOT invented. ۥ/ۦ are
+  dropped as marks (not folded to و/ي) — matches the author's letters(); verified over the full
+  text (V-020). Alef-wasla ٱ→ا. No tanween-split rejoin for Tanzil (0 cases; author's rule targets
+  their reference source).
+- Tanzil asset committed at core/quran/src/main/resources/quran-uthmani.txt with the VERBATIM
+  notice header (28-line block byte-for-byte, sha256 pinned in QuranText). Integrity tests enforce
+  114/6,236/checksum/no-mutation. CC-BY-3.0 interpretation recorded per §7.1 (D-011 cross-ref V-019).
+- core:align semantics resolved during testing (all traceable to §9):
+  - Semi-global DP: free leading/trailing OBSERVED speech AND free leading EXPECTED skips
+    (recitation starts mid-back-window); interior expected skips cost gapMissed; trailing
+    expected are simply not-yet-recited (best-end scan may end at j<m).
+  - Substitution of a high-sim neighbor word is legitimate DP behavior (e.g. skipping الرحمن then
+    reciting الرحيم yields CLOSE for the first + CORRECT for the second); the tracker prefers
+    whatever maximizes total alignment score — no special-casing.
+  - Absence evidence (expected skipped inside a matched span) counts ONLY toward MISSED
+  (≥2 independent), never toward WRONG — a skip is not a misrecitation (bug fixed, V-021).
+  - An all-EXTRA observation (repeat behind window / ta'awwudh) records EXTRA stats and feeds the
+  lost timer (not discarded) (bug fixed, V-021).
+  - Boundary exclusion: pause-FINALs relax interiority per §9.2 (verified by test); partials keep it.
+- Wrong-word and missed-skip tests require CONTEXT words: an isolated single wrong word is
+  legitimately discarded by the semi-global free-edge (score ≤ 0 → pure EXTRA). Recorded as
+  harness-realism note (V-022) — real partial windows (partialWindowMs=2500) provide context.
+- tools:eval pins kotlinx-serialization-json 1.12.0 (latest stable, Maven-verified) with the
+  Kotlin serialization plugin (2.4.21, same Kotlin line).
+- §7.5 N() self-validation PENDING: protocol requires a real clean fixture; none exists in the
+  sandbox. N()↔author-normalizer equivalence verified on the full text instead. No CER claimed.
+- JaCoCo 0.8.13 for coverage measurement; targets MET (91.9% combined).

@@ -1,6 +1,6 @@
 # STATUS — per phase
 
-Last updated: 2026-11-21 (after Phase 0.6 gate-closure work)
+Last updated: 2026-11-21 (Phase 0.6 closed + Phase 1 complete)
 
 ## Phase 0 — Scaffold: **DONE WITH EXCEPTION (E1)**
 Exception E1: **CI has never executed** — sandbox has no `gh` CLI and no git remote; `assembleRelease`
@@ -60,15 +60,26 @@ with exponential backoff, still blocked. Harness-only; not on the Phase 1 critic
    tiny shipping policy §8.1, and the CC-BY-3.0 attribution interpretation (§7.1).
 10. Arabic string review; store copy review; release keystore; code license (Apache-2.0 default).
 
-## Phase 1 — IN PROGRESS (Quran + align + harness, per §16)
-- core:quran: Tanzil asset + notice header + integrity tests (114 / 6,236 / checksum / no-mutation)
-  + N() derived from tokens.txt (V-005 inventory; folds ة→ه, ى→ي, hamza seats) with golden tests;
-  derived table separate, Tanzil notice header in every derived file.
-- core:align: full §9 per v2.0 deltas (semi-global NW + 1↔2 merge/split; independence; precedence
-  machine; confidence-free presets; null-timing mode; speech-only lost timer; EXTRA dedup
-  (text,250ms-bucket); reanchor; idempotency).
-- tools:eval + eval/run_asr.py: same hypotheses JSON as app; synthetic run now; label
-  everything "not measured on real audio".
-- N() self-validation (§7.5): primary model only, clean fixture, model space, target CER < 2%.
-- S6 baseline retry (exponential backoff; never an unpinned mirror).
-Coverage target ≥85% lines on core:quran + core:align.
+## Phase 1 — DONE (with two honest pendings) (Quran + align + harness, per §16)
+- **core:quran DONE**: Tanzil asset committed with verbatim notice header (whole-file sha256
+  8c3a25b0…; ayah-payload sha256 a0d9cd37…); integrity tests (114 / 6,236 / checksums / notice /
+  basmala placement / no-mutation) GREEN; N() derived from the model repo's own normalizer
+  (retrieve.py at pinned rev) — folds/drops documented in code (V-020), 12 golden tests GREEN;
+  full-text verification 77,881 words → 327,514 letters, exactly 29 letters, 0 empty words.
+- **core:align DONE**: full §9 — semi-global NW (free leading/trailing observed, free leading
+  expected) + 1↔2 merge, independence counting, interiority (timed + null-timing token-index),
+  precedence machine (HINTED terminal > CORRECT never-downgraded > MISSED ≥2-independent-absence >
+  WRONG per preset > CLOSE > PENDING), EXTRA dedup (text,250ms bucket), speech-only lost timer,
+  range-wide reanchor, hint, §9.6 summary semantics. 31 tests GREEN; coverage 91.7% lines.
+  Two REAL bugs found & fixed during testing (V-021).
+- **tools:eval + eval/run_asr.py DONE**: same hypotheses JSON as the app; synthetic pipeline run
+  end-to-end (N()(surah 112, 19 words) → run_asr.py --synthetic → tools:eval → report);
+  everything labeled "not measured on real audio" (V-022).
+- **Coverage: core:quran 93.6% lines, core:align 91.7% lines (combined 91.9%) — ≥85% gate MET.**
+- **N() self-validation (§7.5) — PENDING REAL AUDIO**: protocol requires a clean fixture
+  (quiet close-mic/studio recitation); no real speech exists in the sandbox and §0 forbids
+  inventing audio. N() equivalence with the author's normalizer verified over the full text
+  (V-020). Runs as soon as Mo provides one clip; CER < 2% target in model space.
+- **S6 baseline GGML — STILL BLOCKED**: retried with exponential backoff (60/120/180/240 s),
+  HF keeps returning 429. Harness-only, not on the critical path (V-012, V-019).
+- Full build gate: assembleDebug + all unit tests GREEN.

@@ -29,7 +29,6 @@ tmp/
 eval/data/
 eval/labels/
 eval/hypotheses/
-eval/reports/
 
 # OS / IDE
 .DS_Store

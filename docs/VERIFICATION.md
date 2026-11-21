@@ -281,3 +281,46 @@ fetch_models.py → generate_notices.py → assembleDebug.
 
 **T8 — STATUS rewritten** with honest states (DONE WITH EXCEPTION / PARTIAL) and the toolchain-risk
 decision request for Mo.
+
+### V-020 N() derivation + full-text verification (own measurement)
+N() rules derived from the model repo's own normalizer (retrieve.py at pinned rev 0c2744b…):
+_FOLD = {أ→ا, إ→ا, آ→ا, ٱ→ا, ٲ→ا, ٳ→ا, ى→ي, ئ→ي, ے→ي, ی→ي, ؤ→و, ة→ه, ک→ك}; _LETTERS = 29 letters;
+every other char dropped (harakat, 0653–0655, dagger alif 0670, tatweel 0640, small waw/ya 06E5/06E6,
+Quranic marks 06D6–06ED). Verified over the full Tanzil asset: 77,881 words → 327,514 letters,
+exactly 29 distinct letters emitted, 0 words normalize empty; no tanween-split rejoin needed
+(that rule targets the author's retrieve.py reference source, not Tanzil).
+Golden tests (core:quran NormalizerTest, 12 tests incl. U+0670, 06DF, 06E5/06E6, alef-wasla, tatweel,
+basmala = «بسم الله الرحمن الرحيم», ta'awwudh = «اعوذ بالله من الشيطن الرجيم») — GREEN.
+Committed asset: core/quran/src/main/resources/quran-uthmani.txt (1,371,430 B) with the verbatim
+Tanzil notice header; whole-file sha256 8c3a25b0ab5eff2fbb8762b10262caf2d350972c6e704c00eac21af47fa06751;
+ayah-payload sha256 a0d9cd3755df1570c14a3a2c226b401ede4e4d12df44655f5873c0e1924bdd38.
+Integrity tests (114/6236/sha/notice/basmala-9:1) — GREEN (21 tests in core:quran).
+
+### V-021 core:align §9 implementation + tracker tests (own measurement)
+- Semi-global NW with free leading/trailing OBSERVED and free LEADING expected skips; moves:
+  match/substitute (cost 1−sim), skip-expected (gapMissed), extra-observed (gapExtra), 1↔2 merge.
+- Tracker: identity dedup (idempotency), independence counting, interiority (timed + null-timing
+  token-index mode), precedence machine (HINTED terminal > CORRECT never-downgraded > MISSED
+  (pointer+3 & ≥2 independent absence) > WRONG (preset: Conservative ≥2 independent interior,
+  Balanced single FINAL interior) > CLOSE > PENDING), EXTRA dedup (text,250ms bucket), speech-only
+  lost timer, range-wide reanchor (≥3 consecutive τ_correct), hint, summary per §9.6.
+- 31 unit tests GREEN (table + property): incl. boundary-exclusion on partials vs pause-final
+  relaxation, null-timing interiority, monotonic pointer, repeats→EXTRA, merge/split, evidence
+  precedence, WRONG presets, HINTED terminal, MISSED partial-sequence confirmation.
+- Two real bugs found & fixed during testing (recorded): (1) absence evidence was able to trigger
+  WRONG (a skip is not a misrecitation) — absence now counts only toward MISSED; (2) an
+  all-EXTRA observation (repeat behind window / ta'awwudh) was discarded as unusable — now
+  records EXTRA stats and feeds the lost timer.
+
+### V-022 tools:eval + eval/run_asr.py synthetic run (own measurement)
+Pipeline exercised end-to-end: N()(surah 112 = 19 words) → run_asr.py --synthetic → hypotheses.json
+(3 clips: correct/skip/wrong-planted) → tools:eval (same core:align as the app) → report.
+```
+clip syn_correct_001: correct=16 close=0 wrong=0 missed=0 hinted=0 extra=3 | صحيحة: 16 من 19
+clip syn_skip_002: correct=15 close=1 wrong=0 missed=0 hinted=0 extra=3 | صحيحة: 15 من 19
+clip syn_wrong_003: correct=1 close=1 wrong=0 missed=0 hinted=0 extra=0 | صحيحة: 1 من 19
+```
+All labeled "not measured on real audio". Interpretation (harness-realism gaps, documented in the
+report): whole-clip finals vs partial streams; single-final skip (no ≥2 confirmations); 800 ms
+synthetic windows vs 2×boundaryMs. Real decode path (run_asr.py on actual clips) is ready and
+exercised the pinned model earlier (V-015 fixture decode used the same sherpa-onnx API).
