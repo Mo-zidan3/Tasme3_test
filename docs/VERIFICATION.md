@@ -324,3 +324,23 @@ All labeled "not measured on real audio". Interpretation (harness-realism gaps, 
 report): whole-clip finals vs partial streams; single-final skip (no ≥2 confirmations); 800 ms
 synthetic windows vs 2×boundaryMs. Real decode path (run_asr.py on actual clips) is ready and
 exercised the pinned model earlier (V-015 fixture decode used the same sherpa-onnx API).
+
+### V-023 Basmala reconciliation CLOSED — 111 was a counting bug in the CHECK, not the text (2026-11-21)
+Enumeration (letter-level first word of ayah 1, marks stripped):
+```
+112 surahs (2–8, 10–114) have basmala PREFIXED into ayah 1:
+  110 with plain بِسْمِ, and TWO with بِّسْمِ (shadda+kasra under ba): surah 95 (At-Tin) and 97 (Al-Qadr).
+  Raw lines:
+  95|1|بِّسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ وَٱلتِّينِ وَٱلزَّيْتُونِ
+  97|1|بِّسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ إِنَّآ أَنزَلْنَٰهُ فِى لَيْلَةِ ٱلْقَدْرِ
+surah 1: ayah 1 IS the basmala (بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ, byte-exact per V-020 golden test)
+surah 9: NO basmala (بَرَآءَةٌ مِّنَ ٱللَّهِ …)
+```
+The earlier "111" (V-017) used a byte-`startswith("بِسْمِ")` check: it missed the two shadda variants
+(95, 97) and coincidentally counted surah 1 through a different mark order — net 111. The Tanzil
+text itself is CORRECT: 114 = 112 prefixed + 1 Fatihah + 1 Tawbah exactly.
+**Parser verdict: no bug.** The `بِّسْمِ` (U+0628 U+0651 U+0650…) spelling is the known Uthmani
+rasm variant of the basmala's first word in those two surahs.
+Modeling (§7.6): derived expected-words table tags the prefixed basmala of the 112 non-Fatihah
+surahs as `OPTIONAL_PREFIX` — never counted in Y, never MISSED, absorbed when recited. Fatihah's
+basmala is a MANDATORY word (it is ayah 1).

@@ -20,6 +20,9 @@ data class ExpectedWord(
     val surah: Int,
     val ayah: Int,
     val text: String,      // normalized model-space letters
+    /** §7.6: optional-prefix words (basmala) — absorbable when recited, never MISSED,
+     *  excluded from Y (tasmee' summary). */
+    val optionalPrefix: Boolean = false,
 )
 
 /** §9.1 initial values — all tunables live in TrackerConfig (F4: no magic numbers). */

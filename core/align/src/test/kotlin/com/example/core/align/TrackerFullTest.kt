@@ -311,3 +311,63 @@ class TrackerTest {
         assertTrue(t.snapshot().pointer >= 2)
     }
 }
+
+class OptionalPrefixTest {
+
+    private fun obsWith(words: List<AsrWord>, s: Long, e: Long, fin: Boolean = true) =
+        Observation(words = words, windowStartMs = s, windowEndMs = e, isFinal = fin, modelRev = "r")
+
+    @Test
+    fun `recited optional basmala is absorbed and never penalized when omitted`() {
+        // Baqarah 1:1: optional basmala(4) + mandatory الٓمٓ (1)
+        val exp = listOf(
+            ExpectedWord(0, 2, 1, "بسم", optionalPrefix = true),
+            ExpectedWord(1, 2, 1, "الله", optionalPrefix = true),
+            ExpectedWord(2, 2, 1, "الرحمن", optionalPrefix = true),
+            ExpectedWord(3, 2, 1, "الرحيم", optionalPrefix = true),
+            ExpectedWord(4, 2, 1, "الم"),
+        )
+        val t = RecitationTrackerImpl().apply { reset(exp, TrackerConfig()) }
+
+        // path A: reciter SKIPS the basmala entirely, recites only الم
+        t.onObservation(obsWith(listOf(word("الم", 300, 900)), 0, 2400))
+        val s = t.snapshot()
+        assertEquals(WordState.PENDING, s.states[0], "optional word never MISSED")
+        assertEquals(WordState.PENDING, s.states[1])
+        assertEquals(WordState.PENDING, s.states[2])
+        assertEquals(WordState.PENDING, s.states[3])
+        assertEquals(WordState.CORRECT, s.states[4], "mandatory word unaffected")
+        val sum = t.summary()
+        assertEquals(1, sum.y, "Y excludes optional prefix words")
+
+        // path B: fresh tracker, reciter RECITES the basmala + الم → absorbed
+        val t2 = RecitationTrackerImpl().apply { reset(exp, TrackerConfig()) }
+        t2.onObservation(
+            obsWith(
+                listOf(
+                    word("بسم", 300, 900), word("الله", 900, 1500),
+                    word("الرحمن", 1500, 2100), word("الرحيم", 2100, 2700),
+                    word("الم", 2700, 3300),
+                ),
+                0, 3600,
+            ),
+        )
+        val s2 = t2.snapshot()
+        assertEquals(WordState.CORRECT, s2.states[0], "recited basmala word can be CORRECT (absorbed)")
+        assertEquals(WordState.CORRECT, s2.states[4])
+        assertEquals(5 - 0, t2.summary().y, "Y = 5 − 0 HINTED − 0 (optional recited → counted normally)")
+    }
+
+    @Test
+    fun `fatihah basmala is mandatory and can be MISSED`() {
+        val exp = (0 until 8).map { i ->
+            ExpectedWord(i, 1, if (i < 4) 1 else 2, "f$i", optionalPrefix = false)
+        }
+        val t = RecitationTrackerImpl().apply { reset(exp, TrackerConfig()) }
+        // reciter skips f2 (mandatory) with partial bracketing + final
+        t.onObservation(obsWith(listOf(word("f0", 0, 200), word("f1", 200, 400), word("f3", 400, 600)), 0, 600, fin = false))
+        t.onObservation(obsWith(listOf(word("f1", 700, 900), word("f3", 900, 1100)), 700, 1100, fin = false))
+        val u3 = t.onObservation(obsWith(listOf(word("f3", 1200, 1400), word("f4", 1400, 1600), word("f5", 1600, 1800), word("f6", 1800, 2000), word("f7", 2000, 2200)), 1200, 2200))
+        assertEquals(WordState.MISSED, u3.states[2], "mandatory skipped word becomes MISSED")
+    }
+}

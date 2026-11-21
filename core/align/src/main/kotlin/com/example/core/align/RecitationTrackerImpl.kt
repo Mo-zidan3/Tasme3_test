@@ -227,25 +227,32 @@ class RecitationTrackerImpl : RecitationTracker {
         for (i in expected.indices) {
             val current = states[i] ?: WordState.PENDING
             if (current == WordState.HINTED) continue // terminal
+            val optional = expected[i].optionalPrefix
             val e = evidence[i]
             val next = when {
                 e != null && e.bestInteriorSim >= config.tauCorrect -> WordState.CORRECT
                 current == WordState.CORRECT -> WordState.CORRECT // never downgraded
+                // §7.6 optional-prefix words (basmala): absorbing is the only "positive" path;
+                // omitting them is NEVER penalized → no MISSED/WRONG, only PENDING (or CORRECT).
+                optional -> WordState.PENDING
                 e != null && isMissedConfirmed(i, e) -> WordState.MISSED
                 e != null && isWrongConfirmed(i, e) -> WordState.WRONG
                 e != null && e.seen -> WordState.CLOSE
                 else -> WordState.PENDING
             }
-            // self-correction: MISSED/WRONG/CLOSE → CORRECT handled by CORRECT branch above
+            // self-correction: MISSED/WRONG/CLOSE → CORRECT handled by the CORRECT branch above
             if (next == WordState.PENDING && current != WordState.PENDING && e == null) {
                 states[i] = current
             } else {
                 states[i] = next
             }
         }
-        // MISSED confirmation additionally requires pointer ≥3 beyond (§9.3 rule 3)
+        // MISSED confirmation additionally requires pointer ≥3 beyond (§9.3 rule 3);
+        // optional-prefix words are never MISSED (§7.6).
         for (i in expected.indices) {
-            if (states[i] == WordState.MISSED && pointer < i + 3) states[i] = WordState.CLOSE
+            if (states[i] == WordState.MISSED && (pointer < i + 3 || expected[i].optionalPrefix)) {
+                states[i] = if (expected[i].optionalPrefix) WordState.PENDING else WordState.CLOSE
+            }
         }
     }
 
@@ -331,21 +338,22 @@ class RecitationTrackerImpl : RecitationTracker {
     fun snapshot(): TrackerUpdate =
         TrackerUpdate(states = states.toMap(), pointer = pointer, extras = extras.values.toList())
 
-    /** Tasmee' summary (§9.6): X = CORRECT only; Y = expected − HINTED; CLOSE separate. */
+    /** Tasmee' summary (§9.6): X = CORRECT only; Y = expected − HINTED − optional-prefix;
+     *  CLOSE separate. Optional-prefix words (§7.6) never count in Y. */
     fun summary(): TasmeeSummary {
-        var correct = 0; var close = 0; var wrong = 0; var missed = 0; var hinted = 0
-        for (s in states.values) {
+        var correct = 0; var close = 0; var wrong = 0; var missed = 0; var hinted = 0; var optional = 0
+        for ((i, s) in states) {
             when (s) {
                 WordState.CORRECT -> correct++
                 WordState.CLOSE -> close++
                 WordState.WRONG -> wrong++
                 WordState.MISSED -> missed++
                 WordState.HINTED -> hinted++
-                WordState.PENDING -> {}
+                WordState.PENDING -> if (expected.getOrNull(i)?.optionalPrefix == true) optional++
                 WordState.EXTRA -> {}
             }
         }
-        val y = states.size - hinted
+        val y = states.size - hinted - optional
         return TasmeeSummary(correct = correct, y = y, close = close, wrong = wrong, missed = missed, hinted = hinted, extra = extras.size)
     }
 }
