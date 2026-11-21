@@ -390,3 +390,30 @@ Root cause chain (probe-measured, evidence dumps in test history):
 Tests: 35 GREEN in core:align (incl. 4 simulator tests; cadence/width/truncation asserted
 within-segment 1000 ms, width ≤ 2500+2×vadPad, first partials truncated at segment start — app
 behavior).
+
+### V-026 §7.5 N() self-validation — PRIMARY model, clean studio clips (own measurement)
+Fixtures (public EveryAyah MP3s of Abdul Basit Murattal 192 kbps — a studio-quality reciter,
+clean close-mic): converted to 16 kHz mono, git-ignored (`eval/fixtures/`), never shipped.
+Scoring: model space (N(expected) vs N(hypothesis)), CER per clip, primary model only:
+```
+1:1   audio=4.4s CER=0.00%  ref="بسم الله الرحمن الرحيم"                 hyp identical
+1:3   audio=4.0s CER=0.00%  ref="الرحمن الرحيم"                          hyp identical
+1:5   audio=5.6s CER=0.00%  ref="اياك نعبد واياك نستعين"                 hyp identical
+112:1 audio=3.2s CER=0.00%* ref="قل هو الله احد" (basmala EXCLUDED)      hyp identical
+112:4 audio=4.3s CER=0.00%  ref="ولم يكن له كفوا احد"                    hyp identical
+114:6 audio=5.1s CER=0.00%  ref="من الجنه والناس"                         hyp identical
+AGGREGATE CER = 0.00% (target <2%) → §7.5 N() self-validation PASSES on clean fixtures.
+```
+*112:1 first scored 62% against a reference that INCLUDED the prefixed basmala — the reciter
+legitimately omitted it. With the basmala treated as OPTIONAL (§7.6, V-023 OPTIONAL_PREFIX),
+CER = 0.00%. The optional-prefix modeling is REQUIRED even for evaluation, not just tracking.
+Caveats (honest): 6 clips, ONE reciter (studio) — indicative on clean audio, NOT the §13 phone-mic
+gate; author-reported raw-space numbers were NOT used. Provenance/license note: EveryAyah audio
+compilation © EveryAyah (CC-BY-4.0 per their site; individual recording rights belong to the
+reciter/heirs) — fixtures used locally for validation only, never committed, never shipped.
+
+### V-027 S6 baseline — STILL BLOCKED; run_baseline.py stub lands (2026-11-21)
+Retried twice more this session (90 s + 180 s backoff): HTTP 429 then a 404 on the second URL
+form. The whisper.cpp GGML remains un-fetchable. `eval/run_baseline.py` now exists with the
+§13.2 interface and REFUSES to produce numbers ("baseline NOT YET MEASURED"). Harness-only;
+never blocks Phase 2.

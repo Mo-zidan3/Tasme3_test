@@ -34,6 +34,7 @@ dependencies {
     ksp(libs.hilt.compiler)
 
     testImplementation(libs.junit.jupiter)
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher:1.13.4")
     testImplementation(libs.truth)
 }
 

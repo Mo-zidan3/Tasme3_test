@@ -34,3 +34,6 @@ eval/hypotheses/
 .DS_Store
 .idea/
 *.iml
+
+# calibration/validation audio — never committed, never shipped (§13.1)
+eval/fixtures/
