@@ -1,2 +1,36 @@
 skills/
 node_modules/
+
+# Build
+build/
+.gradle/
+local.properties
+.kotlin/
+
+# Toolchain kept inside the workspace (not part of the project)
+.sdk/
+.jdk/
+
+# Large binaries / models — fetched by scripts/fetch_models.py (§8.2)
+app/src/main/assets/models/
+third_party/
+
+# Spike scratch
+tmp/
+
+# Env / keys — never commit keystores or env files (Phase 4 §4, §12.3)
+*.jks
+*.keystore
+**/credentials*
+.env*
+
+# Eval data & labels — git-ignored per §13.1 (Mo's recordings, gated audio)
+eval/data/
+eval/labels/
+eval/hypotheses/
+eval/reports/
+
+# OS / IDE
+.DS_Store
+.idea/
+*.iml
