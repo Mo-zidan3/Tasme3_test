@@ -98,32 +98,43 @@ def assemble_words(result, segment_start_ms, table):
     return words
 
 
+def _stream(words_timed, model_rev="synthetic", partial_window=2500, partial_every=1000,
+            pause_final=500, pad=300):
+    """App-shaped observation stream (same law as core:align SegmenterSimulator):
+    trailing partials every partial_every ms; pause-final covering the segment."""
+    if not words_timed:
+        return []
+    obs = []
+    seg_start = words_timed[0][1]
+    seg_end = words_timed[-1][2]
+    t = seg_start + partial_every
+    while t < seg_end:
+        w_start = max(seg_start, t - partial_window)
+        in_win = [[w, s, e] for (w, s, e) in words_timed if e > w_start and s < t]
+        obs.append({"words": in_win, "windowStartMs": w_start - pad, "windowEndMs": t + pad,
+                    "isFinal": False, "modelRev": model_rev})
+        t += partial_every
+    obs.append({"words": words_timed, "windowStartMs": seg_start - pad,
+                "windowEndMs": seg_end + pad, "isFinal": True, "modelRev": model_rev})
+    return obs
+
+
 def synthetic(expected_words_json: Path):
     """Fabricate hypotheses from expected words with planted errors (§13-style, no real audio).
-    Produces realistic observation windows (2.5s partials + final)."""
+    Observation streams mirror the app's segmenter law (partials + pause-final), matching the
+    SegmenterSimulator used in core:align tests."""
     spec = json.loads(expected_words_json.read_text(encoding="utf-8"))
     words = spec["words"]
     clips = []
-    # clip A: correct recitation → all CORRECT (expected on correct clips: zero WRONG flags)
-    a_words = [[w, i * 400, i * 400 + 350] for i, w in enumerate(words)]
-    clips.append({"clipId": "syn_correct_001", "observations": [
-        {"words": a_words, "windowStartMs": 0, "windowEndMs": len(words) * 400 + 400, "isFinal": True,
-         "modelRev": "synthetic"}]})
-    # clip B: skip word 2 → MISSED candidate
-    b_words = [[w, i * 400, i * 400 + 350] for i, w in enumerate(words) if i != 2]
-    clips.append({"clipId": "syn_skip_002", "observations": [
-        {"words": b_words, "windowStartMs": 0, "windowEndMs": len(words) * 400 + 400, "isFinal": True,
-         "modelRev": "synthetic"}]})
-    # clip C: substitute word 1 with a garbled word (3 independent partial windows) → WRONG
-    garbled = "ز" + (words[1][1:] if len(words[1]) > 1 else "لق")
-    c_obs = []
-    t0 = 0
-    for k in range(3):
-        ws = [[words[0], t0, t0 + 350], [garbled, t0 + 400, t0 + 750]]
-        c_obs.append({"words": ws, "windowStartMs": t0, "windowEndMs": t0 + 800, "isFinal": k == 2,
-                      "modelRev": "synthetic"})
-        t0 += 500
-    clips.append({"clipId": "syn_wrong_003", "observations": c_obs})
+    # clip A: correct recitation → expect all CORRECT, zero WRONG flags
+    a = [[w, i * 400, i * 400 + 350] for i, w in enumerate(words)]
+    clips.append({"clipId": "syn_correct_001", "observations": _stream(a)})
+    # clip B: skip word 11 (يلد) with its slot silent → MISSED
+    b = [[w, i * 400, i * 400 + 350] for i, w in enumerate(words) if i != 11]
+    clips.append({"clipId": "syn_skip_002", "observations": _stream(b)})
+    # clip C: persistent substitution word 15 (يكن→كين, sim 0.333) → WRONG under both presets
+    c = [[("كين" if i == 15 else w), i * 400, i * 400 + 350] for i, w in enumerate(words)]
+    clips.append({"clipId": "syn_wrong_003", "observations": _stream(c)})
     return clips
 
 

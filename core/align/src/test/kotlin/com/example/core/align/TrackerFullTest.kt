@@ -210,8 +210,9 @@ class TrackerTest {
         t.onObservation(obs((0..4).map { word("w$it", it * 200L, it * 200L + 200) }, 0, 1000, isFinal = true))
         val u = t.snapshot()
         assertEquals(5, u.pointer)
-        // reciter repeats w0: window with just w0 → matches nothing in [2..19] → EXTRA
-        val u2 = t.onObservation(obs(listOf(word("w0", 1000, 1200)), 1000, 1200, isFinal = true))
+        // reciter repeats w0: PARTIAL window with just w0 → matches nothing in [2..19] → EXTRA
+        // (finals now align with lo=0 and may match a repeat for evidence refresh — V-025)
+        val u2 = t.onObservation(obs(listOf(word("w0", 1000, 1200)), 1000, 1200, isFinal = false))
         assertEquals(u.states[0], u2.states[0], "repeat behind window must not change state")
         assertTrue(u2.extras.isNotEmpty(), "repeat behind window should surface as EXTRA")
     }

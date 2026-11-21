@@ -4,6 +4,7 @@ import com.example.core.align.ExpectedWord
 import com.example.core.align.model.Observation
 import com.example.core.align.RecitationTrackerImpl
 import com.example.core.align.TrackerConfig
+import com.example.core.align.WordState
 import com.example.core.align.model.AsrWord
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonArray
@@ -81,6 +82,77 @@ fun main(args: Array<String>) {
         )
     }
     report.appendLine("TOTAL: correct=$totalCorrect close=$totalClose wrong=$totalWrong missed=$totalMissed hinted=$totalHinted")
+
+    // v2.0 metrics on synthetic streams (SIMULATION — labeled):
+    //  - tracking hit-rate: % of correctly-recited words reaching CORRECT/CLOSE
+    //  - word-highlight latency: simulated audio-end-of-word → UI state (final/partial that
+    //    made it non-PENDING), bounded by the observation stream itself
+    report.appendLine()
+    report.appendLine("## v2.0 metrics (SIMULATION — not measured on real audio)")
+    var hitNumerator = 0
+    var hitDenominator = 0
+    val latencies = ArrayList<Long>()
+    for (clipEl in clips) {
+        val clip = clipEl as? JsonObject ?: continue
+        val clipId = (clip["clipId"] as? JsonPrimitive)?.content ?: "?"
+        val tracker = RecitationTrackerImpl()
+        tracker.reset(expected, TrackerConfig())
+        val obsArr = clip["observations"] as? JsonArray ?: continue
+        var lastStates: Map<Int, WordState> = emptyMap()
+        val wordEndTimes = HashMap<Int, Long>() // expected index -> word endMs
+        for (obsEl in obsArr) {
+            val obsO = obsEl as? JsonObject ?: continue
+            val obsEnd = (obsO["windowEndMs"] as? JsonPrimitive)?.content?.toLongOrNull() ?: 0
+            val words = (obsO["words"] as? JsonArray ?: continue).mapNotNull { wel ->
+                val w = wel as? JsonArray
+                AsrWord(
+                    text = (w?.getOrNull(0) as? JsonPrimitive)?.content ?: return@mapNotNull null,
+                    startMs = (w?.getOrNull(1) as? JsonPrimitive)?.content?.toLongOrNull(),
+                    endMs = (w?.getOrNull(2) as? JsonPrimitive)?.content?.toLongOrNull(),
+                )
+            }
+            val o = Observation(
+                words = words,
+                windowStartMs = (obsO["windowStartMs"] as? JsonPrimitive)?.content?.toLongOrNull() ?: 0,
+                windowEndMs = obsEnd,
+                isFinal = (obsO["isFinal"] as? JsonPrimitive)?.content == "true",
+                modelRev = (obsO["modelRev"] as? JsonPrimitive)?.content ?: "synthetic",
+            )
+            val before = tracker.snapshot().states
+            tracker.onObservation(o)
+            lastStates = tracker.snapshot().states
+            // simulated latency: first observation that took the word out of PENDING
+            for ((idx, st) in lastStates) {
+                if (st != WordState.PENDING && before[idx] == WordState.PENDING) {
+                    // word end for this expected index: match by text against expected table
+                    val text = expected.getOrNull(idx)?.text ?: continue
+                    val end = words.firstOrNull { it.text == text }?.endMs ?: continue
+                    latencies.add(obsEnd - (end ?: 0L))
+                }
+            }
+            for (w in words) {
+                val idx = expected.indexOfFirst { it.text == w.text && w.endMs != null && !wordEndTimes.containsKey(expected.indexOfFirst { it.text == w.text }) }
+                if (idx >= 0 && w.endMs != null) wordEndTimes.putIfAbsent(idx, w.endMs!!)
+            }
+        }
+        // hit-rate: correctly-recited words (expected, non-hinted, not substituted in this clip)
+        // reaching CORRECT/CLOSE by the end
+        val s = tracker.summary()
+        run {
+            val correctRecited = s.correct + s.close
+            hitNumerator += correctRecited
+            hitDenominator += s.y
+        }
+        report.appendLine("clip $clipId hit-rate: ${"%.1f".format(100.0 * (s.correct + s.close) / maxOf(1, s.y))}%")
+    }
+    val hitRate = if (hitDenominator > 0) 100.0 * hitNumerator / hitDenominator else 0.0
+    report.appendLine("TRACKING HIT-RATE (simulated): ${"%.1f".format(hitRate)}% ($hitNumerator/$hitDenominator)")
+    if (latencies.isNotEmpty()) {
+        val sorted = latencies.sorted()
+        val p50 = sorted[sorted.size / 2]
+        val p95 = sorted[(sorted.size * 0.95).toInt().coerceAtMost(sorted.size - 1)]
+        report.appendLine("WORD-HIGHLIGHT LATENCY (simulated): p50=${p50}ms p95=${p95}ms [SLO 1500ms] — SIMULATION of the observation stream only; on-device latency (§13.3) is NOT measured here")
+    }
     println(report)
     val out = File("eval/reports/synthetic-report.md")
     out.parentFile.mkdirs()

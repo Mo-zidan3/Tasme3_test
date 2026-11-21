@@ -361,3 +361,32 @@ Conclusion: this is an INHERENT property of the letters-only model token space (
 normalization bug. Two different Quranic words that share a normalized form give sim=1.0 —
 a real substitution between them is UNDETECTABLE in the app's comparison space. Documented in
 docs/EVALUATION.md + user-facing Limitations text (not "fixed" by inventing rules — §0 hard rule).
+
+### V-025 SegmenterSimulator + trailing-EXTRA verdict + finals-lo fix (own measurement)
+Built `SegmenterSimulator` (core:align/sim) — ONE simulator, TWO consumers (core:audio tests +
+tools:eval generation): session-global ms; partialWindowMs=2500 @ partialEveryMs=1000;
+pause-finals 500 ms; maxSegmentMs=8000 with overlapMs=1000; isFinal flags; optional VAD padding.
+
+**Trailing-EXTRA investigation (P2): REAL ALIGNER DEFECT FOUND AND FIXED.**
+Root cause chain (probe-measured, evidence dumps in test history):
+1. The old synthetic report's trailing-EXTRA was partly a generator artifact (single whole-clip
+   final), AND partly a real defect: `alignWindow` aligned EVERY observation against
+   `[pointer−backWords, pointer+lookahead]` — for a FINAL covering a whole segment, the pointer
+   had already advanced past the segment start, so the segment's early words could only become
+   "free leading OBSERVED" (no evidence) → trailing words never reached CORRECT and substituted
+   words never accumulated final-interior votes.
+2. FIX: FINALS now align with lo=0 (leading expected skips are free since V-021; no cost
+   distortion). Measured after fix: 19/19 words CORRECT on the app-shaped stream (was 16/19);
+   MISSED fires for a skipped word with its slot silent; WRONG fires for a persistent
+   substitution (كين for يكن, sim 0.333) under BOTH presets.
+3. CORRECTED STRUCTURAL CLAIM (my earlier hypothesis disproved by measurement): the FINAL is
+   itself an independent interior observation (§9.2: final + windows differ), so a substitution
+   interior in one partial + the final = 2 independent votes → Conservative-WRONG fires within
+   a segment. The earlier رحيم case stayed CLOSE only because a MERGE pushed bestSim to exactly
+   tauWrong (0.5) — a threshold boundary. 1-letter slips on 2–3-letter words (sim ≥ 0.5)
+   legitimately produce CLOSE.
+4. Pathological-vocabulary lesson: synthetic words like w0..w18 (every pair sim=0.5) sit exactly
+   at tauWrong — meaningless. The simulator tests use real Quranic words (surah 112) now.
+Tests: 35 GREEN in core:align (incl. 4 simulator tests; cadence/width/truncation asserted
+within-segment 1000 ms, width ≤ 2500+2×vadPad, first partials truncated at segment start — app
+behavior).

@@ -77,10 +77,14 @@ class RecitationTrackerImpl : RecitationTracker {
         return snapshot()
     }
 
-    /** Aligns obs to the pointer window; returns null when unusable. */
+    /** Aligns obs to the pointer window; returns null when unusable.
+     *  FINALS cover a whole segment: their audio window extends far behind the pointer, so they
+     *  align with lo=0 (leading expected skips are free since V-021) — otherwise the segment's
+     *  early words become "free leading OBSERVED" and never earn evidence from the final
+     *  (root cause of the trailing-EXTRA / never-WRONG artifacts, V-025). */
     private fun alignWindow(obs: Observation): Pair<Alignment?, Boolean> {
         if (obs.words.isEmpty() || expected.isEmpty()) return null to false
-        val lo = (pointer - config.backWords).coerceAtLeast(0)
+        val lo = if (obs.isFinal) 0 else (pointer - config.backWords).coerceAtLeast(0)
         val hi = (pointer + config.lookaheadWords).coerceAtMost(expected.size - 1)
         val alignment = Aligner.align(obs.words, expected, lo, hi, config)
         val matchedCount = alignment.moves.count { it is Move.Match || it is Move.Merge }
