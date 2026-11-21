@@ -14,13 +14,19 @@ Requirements: JDK 17+ (toolchain 17; sandbox used Temurin 21), Android SDK
 with `platforms;android-37.1` and `build-tools;36.0.0`.
 
 ```bash
-# 1) fetch pinned model assets (pinned revisions + SHA-256; not in git)
+# 1) fetch pinned native libs (sherpa-onnx v2.0.2 arm64 jniLibs + silero VAD; SHA-256 verified)
+python3 scripts/fetch_native.py
+
+# 2) fetch pinned model assets (Abdou quran-asr small/tiny int8; SHA-256 verified)
 python3 scripts/fetch_models.py
 
-# 2) build
+# 3) generate in-app license/attribution texts (assets/notices/)
+python3 scripts/generate_notices.py
+
+# 4) build
 ./gradlew assembleDebug
 
-# 3) unit tests
+# 5) unit tests
 ./gradlew test
 ```
 

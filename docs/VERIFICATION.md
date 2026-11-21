@@ -159,3 +159,125 @@ even with heap lowered to 1280 m and parallelism off. Debug build + unit tests s
 Mitigation: `-PsandboxNoMinify` flag added (skips R8/shrink locally); **CI must run the full
 minified release** (ubuntu-latest runners have more RAM) — encoded in ci.yml. R8 release
 decode-on-device gate remains Phase 4.
+
+## 2026-11-21 (later) — Phase 0.6 gate closure
+
+### V-015 Q8 CLOSED on host — timestamp unit + frame shift (own measurement, host Python sherpa-onnx 2.0.2)
+Setup: `pip install sherpa-onnx==2.0.2 soundfile numpy onnx` (host, not device). Fixture
+synthesized locally (harmonic complex, 8 syllables/s, pitch steps; no gated audio, git-ignored,
+never shipped): `/tmp/fixture3.wav` 8.0 s.
+```
+r = sherpa_onnx.OfflineRecognizer.from_zipformer_ctc(model="…/quran-asr-small/model.int8.onnx", tokens="…/tokens.txt", num_threads=2)
+s = r.create_stream(); s.accept_waveform(16000, x); r.decode_stream(s)
+result: 26 tokens; timestamps[:5] = 0.2, 0.28, 0.36, 0.48, 0.56 (seconds-scale values < 8.0 audio duration)
+deltas_ms = [80,80,120,80,80,80,80,400,1520,1080,1440,440,1560,120,80,40,40,80,40,40,40,80,40,40,40]
+histogram: 80ms×9, 40ms×8, 120ms×2 (+ speech-gap multiples) → min delta 40 ms; all deltas are multiples of 40 ms.
+onnx metadata_props: model_type=zipformer2_ctc, vocab_size=31, subsampling_factor=4, comment="Quran recitation, Arabic letters without harakat (Warsh + Hafs)"
+```
+**Conclusion: timestamps are SECONDS; token frame shift = 40 ms (= 10 ms hop × subsampling 4).**
+Confirms the §6.2 contract: `startMs = segmentStartMs + ts*1000`; `endMs = segmentStartMs + lastTs*1000 + 40`.
+`core:align` `FRAME_SHIFT_MS = 40` constant + unit tests updated accordingly.
+(Note: fixture is synthetic non-speech; it proves the timing grid, not recognition accuracy.)
+
+### V-016 Native-lib compliance (own measurement, readelf on the shipped .so)
+```
+libsherpa-onnx-jni.so:
+  LOAD segments: Align 0x4000 (all three)  → 16 KB page-size safe ✓
+  NEEDED: libandroid.so, liblog.so, libonnxruntime.so, libm.so, libdl.so, libc.so
+          → only libonnxruntime.so is our own extra; the two extracted .so are SUFFICIENT (V-004 closed)
+  .note.android.ident: NDK r30 (rev 16248370), api_level 0x15 = min API 21
+libonnxruntime.so:
+  LOAD segments: Align 0x4000 (all four)  → 16 KB page-size safe ✓
+  NEEDED: libdl.so, liblog.so, libm.so, libc.so (no our-own deps)
+  .note.android.ident: NDK r27d (rev 13750724), api_level 0x1b = min API 27
+```
+Conclusions:
+- **16 KB page-size compliance: YES** — all LOAD alignments are 0x4000 on both libraries.
+  (Play's 16 KB page requirement targets apps *targeting* API 35+; our targetSdk 37 → must hold;
+  measured directly, not assumed. Re-check at each jniLibs bump.)
+- **Prebuilt minSdk: onnxruntime requires API ≥ 27, jni requires API ≥ 21** → effective native
+  minSdk = **27**. Our declared minSdk 26 < 27: on API 26 devices the app may fail to load
+  libonnxruntime.so. Escalation recorded in STATUS/DECISIONS (options: raise minSdk to 27 —
+  clean, loses ~1% of devices; or accept 26 with a documented risk). NOT silently ignored.
+- NEEDED confirms V-004's extraction choice (two .so suffice).
+
+### V-017 Basmala embedding + font cmap coverage (own measurement, host)
+Tanzil Uthmani (txt-2, marks+sajdah+rub):
+```
+awk -F'|' '$1==1&&$2==1' → 1|1|بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ      (Al-Fatihah 1:1 IS the basmala)
+awk -F'|' '$1==2&&$2==1' → 2|1|بِسْمِ … ٱلرَّحِيمِ الٓمٓ                (basmala PREFIXED into ayah 1)
+awk -F'|' '$1==9&&$2==1' → 9|1|بَرَآءَةٌ مِّنَ ٱللَّهِ …               (At-Tawbah: NO basmala) ✓
+full-text==basmala ayahs: 1 (Al-Fatihah 1:1 only); basmala-prefixed ayah-1: 111 surahs (all but 1 and 9)
+```
+→ **N() and tracker must treat basmala as OPTIONAL at every surah start except Al-Fatihah (where it
+is ayah 1, mandatory) and At-Tawbah (absent).** Expected-word sequences must strip the prefixed
+basmala words from ayah-1 texts of surahs 2–8,10–114 or make them optional (never penalize).
+Design note recorded for core:quran (Phase 1): store a `basmalaWords` marker, not removal.
+
+Font coverage (fonttools, AmiriQuran.ttf 1.003):
+```
+distinct codepoints in text: 61 (29 letters + alef-wasla U+0671 + tatweel + harakat + Quranic marks)
+marks-in-use: U+0640,0670,0671,064B–0654,06DC,06DF,06E0,06E2,06E3,06E5,06E6,06E7,06E8,06EA,06EB,06EC,06ED
+AmiriQuran.ttf cmap (266 glyphs): 0 codepoints missing → FULL static coverage.
+```
+(Shaping/visual correctness still needs on-device render tests per §7.7 — not possible in sandbox.)
+
+### V-018 Module count + size truth (own measurement)
+```
+settings.gradle.kts include() count = 13 Gradle modules:
+  app, core:{quran,align,asr,audio,session,data,designsystem}, feature:{reader,recite,history,settings}, tools:eval
+```
+STATUS previously claimed "15-module" — WRONG; corrected to 13 (matches spec §6.1 tree; eval/scripts/docs
+are directories, not Gradle modules).
+
+Debug APK measured from the artifact (unzip/python zipfile, 2026-11-21):
+```
+group              compressed MB    %
+assets/models           45.38      51.7%   (55.6 MB uncompressed: small 36.08 + tiny 18.85 + VAD 0.64)
+lib arm64 .so           27.64      31.5%   (onnxruntime 22.25 + sherpa-jni 5.37 + 2 androidx stubs)
+classes*.dex            14.07      16.0%   (debug dex; R8 release will shrink)
+assets/notices           0.02
+assets/fonts             0.08      (AmiriQuran.ttf 0.13 MB uncompressed)
+res/ + root              0.57
+TOTAL                   87.75 MB debug APK (uncompressed-ARSCLib; AAB differs — see below)
+```
+Debug APK ≠ download size. AAB download estimate: models 45.4 + jniLibs 27.6 stored as-is (Play
+stores .so and assets with compression for download) + release dex (R8, est. 4–6 MB compressed,
+not measured — no release build possible in sandbox, V-014) + res/root ≈ 0.6 →
+**estimated AAB download ≈ 77–80 MB — AT the ≤80 MB budget edge.** This is an ESTIMATE, not a
+measurement (release/AAB not built anywhere yet, E1). Options per §14 if over: PAD install-time
+pack / drop tiny (−15.6 MB stored → ~62 MB, safe) / accept with ADR. Escalate to Mo now
+(early, per Phase 0.6 instruction) rather than at Phase 4.
+
+### V-019 Phase 0.6 T-task evidence (2026-11-21)
+**T1 — CI has NOT run remotely.** Sandbox has no `gh` CLI and no git remote (`git remote -v`
+empty). No way to trigger GitHub Actions from here. `assembleRelease` with R8 has still
+never succeeded anywhere (V-014 sandbox OOM). → Phase 0 = **DONE WITH EXCEPTION E1**.
+Mitigations committed: ci.yml now (a) runs fetch_native.py + generate_notices.py +
+fetch_models.py (fully reproducible asset pipeline), (b) **release-minify guard** — fails CI
+unless `app/build/outputs/mapping/release/mapping.txt` exists (proves R8 ran; closes the
+sandboxNoMinify leak path), (c) merged-manifest offline check unchanged. First real CI run
+must be triggered by Mo (push to GitHub). CI is expected to need ~50 min + model fetch time.
+
+**T4 — Notices:** full license texts now ship in `app/src/main/assets/notices/` (generated by
+`scripts/generate_notices.py`, pinned SHA-256 where available):
+```
+MIT-models.txt        sha256 3a9d79091d3c680c22dfa9af3dc8dfa12e62f6f9eb94bad36361393453a5583c (fetched at pinned rev 0c2744b…; earlier attempt got HTTP 429 ×4)
+Apache-2.0.txt        sha256 cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30 (canonical apache.org)
+OFL-1.1-AmiriQuran.txt sha256 72de68e5954f4fdd24702292ef5a32f003ca960ec9330dc86e5eefb5dffb9b22 (upstream 1.003 zip)
+CC-BY-3.0-Tanzil.txt  byte-for-byte block from quran-uthmani.txt (diff-verified against source lines)
+CC-BY-4.0-tlog.txt   sha256 9ba9550ad48438d0836ddab3da480b3b69ffa0aac7b7878b5a0039e7ab429411 (creativecommons.org)
+README.txt           index + official BibTeX citation (Fadheli, Abdeladim; DOI 10.5281/zenodo.23761691)
+```
+Model copyright line, verbatim from LICENSE at the pinned revision: **"Copyright (c) 2026 Abdou"**
+(model-card BibTeX author is Fadheli, Abdeladim — both recorded as-is, no adjudication).
+Tanzil block (28 lines) also committed at `docs/tanzil-notice.txt` for derived-file headers.
+
+**T5 — Reproducibility:** `scripts/fetch_native.py` (tarball SHA-256 verified; extracts ONLY
+the arm64 pair; pins both .so hashes — measured: libonnxruntime.so
+33847ad4…da1, libsherpa-onnx-jni.so 089fd48e…8084; VAD sha pinned). `jniLibs/` now git-ignored;
+repo carries sources + fetch scripts only. README documents fetch order: fetch_native.py →
+fetch_models.py → generate_notices.py → assembleDebug.
+
+**T8 — STATUS rewritten** with honest states (DONE WITH EXCEPTION / PARTIAL) and the toolchain-risk
+decision request for Mo.

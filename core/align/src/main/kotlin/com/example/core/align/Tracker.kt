@@ -40,6 +40,16 @@ data class TrackerConfig(
     enum class Preset { CONSERVATIVE, BALANCED }
 }
 
+/**
+ * Token→wall-clock timing contract (§6.2), verified on host (V-015):
+ * sherpa-onnx timestamps are SECONDS; token frame shift is 40 ms
+ * (10 ms hop × subsampling_factor 4, model metadata + measured deltas).
+ *
+ * word.startMs = segmentStartMs + firstTokenTs * 1000
+ * word.endMs   = segmentStartMs + lastTokenTs * 1000 + FRAME_SHIFT_MS
+ */
+const val FRAME_SHIFT_MS: Long = 40
+
 /** Snapshot returned after each observation/hint/reanchor (§6.2). */
 data class TrackerUpdate(
     val states: Map<Int, WordState>,

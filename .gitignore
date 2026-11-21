@@ -11,8 +11,9 @@ local.properties
 .sdk/
 .jdk/
 
-# Large binaries / models — fetched by scripts/fetch_models.py (§8.2)
+# Large binaries — fetched by scripts/fetch_models.py + scripts/fetch_native.py (§8.2)
 app/src/main/assets/models/
+app/src/main/jniLibs/
 third_party/
 
 # Spike scratch

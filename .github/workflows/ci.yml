@@ -24,11 +24,26 @@ jobs:
       - name: Fetch model assets (pinned SHA-256)
         run: python3 scripts/fetch_models.py
 
+      - name: Fetch native libs + notices (pinned SHA-256)
+        run: |
+          python3 scripts/fetch_native.py
+          python3 scripts/generate_notices.py
+
       - name: Build debug + release APKs
         run: ./gradlew assembleDebug assembleRelease
 
       - name: Unit tests
         run: ./gradlew test
+
+      # T1 guard: release must be minified; the sandboxNoMinify escape hatch must never leak into CI.
+      - name: Release minify guard
+        run: |
+          # functional check: the produced release APK must have been R8-processed.
+          # R8 builds produce a mapping file under app/build/outputs/mapping/release/
+          if [ ! -f app/build/outputs/mapping/release/mapping.txt ]; then
+            echo "FAIL: no R8 mapping.txt found — release was NOT minified"; exit 1
+          fi
+          echo "OK: release minified (mapping.txt present)"
 
       # §4 / §12.1: the merged release manifest must contain NO INTERNET and no
       # ACCESS_NETWORK_STATE uses-permission. Fail CI if either appears.
