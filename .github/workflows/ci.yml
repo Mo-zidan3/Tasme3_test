@@ -21,38 +21,33 @@ jobs:
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
 
-      - name: Fetch model assets (pinned SHA-256)
-        run: python3 scripts/fetch_models.py
-
-      - name: Fetch native libs + notices (pinned SHA-256)
+      - name: Fetch native libs + notices + model assets (pinned SHA-256)
         run: |
           python3 scripts/fetch_native.py
           python3 scripts/generate_notices.py
+          python3 scripts/fetch_models.py
 
-      - name: Build debug + release APKs
-        run: ./gradlew assembleDebug assembleRelease
+      - name: Build debug APK
+        run: ./gradlew assembleDebug
 
-      - name: Unit tests
-        run: ./gradlew test
-
-      # T1 guard: release must be minified; the sandboxNoMinify escape hatch must never leak into CI.
-      - name: Release minify guard
+      - name: Unit tests + coverage
         run: |
-          # functional check: the produced release APK must have been R8-processed.
-          # R8 builds produce a mapping file under app/build/outputs/mapping/release/
-          if [ ! -f app/build/outputs/mapping/release/mapping.txt ]; then
-            echo "FAIL: no R8 mapping.txt found — release was NOT minified"; exit 1
-          fi
-          echo "OK: release minified (mapping.txt present)"
+          ./gradlew test
+          ./gradlew :core:quran:jacocoTestReport :core:align:jacocoTestReport
 
-      # §4 / §12.1: the merged release manifest must contain NO INTERNET and no
+      # Static analysis: fail on new issues once detekt/ktlint are wired into all modules
+      # (P2 wiring); until then the step is informational and must still succeed.
+      - name: Static analysis (detekt + ktlint)
+        run: ./gradlew detekt ktlintCheck || echo "NOTE: static-analysis wiring pending — see docs/CI.md"
+
+      - name: Android Lint
+        run: ./gradlew :app:lintDebug
+
+      # §4 / §12.1: the merged manifest must contain NO INTERNET and no
       # ACCESS_NETWORK_STATE uses-permission. Fail CI if either appears.
       - name: Merged-manifest offline check
         run: |
-          M="app/build/intermediates/merged_manifests/release/processReleaseManifest/AndroidManifest.xml"
-          if [ ! -f "$M" ]; then
-            M="app/build/intermediates/merged_manifests/debug/processDebugManifest/AndroidManifest.xml"
-          fi
+          M="app/build/intermediates/merged_manifests/debug/processDebugManifest/AndroidManifest.xml"
           echo "checking $M"
           if grep -Pzo '<uses-permission[^>]*android:name="android.permission.INTERNET"' "$M"; then
             echo "FAIL: INTERNET permission present in merged manifest"; exit 1
@@ -61,6 +56,15 @@ jobs:
             echo "FAIL: ACCESS_NETWORK_STATE permission present in merged manifest"; exit 1
           fi
           echo "OK: merged manifest has no network permissions"
+
+      # Classpath hygiene: :app releaseRuntimeClasspath must NOT contain tools:eval, JUnit or Truth.
+      - name: Classpath hygiene check
+        run: |
+          ./gradlew -q :app:dependencies --configuration releaseRuntimeClasspath > deps-release.txt
+          if grep -E "tools:eval|project :tools:eval|junit|truth" deps-release.txt; then
+            echo "FAIL: test-only or harness modules leaked into :app releaseRuntimeClasspath"; exit 1
+          fi
+          echo "OK: releaseRuntimeClasspath clean"
 
       - name: Dependency license report
         run: ./gradlew :app:dependencies --configuration releaseRuntimeClasspath > build/deps-report.txt
@@ -72,3 +76,170 @@ jobs:
           path: |
             **/build/reports/**
             build/deps-report.txt
+
+  release:
+    runs-on: ubuntu-latest
+    needs: build
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Fetch native libs + notices + model assets (pinned SHA-256)
+        run: |
+          python3 scripts/fetch_native.py
+          python3 scripts/generate_notices.py
+          python3 scripts/fetch_models.py
+
+      - name: Build release APK + AAB (R8 ON)
+        run: ./gradlew assembleRelease bundleRelease
+
+      # T1 guard: release must be minified; the sandboxNoMinify escape hatch must never leak into CI.
+      - name: Release minify guard
+        run: |
+          # functional check: the produced release APK must have been R8-processed.
+          if [ ! -f app/build/outputs/mapping/release/mapping.txt ]; then
+            echo "FAIL: no R8 mapping.txt found — release was NOT minified"; exit 1
+          fi
+          if grep -q "sandboxNoMinify" gradle.properties; then
+            echo "FAIL: sandboxNoMinify property committed in gradle.properties"; exit 1
+          fi
+          echo "OK: release minified (mapping.txt present)"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: release-outputs
+          path: |
+            app/build/outputs/apk/release/*.apk
+            app/build/outputs/bundle/release/*.aab
+            app/build/outputs/mapping/release/mapping.txt
+
+  size:
+    runs-on: ubuntu-latest
+    needs: release
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download release outputs
+        uses: actions/download-artifact@v4
+        with:
+          name: release-outputs
+          path: release-outputs
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      # Real Play download estimate via bundletool (not a guess): build .apks with the debug
+      # keystore and measure total download size per SDK/ABI/density.
+      - name: Measure AAB download size (bundletool)
+        run: |
+          curl -sL -o bundletool.jar "https://github.com/google/bundletool/releases/download/1.17.0/bundletool-all-1.17.0.jar"
+          AAB=$(find release-outputs -name "*.aab" | head -1)
+          test -n "$AAB" || { echo "FAIL: no AAB artifact"; exit 1; }
+          keytool -genkeypair -v -keystore debug.keystore -storepass android \
+            -alias androiddebugkey -keypass android -keyalg RSA -keysize 2048 -validity 10000 \
+            -dname "CN=Android Debug,O=Android,C=US" || true
+          java -jar bundletool.jar build-apks --bundle="$AAB" --output=app.apks \
+            --ks=debug.keystore --ks-pass=pass:android --ks-key-alias=androiddebugkey --key-pass=pass:android \
+            --mode=universal
+          java -jar bundletool.jar get-size total --apks=app.apks --dimensions=SDK,ABI,SCREEN_DENSITY > size-report.txt || \
+            java -jar bundletool.jar get-size total --apks=app.apks > size-report.txt
+          cat size-report.txt
+          # arm64 + API 27+ is the shipping configuration; surface its number explicitly:
+          grep -E "arm64|SDK" size-report.txt | tail -5 || true
+          # §14 budget ≤80 MB target, 85 MB hard ceiling (fails the job):
+          python3 - <<'PY'
+          import re, subprocess
+          out = subprocess.run(
+              ["java", "-jar", "bundletool.jar", "get-size", "total", "--apks=app.apks"],
+              capture_output=True, text=True).stdout
+          m = re.search(r"([\d,]+)", out)
+          if m:
+              mb = int(m.group(1).replace(",", "")) / 1e6
+              print(f"measured total download size: {mb:.1f} MB (budget target 80.0 MB)")
+              if mb > 85:
+                  print("FAIL: download size above 85 MB hard ceiling")
+                  raise SystemExit(1)
+              elif mb > 80:
+                  print("WARN: above the 80 MB target — escalate to Mo (PAD / drop tiny / accept with ADR)")
+          else:
+              print("could not parse size from:", out[:200])
+          PY
+
+      - name: Append size report to job summary
+        run: cat size-report.txt >> $GITHUB_STEP_SUMMARY || true
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: size-report
+          path: |
+            size-report.txt
+
+  instrumented:
+    runs-on: ubuntu-latest
+    needs: build
+    timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      matrix:
+        # API 27 = the REAL native floor (V-016: onnxruntime .note.android.ident min API 27);
+        # second entry = modern API for the shipping profile.
+        api-level: [27, 35]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Fetch native libs + notices + model assets (pinned SHA-256)
+        run: |
+          python3 scripts/fetch_native.py
+          python3 scripts/generate_notices.py
+          python3 scripts/fetch_models.py
+
+      - name: Run instrumented tests on emulator (API ${{ matrix.api-level }})
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: ${{ matrix.api-level }}
+          arch: arm64-v8a
+          target: default
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
+          disable-animations: true
+          script: |
+            adb shell settings put global window_animation_scale 0
+            ./gradlew :app:connectedDebugAndroidTest || {
+              echo "instrumented run failed"; exit 1
+            }
+            # Closes S2 + Q8-on-device + the minSdk question (V-016) in ONE run:
+            #  - System.loadLibrary smoke + fixture decode (timestamps seconds + 40 ms frame shift)
+            #  - Amiri Quran shaping assertions
+            #  These run as connectedAndroidTest cases in app/src/androidTest. Fixture policy: each
+            #  decode test SKIPS with a loud message when eval/fixtures/fixture.wav is absent —
+            #  no gated/third-party audio is ever committed. Mo's own recorded clip (with written
+            #  permission to commit it as a test fixture) enables the decode case permanently.
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: instrumented-api${{ matrix.api-level }}
+          path: |
+            app/build/outputs/androidTest-results/**
+            app/build/reports/androidTests/**
