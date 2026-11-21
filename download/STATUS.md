@@ -1,6 +1,6 @@
 # STATUS — per phase
 
-Last updated: 2026-11-21 (Phase 0.6 closed + Phase 1 complete)
+Last updated: 2026-11-21 (Phase 1 hardening + Phase 2 host-side; CI ready for first push)
 
 ## Phase 0 — Scaffold: **DONE WITH EXCEPTION (E1)**
 Exception E1: **CI has never executed** — sandbox has no `gh` CLI and no git remote; `assembleRelease`
@@ -42,8 +42,11 @@ with exponential backoff, still blocked. Harness-only; not on the Phase 1 critic
   **"gates green" is NOT claimed for CI or minified release.**
 
 ## Needs from Mo (§18 + Phase 0.6)
-1. **Trigger CI**: push the repo to GitHub (Actions workflow is ready) — closes E1 when green,
-   and yields the first minified release build + AAB size measurement.
+1. **Trigger CI**: push the repo to GitHub (Actions workflow is ready) — closes E1, S2 (emulator
+   decode), the AAB size measurement, and the R8 keep-rules gate in ONE run (docs/CI.md).
+2. **A 5–10 s clip you record yourself, with written permission to commit it as a test fixture**
+   (Mo owns the rights → clean, permanent, CI-usable) — permanently enables the on-device decode
+   test. No gated/third-party audio is ever committed.
 2. **Toolchain risk decision [new]**: AGP 9.5.2 / Kotlin 2.4.21 / compileSdk 37.1 / KSP2 is
    bleeding-edge and already deviated once from the documented KGP-classpath path (D-001).
    Freeze explicitly, or approve a documented Plan B (AGP 8.x line / compileSdk 36) to be
@@ -59,6 +62,38 @@ with exponential backoff, still blocked. Harness-only; not on the Phase 1 critic
 9. Ratification of `[MO]` items: presets §9.5, summary §9.6, Amiri default §7.7,
    tiny shipping policy §8.1, and the CC-BY-3.0 attribution interpretation (§7.1).
 10. Arabic string review; store copy review; release keystore; code license (Apache-2.0 default).
+
+## Phase 1.5 (hardening) + Phase 2 host-side — 2026-11-21 (this session)
+- **Basmala BLOCKER closed (V-023)**: 112 surahs carry the prefix (110 plain + 95/97 with
+  `بِّسْمِ` shadda-first bytes); Fatihah = ayah itself; Tawbah none. The earlier "111" was a
+  byte-startswith artifact of the CHECK, not the text. OPTIONAL_PREFIX modeled in the derived
+  table (never MISSED, excluded from Y, absorbed when recited) + core:align honors it. Tests
+  on Fatihah/Baqarah/Tawbah/95/97.
+- **SPEC_DELTAS.md committed**: every v2.0 §-reference resolves; deltas normative.
+- **CI engineered for one push (docs/CI.md)**: build(+hygiene+lint+manifest+classpath), release
+  (R8 guard + AAB), size (bundletool SDK/ABI measurement), instrumented (API 27+35 emulator,
+  native smoke + loud-skip fixture policy). E1/S2/AAB/minSdk close on Mo's FIRST push.
+- **N() collision analysis (V-024)**: 18.9% of forms collide (68.9% of instances — harakat-only
+  mostly); 275 ayahs letter-identical elsewhere. Documented as inherent letters-only limitation
+  (EVALUATION + user-facing ar/en disclosure). NOT "fixed" (correct per §0).
+- **SegmenterSimulator + REAL aligner defect fixed (V-025)**: finals aligned lo=0; synthetic
+  report regenerated: 19/19 CORRECT, MISSED fires, WRONG fires, hit-rate 96.5%, simulated
+  latency p50=750/p95=4700 labeled SIMULATION. 35 align tests.
+- **Phase 2 host-side (P3) — implemented, NOT claimed done**: core:audio Scheduler (law
+  max(partialEveryMs, RTF×W), queue depth 1, final-never-starves, stale-drop; 13 tests with
+  fake RTFs), PcmRingBuffer, Segmenter (pause-finals, force-cut + overlap); core:asr decode +
+  word assembly (▁ separators, seconds×1000 + 40 ms, null-timing fallback; 5 tests); core:session
+  orchestration with fake recognizer + §11 checkpoints + calibration (3 probes, discard first,
+  median → RTF → L0–L3 with MEASURED triggers + model choice + badge from L2; 8 tests).
+  88 unit tests green across 5 modules. The Phase 2 gate (fixture decode on device, RTF/RAM/
+  battery/latency) stays OPEN until the CI emulator job or Mo's devices run.
+- **§7.5 N() self-validation CLOSED on clean audio (V-026)**: 6/6 studio clips CER 0.00%
+  (primary model, model space) — with the optional basmala correctly excluded. Indicative (one
+  reciter, studio); the §13 phone gate is separate.
+- **S6 baseline STILL BLOCKED** (429/404); run_baseline.py stub refuses to emit numbers (V-027).
+- **D-012**: minSdk 26→27 ADR (native floor measured 27, V-016) pending Mo ratification +
+  emulator verification; size options table deferred until the bundletool measurement (P0 job).
+- Coverage after this session: core:quran 93.6% / core:align 91.7% lines (jacoco).
 
 ## Phase 1 — DONE (with two honest pendings) (Quran + align + harness, per §16)
 - **core:quran DONE**: Tanzil asset committed with verbatim notice header (whole-file sha256

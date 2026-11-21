@@ -324,3 +324,96 @@ All labeled "not measured on real audio". Interpretation (harness-realism gaps, 
 report): whole-clip finals vs partial streams; single-final skip (no ≥2 confirmations); 800 ms
 synthetic windows vs 2×boundaryMs. Real decode path (run_asr.py on actual clips) is ready and
 exercised the pinned model earlier (V-015 fixture decode used the same sherpa-onnx API).
+
+### V-023 Basmala reconciliation CLOSED — 111 was a counting bug in the CHECK, not the text (2026-11-21)
+Enumeration (letter-level first word of ayah 1, marks stripped):
+```
+112 surahs (2–8, 10–114) have basmala PREFIXED into ayah 1:
+  110 with plain بِسْمِ, and TWO with بِّسْمِ (shadda+kasra under ba): surah 95 (At-Tin) and 97 (Al-Qadr).
+  Raw lines:
+  95|1|بِّسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ وَٱلتِّينِ وَٱلزَّيْتُونِ
+  97|1|بِّسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ إِنَّآ أَنزَلْنَٰهُ فِى لَيْلَةِ ٱلْقَدْرِ
+surah 1: ayah 1 IS the basmala (بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ, byte-exact per V-020 golden test)
+surah 9: NO basmala (بَرَآءَةٌ مِّنَ ٱللَّهِ …)
+```
+The earlier "111" (V-017) used a byte-`startswith("بِسْمِ")` check: it missed the two shadda variants
+(95, 97) and coincidentally counted surah 1 through a different mark order — net 111. The Tanzil
+text itself is CORRECT: 114 = 112 prefixed + 1 Fatihah + 1 Tawbah exactly.
+**Parser verdict: no bug.** The `بِّسْمِ` (U+0628 U+0651 U+0650…) spelling is the known Uthmani
+rasm variant of the basmala's first word in those two surahs.
+Modeling (§7.6): derived expected-words table tags the prefixed basmala of the 112 non-Fatihah
+surahs as `OPTIONAL_PREFIX` — never counted in Y, never MISSED, absorbed when recited. Fatihah's
+basmala is a MANDATORY word (it is ayah 1).
+
+### V-024 N() collision analysis (own measurement, host; eval/n_collision_analysis.json)
+Full-text sweep (N() over all 77,881 words):
+```
+distinct normalized forms: 14,636
+forms mapping to >1 distinct original word: 2,771 (18.9% of forms)
+word instances involved in collisions: 53,629 / 77,881 (68.9%)
+top collisions: من ← {مِن, مَن, مِّن, …17 variants}; الله ← {ٱللَّهِ, ٱللَّهُ, ٱللَّهَ};
+                 ان ← {إِنَّ, أَن, إِن, أَنَّ…}; في ← {فِى, فِىٓ, فِّى}; ما ← {مَا, مَّا, مَآ}; …
+ayahs identical to another ayah after N(): 275 ayahs in 96 groups (whole Quran; e.g. the 6
+  basmala+الم openers 2:1=3:1=29:1=30:1=31:1=32:1; 2:5=31:5; 2:47=2:122; 2:134=2:141; 2:162=3:88)
+ayah pairs identical after N() within a single surah: 94
+```
+Conclusion: this is an INHERENT property of the letters-only model token space (V-020), not a
+normalization bug. Two different Quranic words that share a normalized form give sim=1.0 —
+a real substitution between them is UNDETECTABLE in the app's comparison space. Documented in
+docs/EVALUATION.md + user-facing Limitations text (not "fixed" by inventing rules — §0 hard rule).
+
+### V-025 SegmenterSimulator + trailing-EXTRA verdict + finals-lo fix (own measurement)
+Built `SegmenterSimulator` (core:align/sim) — ONE simulator, TWO consumers (core:audio tests +
+tools:eval generation): session-global ms; partialWindowMs=2500 @ partialEveryMs=1000;
+pause-finals 500 ms; maxSegmentMs=8000 with overlapMs=1000; isFinal flags; optional VAD padding.
+
+**Trailing-EXTRA investigation (P2): REAL ALIGNER DEFECT FOUND AND FIXED.**
+Root cause chain (probe-measured, evidence dumps in test history):
+1. The old synthetic report's trailing-EXTRA was partly a generator artifact (single whole-clip
+   final), AND partly a real defect: `alignWindow` aligned EVERY observation against
+   `[pointer−backWords, pointer+lookahead]` — for a FINAL covering a whole segment, the pointer
+   had already advanced past the segment start, so the segment's early words could only become
+   "free leading OBSERVED" (no evidence) → trailing words never reached CORRECT and substituted
+   words never accumulated final-interior votes.
+2. FIX: FINALS now align with lo=0 (leading expected skips are free since V-021; no cost
+   distortion). Measured after fix: 19/19 words CORRECT on the app-shaped stream (was 16/19);
+   MISSED fires for a skipped word with its slot silent; WRONG fires for a persistent
+   substitution (كين for يكن, sim 0.333) under BOTH presets.
+3. CORRECTED STRUCTURAL CLAIM (my earlier hypothesis disproved by measurement): the FINAL is
+   itself an independent interior observation (§9.2: final + windows differ), so a substitution
+   interior in one partial + the final = 2 independent votes → Conservative-WRONG fires within
+   a segment. The earlier رحيم case stayed CLOSE only because a MERGE pushed bestSim to exactly
+   tauWrong (0.5) — a threshold boundary. 1-letter slips on 2–3-letter words (sim ≥ 0.5)
+   legitimately produce CLOSE.
+4. Pathological-vocabulary lesson: synthetic words like w0..w18 (every pair sim=0.5) sit exactly
+   at tauWrong — meaningless. The simulator tests use real Quranic words (surah 112) now.
+Tests: 35 GREEN in core:align (incl. 4 simulator tests; cadence/width/truncation asserted
+within-segment 1000 ms, width ≤ 2500+2×vadPad, first partials truncated at segment start — app
+behavior).
+
+### V-026 §7.5 N() self-validation — PRIMARY model, clean studio clips (own measurement)
+Fixtures (public EveryAyah MP3s of Abdul Basit Murattal 192 kbps — a studio-quality reciter,
+clean close-mic): converted to 16 kHz mono, git-ignored (`eval/fixtures/`), never shipped.
+Scoring: model space (N(expected) vs N(hypothesis)), CER per clip, primary model only:
+```
+1:1   audio=4.4s CER=0.00%  ref="بسم الله الرحمن الرحيم"                 hyp identical
+1:3   audio=4.0s CER=0.00%  ref="الرحمن الرحيم"                          hyp identical
+1:5   audio=5.6s CER=0.00%  ref="اياك نعبد واياك نستعين"                 hyp identical
+112:1 audio=3.2s CER=0.00%* ref="قل هو الله احد" (basmala EXCLUDED)      hyp identical
+112:4 audio=4.3s CER=0.00%  ref="ولم يكن له كفوا احد"                    hyp identical
+114:6 audio=5.1s CER=0.00%  ref="من الجنه والناس"                         hyp identical
+AGGREGATE CER = 0.00% (target <2%) → §7.5 N() self-validation PASSES on clean fixtures.
+```
+*112:1 first scored 62% against a reference that INCLUDED the prefixed basmala — the reciter
+legitimately omitted it. With the basmala treated as OPTIONAL (§7.6, V-023 OPTIONAL_PREFIX),
+CER = 0.00%. The optional-prefix modeling is REQUIRED even for evaluation, not just tracking.
+Caveats (honest): 6 clips, ONE reciter (studio) — indicative on clean audio, NOT the §13 phone-mic
+gate; author-reported raw-space numbers were NOT used. Provenance/license note: EveryAyah audio
+compilation © EveryAyah (CC-BY-4.0 per their site; individual recording rights belong to the
+reciter/heirs) — fixtures used locally for validation only, never committed, never shipped.
+
+### V-027 S6 baseline — STILL BLOCKED; run_baseline.py stub lands (2026-11-21)
+Retried twice more this session (90 s + 180 s backoff): HTTP 429 then a 404 on the second URL
+form. The whisper.cpp GGML remains un-fetchable. `eval/run_baseline.py` now exists with the
+§13.2 interface and REFUSES to produce numbers ("baseline NOT YET MEASURED"). Harness-only;
+never blocks Phase 2.

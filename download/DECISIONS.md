@@ -138,3 +138,28 @@ verified against the value published by services.gradle.org for 9.9.2 (docs/VERI
 - §7.5 N() self-validation PENDING: protocol requires a real clean fixture; none exists in the
   sandbox. N()↔author-normalizer equivalence verified on the full text instead. No CER claimed.
 - JaCoCo 0.8.13 for coverage measurement; targets MET (91.9% combined).
+
+## D-012 Phase-2 host-side + minSdk ADR (2026-11-21)
+- **ADR: raise minSdk 26 → 27.** Measured basis (V-016): the prebuilt `libonnxruntime.so`
+  carries `.note.android.ident` with API floor 27 (NDK r27d); loading it on API 26 is
+  undefined. Raising to 27 (Android 8.1) excludes only Android 8.0 devices (API 26) — a small
+  slice. This is a §4 deviation forced by a pinned dependency, flagged for Mo ratification;
+  verified on the API-27 emulator entry of the CI instrumented job (docs/CI.md) the first time
+  it runs. app/build.gradle.kts will change to `minSdk = 27` in Phase 3 (UI) together with the
+  emulator evidence, to keep this commit host-side only. [MO] ratification requested.
+- **D-025 trailing-EXTRA root cause** (aligner, not generator): finals aligned against
+  pointer−backWords only. Fixed: finals align with lo=0 (free leading expected skips). The
+  synthetic report regenerated: 19/19 CORRECT, MISSED + WRONG fire, hit-rate 96.5%.
+- **Scheduler law implemented** (core:audio): effective cadence = max(partialEveryMs, RTF×W);
+  queue depth 1 (final never starves); stale-drop by windowEndMs (§6.2). 13 tests, fake RTFs
+  0.2/0.3/0.5/0.9/1.4 asserted.
+- **core:asr decode implemented** (host-side): greedy CTC via vendored sherpa API
+  (createStream/acceptWaveform(pcm, 16000)/decode/getResult), word assembly between ▁ with
+  seconds×1000 + FRAME_SHIFT_MS=40 (V-015), null-timing fallback (5 tests).
+- **core:session orchestration + calibration**: fake-recognizer driven session; checkpoint
+  after each FINAL (§11); calibration = 3 probes, discard first, median → RTF → L0–L3 ladder
+  (measured triggers only) + model choice; badge («الوضع الخفيف») from L2 (§8.6/§10.5).
+- Size options table for Mo (PENDING the CI bundletool measurement — numbers land with the
+  first remote run): (a) PAD install-time pack [VERIFY AssetManager access + no INTERNET
+  needed], (b) drop tiny −15.6 MB stored (kills the low-end fallback — interacts with §8.6),
+  (c) accept with ADR. Do NOT decide before the measurement.
