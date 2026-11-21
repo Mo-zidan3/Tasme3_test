@@ -344,3 +344,20 @@ rasm variant of the basmala's first word in those two surahs.
 Modeling (§7.6): derived expected-words table tags the prefixed basmala of the 112 non-Fatihah
 surahs as `OPTIONAL_PREFIX` — never counted in Y, never MISSED, absorbed when recited. Fatihah's
 basmala is a MANDATORY word (it is ayah 1).
+
+### V-024 N() collision analysis (own measurement, host; eval/n_collision_analysis.json)
+Full-text sweep (N() over all 77,881 words):
+```
+distinct normalized forms: 14,636
+forms mapping to >1 distinct original word: 2,771 (18.9% of forms)
+word instances involved in collisions: 53,629 / 77,881 (68.9%)
+top collisions: من ← {مِن, مَن, مِّن, …17 variants}; الله ← {ٱللَّهِ, ٱللَّهُ, ٱللَّهَ};
+                 ان ← {إِنَّ, أَن, إِن, أَنَّ…}; في ← {فِى, فِىٓ, فِّى}; ما ← {مَا, مَّا, مَآ}; …
+ayahs identical to another ayah after N(): 275 ayahs in 96 groups (whole Quran; e.g. the 6
+  basmala+الم openers 2:1=3:1=29:1=30:1=31:1=32:1; 2:5=31:5; 2:47=2:122; 2:134=2:141; 2:162=3:88)
+ayah pairs identical after N() within a single surah: 94
+```
+Conclusion: this is an INHERENT property of the letters-only model token space (V-020), not a
+normalization bug. Two different Quranic words that share a normalized form give sim=1.0 —
+a real substitution between them is UNDETECTABLE in the app's comparison space. Documented in
+docs/EVALUATION.md + user-facing Limitations text (not "fixed" by inventing rules — §0 hard rule).

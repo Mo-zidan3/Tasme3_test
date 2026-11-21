@@ -21,3 +21,11 @@ Model LICENSE copyright line (verbatim, per LICENSE at pinned revision):
 Training-data credits: tarteel-ai/tlog (CC-BY-4.0, gated), EveryAyah Hafs recitations
 (compilation CC-BY-4.0; individual recording licenses undocumented), IqraEval (21 h).
 Tanzil Project: https://tanzil.net
+
+Limitations disclosure (user-facing; ar/en):
+  AR: يعمل التطبيق في فضاء الحروف فقط (بدون حركات)، فبعض الكلمات المتشابهة بالحروف لا يمكن
+      التمييز بينها عند التتبّع — مثلاً اختلافات الحركات في «من/مَن» أو «إنّ/أن». هذه خاصية
+      في دقة النموذج نفسه، لا خطأ في النص.
+  EN: This app tracks recitation at the letter level (without diacritics). Some words that differ
+      only in diacritics (min/man, inna/anna) are indistinguishable to the tracker — a property of
+      the recognizer's output, not of the Quran text.
