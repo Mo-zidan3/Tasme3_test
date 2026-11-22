@@ -398,10 +398,13 @@ jobs:
           script: |
             adb shell settings put global window_animation_scale 0
             # V-037: the DEVICE cannot see the repo checkout — push the generated timing
-            # fixture into the app's external-files dir (app-readable without permissions;
-            # /data/local/tmp is shell-owned and not traversable by the app under test).
-            adb shell mkdir -p /sdcard/Android/data/com.example.tasmee/files/eval/fixtures
+            # fixture into BOTH the app's and the instrumentation APK's external-files dirs
+            # (app-readable without permissions; API-35 run 45064204429 skipped the timing
+            # test when only the app dir was probed — instrumentation dir is the canonical
+            # channel for androidTest fixtures).
+            adb shell mkdir -p /sdcard/Android/data/com.example.tasmee/files/eval/fixtures /sdcard/Android/data/com.example.tasmee.test/files/eval/fixtures
             adb push eval/fixtures/timing_fixture.wav /sdcard/Android/data/com.example.tasmee/files/eval/fixtures/timing_fixture.wav
+            adb push eval/fixtures/timing_fixture.wav /sdcard/Android/data/com.example.tasmee.test/files/eval/fixtures/timing_fixture.wav
             ./gradlew :app:connectedDebugAndroidTest || { echo "instrumented run failed"; exit 1; }
 
       - uses: actions/upload-artifact@v4

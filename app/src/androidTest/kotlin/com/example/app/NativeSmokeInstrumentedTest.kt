@@ -32,13 +32,19 @@ class NativeSmokeInstrumentedTest {
         // (/sdcard/Android/data/<pkg>/files/<rel> — readable by the app under test); that
         // external-storage path is probed via context.getExternalFilesDir(null) too.
         val instrumentation = InstrumentationRegistry.getInstrumentation()
-        val external = instrumentation.targetContext.getExternalFilesDir(null)
-        val cands = listOf(
-            File(rel),
-            File("../$rel"),
-            File("/sdcard/Android/data/com.example.tasmee/files/$rel"),
-        ) + listOfNotNull(external?.let { File(it, rel) })
-        return cands.firstOrNull { it.exists() }
+        // V-037 (run 45064204429 follow-up): probe BOTH contexts' external-files dirs —
+        // on API 35 the target-context probe alone did not surface the pushed fixture
+        // (timing test skipped), while API 27 found it. Both canonical and legacy /sdcard
+        // forms are covered by getExternalFilesDir + the explicit legacy path.
+        val legacyDirs = listOf(
+            "/sdcard/Android/data/com.example.tasmee/files",
+            "/storage/emulated/0/Android/data/com.example.tasmee/files",
+        )
+        val externalDirs = listOf(instrumentation.targetContext, instrumentation.context)
+            .mapNotNull { it.getExternalFilesDir(null) }
+        return (legacyDirs.map { File(it, rel) } + externalDirs.map { File(it, rel) })
+            .plus(listOf(File(rel), File("../$rel")))
+            .firstOrNull { it.exists() }
     }
 
     @Test
