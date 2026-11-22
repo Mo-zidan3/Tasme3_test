@@ -122,13 +122,22 @@ def main() -> int:
         ok = False
 
     # 4) Tanzil CC-BY-3.0 — byte-for-byte copyright block from the text file
-    lines = TANZIL.read_text(encoding="utf-8").split("\n")
-    start = next(i for i, l in enumerate(lines) if l.startswith("# PLEASE DO NOT REMOVE"))
-    end = next(i for i in range(len(lines) - 1, start, -1) if lines[i].startswith("#=="))
-    notice = "\n".join(lines[start : end + 1]) + "\n"
-    (OUT / "CC-BY-3.0-Tanzil.txt").write_text(notice, encoding="utf-8")
-    print(f"[ ok ] CC-BY-3.0-Tanzil.txt ({len(notice)} bytes, byte-for-byte block)")
-    assert "#  Copyright (C) 2007-2026 Tanzil Project" in notice
+    # Fallback to committed asset if third_party is missing (cold cache)
+    tanzil_path = TANZIL
+    if not tanzil_path.exists():
+        tanzil_path = REPO / "core" / "quran" / "src" / "main" / "resources" / "quran-uthmani.txt"
+    
+    if tanzil_path.exists():
+        tanzil_lines = tanzil_path.read_text(encoding="utf-8").split("\n")
+        start = next((i for i, l in enumerate(tanzil_lines) if l.startswith("# PLEASE DO NOT REMOVE")), 0)
+        end = next((i for i in range(len(tanzil_lines) - 1, start, -1) if tanzil_lines[i].startswith("#==")), len(tanzil_lines)-1)
+        notice = "\n".join(tanzil_lines[start : end + 1]) + "\n"
+        (OUT / "CC-BY-3.0-Tanzil.txt").write_text(notice, encoding="utf-8")
+        print(f"[ ok ] CC-BY-3.0-Tanzil.txt ({len(notice)} bytes, byte-for-byte block)")
+        assert "#  Copyright (C) 2007-2026 Tanzil Project" in notice
+    else:
+        print("[bad ] Tanzil quran-uthmani.txt missing in both third_party and core assets")
+        ok = False
 
     # 5) CC-BY-4.0 (tlog training-data credit)
     ok &= fetch(
