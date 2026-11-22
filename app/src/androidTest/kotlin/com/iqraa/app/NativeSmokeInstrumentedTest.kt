@@ -100,8 +100,10 @@ class NativeSmokeInstrumentedTest {
                     java.lang.Runtime.getRuntime().exec("dumpsys meminfo $pkg").inputStream,
                 ),
             ).readLines()
-            val totalPss = meminfo.firstOrNull { it.trim().startsWith("TOTAL PSS:") }
-                ?.trim() ?: "n/a"
+            val totalPss = meminfo.firstOrNull {
+                val t = it.trim()
+                t.startsWith("TOTAL PSS:") || t.startsWith("TOTAL ") || t.startsWith("TOTAL\t")
+            }?.trim() ?: "TOTAL-line-not-found"
             val msg =
                 "[PERF-SMOKE][INDICATIVE][EMULATOR-x86_64] load=$loadMs ms " +
                     "decode=$decodeMs ms audio=$durationMs ms RTF=" +

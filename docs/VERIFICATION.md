@@ -748,3 +748,21 @@ use" — recorded verbatim in eval/data/PROVENANCE.md (the authorization of reco
   the model's weak spot on fast recitation, which the §13 phone gate must re-test on real
   hardware. FA 6.2% is bag-level, NOT the app's session EXTRA rate. These numbers do NOT
   certify phone-mic behavior (INDICATIVE label, subset + scoring space stated).
+
+### V-039 T4+T5 verified on-device — run 45079074846 (21c93ca): ALL 5 JOBS GREEN (2026-11-22)
+Instrumented per-test outcomes (artifacts, both floors, 5 tests each):
+- **`sherpaAccuracyDecode_moClip…` PASS on API 27 (0.473 s) AND API 35 (0.670 s) — NO SKIP**:
+  the committed fixture (al-Qamar 54:10, PROVENANCE-recorded permission) decodes on-device
+  and the letters-only CER ≤ 0.20 assertion HOLDS on both floors. The accuracy test is no
+  longer a §0 skip — it is a real, passing, licensed-fixture assertion.
+- `sherpaTimingDecode…` PASS (0.389 s / 0.621 s); `loadLibrarySmoke` PASS; font smoke PASS.
+- **T5 PERF SMOKE (INDICATIVE — EMULATOR x86_64, NOT a phone; Q7 OPEN for Mo's hardware)**,
+  from the job log's logcat harvest (IqraaPerfSmoke tag):
+  ```
+  API 27: load=311 ms decode=170 ms audio=8000 ms RTF=0.021 coldStartToFirstDecode=481 ms
+  API 35: load=461 ms decode=224 ms audio=8000 ms RTF=0.028 coldStartToFirstDecode=685 ms
+  peakRSS: dumpsys TOTAL-PSS parse returned n/a on this run (parser widened in the follow-up
+  commit — next run reports the value; NOT a measured number, NOT claimed)
+  ```
+  Labels: synthetic non-speech fixture (timing/8 s generated) — proves the JNI path + timing
+  grid + load/decode latency, NOT recognition accuracy; emulator x86_64 with KVM, not a phone.
