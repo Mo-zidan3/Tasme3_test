@@ -36,9 +36,9 @@ tasks.named<JacocoReport>("jacocoTestReport") {
     reports {
         xml.required.set(true)
         html.required.set(true)
+        // deterministic location the CI gate probes
+        xml.outputLocation.set(layout.buildDirectory.file("reports/jacoco/test/jacocoTestReport.xml"))
     }
-    // deterministic location the CI gate probes
-    xml.outputLocation.set(layout.buildDirectory.file("reports/jacoco/test/jacocoTestReport.xml"))
 }
 
 tasks.withType<Test> {
