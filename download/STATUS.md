@@ -1,6 +1,12 @@
 # STATUS — per phase
 
-Last updated: 2026-11-21 (Phase 1 hardening + Phase 2 host-side; CI ready for first push)
+Last updated: 2026-11-22 (V-037c: run 45067719380 — ALL FIVE JOBS GREEN with S2 CLOSED ON BOTH
+API FLOORS: timing decode PASS on API 27 (0.597s) AND API 35 (0.598s) via androidTest-APK
+assets (scoped storage hides shell-pushed files on Android 15); loadLibrary PASS both floors
+(minSdk=27 runtime proof); coverage gate REAL numbers (quran 93.1%, align 91.0% ≥85%); ktlint
+0 out-of-baseline; AAB measured 55.9 MB ≤80 MB budget MET; all six notices canonical-SHA gates
+OK; accuracy clip remains the loud §0 skip. Commit B (detekt) HELD: sandbox Maven 429 blocks
+local ./gradlew help verification — D-017 open for Mo)
 
 ## Phase 0 — Scaffold: **DONE WITH EXCEPTION (E1)**
 Exception E1: **CI has never executed** — sandbox has no `gh` CLI and no git remote; `assembleRelease`
@@ -41,6 +47,18 @@ with exponential backoff, still blocked. Harness-only; not on the Phase 1 critic
 - T1 ❌ **BLOCKED in sandbox** (no gh/remote): Phase 0 keeps the DONE WITH EXCEPTION label;
   **"gates green" is NOT claimed for CI or minified release.**
 
+- **CI RUN 45061168092 (V-037, 2026-11-22)**: instrumented API 27 + 35 GREEN — the V-035
+  KVM repair WORKED (/dev/kvm present on ubuntu-24.04; emulator boots ~37 s; tests run).
+  loadLibrary PASS on API 27 AND 35 (minSdk=27 native floor proven on-device — D-012
+  ratification now has runtime evidence). AAB size MEASURED 55.9 MB universal (≤80 MB target
+  — met with margin; the 77–80 MB estimate is retired). Notices canonical-SHA gate GREEN.
+  Timing decode test SKIPPED — fixture-visibility defect (device cannot see the runner's
+  repo checkout) — fixed in 15cf4ab (adb push to the app's external-files dir + repoFile
+  probes it); run 45061936775 verifies. build RED at coverage gate: Gradle 9 jacoco produced
+  no XML (xml.required default) — fixed in 15cf4ab; the gate correctly hard-failed instead of
+  faking numbers. release gate step crashed on a CSV-parse bug AFTER the measurement — fixed
+  in 15cf4ab; measurement recorded in V-037.
+
 ## Needs from Mo (§18 + Phase 0.6)
 1. **Trigger CI**: push the repo to GitHub (Actions workflow is ready) — closes E1, S2 (emulator
    decode), the AAB size measurement, and the R8 keep-rules gate in ONE run (docs/CI.md).
@@ -64,6 +82,25 @@ with exponential backoff, still blocked. Harness-only; not on the Phase 1 critic
 10. Arabic string review; store copy review; release keystore; code license (Apache-2.0 default).
 
 ## Phase 1.5 (hardening) + Phase 2 host-side — 2026-11-21 (this session)
+- **CI RUN 45035800627 (V-035, 2026-11-22)**: secrets-scan/build/release GREEN (unit tests,
+  lint, manifest-offline, classpath, ABI floor all pass; assembleRelease+bundleRelease with
+  R8 mapping.txt; release APK arm64-v8a only; release-outputs uploaded). E1's
+  "never-built-minified-release" exception is CLOSED. size job RED = artifact RACE (CI
+  defect): job deleted, bundletool 1.17.0 (sha-pinned) merged into release after
+  bundleRelease — measurement, ≤80 MB warn / >85 MB fail, report to step summary. AAB size
+  still UNKNOWN. instrumented 27+35 RED = no /dev/kvm on ubuntu-26.04 ("Software CPU
+  emulation is not supported") → ubuntu-24.04 + mandatory kvm pre-flight +
+  disable-linux-hw-accel:false + -no-metrics + boot timeout 900 (NO TCG fallback without
+  Mo's explicit acceptance). S2-on-device OPEN.
+- **Quality gates REAL (V-035 P2)**: ktlint 1.8.0 CLI sha-pinned; parse errors hard-fail;
+  violations ratchet vs baseline 817 (growth fails). detekt 1.23.8 wired at root for all
+  subprojects (the old `|| echo "NOTE"` fake pass is gone; maxIssues ceiling 100000
+  pending Mo's ratchet decision — D-017). JaCoCo XML parsed by scripts/ci_coverage_gate.py:
+  hard fail <85% lines on core:quran/core:align, measured numbers printed.
+- **License-asset regression repaired (V-035 P0b)**: Mo's 3b1da0a generate_notices rewrite
+  produced degraded cold-runner texts (Tanzil 1004 B, OFL 4027 B, README overwritten). Fixed:
+  fallbacks = git-tracked canonical assets; byte-exact verified (1106 B/4389 B, shas
+  72493509…/72de68e5…); README only generated when absent.
 - **Basmala BLOCKER closed (V-023)**: 112 surahs carry the prefix (110 plain + 95/97 with
   `بِّسْمِ` shadda-first bytes); Fatihah = ayah itself; Tawbah none. The earlier "111" was a
   byte-startswith artifact of the CHECK, not the text. OPTIONAL_PREFIX modeled in the derived
