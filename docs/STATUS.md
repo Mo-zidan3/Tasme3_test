@@ -1,15 +1,14 @@
 # STATUS — per phase
 
-Last updated: 2026-11-22 (V-035: run 45035800627 — secrets/build/release GREEN; FIRST
-minified release + AAB built remotely (E1 build half closed); size job = artifact race →
-job deleted, bundletool measurement merged into release; instrumented 27/35 = no-KVM boot
-timeout on ubuntu-26.04 → ubuntu-24.04 + /dev/kvm pre-flight; quality gates made REAL
-(ktlint pinned+committed baseline.xml, JaCoCo XML 85% floor with report-level counters; detekt
-= commit B, held until it compiles locally — review fix 2.1); Mo's 3b1da0a
-generate_notices rewrite shipped degraded license assets on cold runners (Tanzil 1004 B vs
-canonical 1106 B; OFL 4027 vs 4389) — repaired byte-exact this session; AAB download size
-UNKNOWN until bundletool runs; S2-on-device OPEN; license-BYTES SHA gate added (V-036 §3 — the
-green release had shipped degraded notices); push token revoked — Mo pushes)
+Last updated: 2026-11-22 (V-037: run 45061168092 — instrumented (27) and (35) BOTH GREEN:
+KVM pre-flight passed on ubuntu-24.04, emulator booted, connectedDebugAndroidTest ran;
+loadLibrarySmoke PASS on API 27 AND 35 → minSdk=27 native floor proven ON-DEVICE; font
+smoke PASS; timing decode was SKIPPED by a fixture-visibility defect (fixed in 15cf4ab —
+next run asserts it for real). AAB download size MEASURED: 55,900,674 B ≈ 55.9 MB universal,
+min=max, UNDER the 80 MB target — V-018's 77–80 MB estimate superseded, no §14 escalation
+needed. Notices canonical-SHA gate GREEN. build RED only at the coverage gate (jacoco XML
+not produced by Gradle 9 defaults — fixed in 15cf4ab: xml.required + pinned path). Run
+45061936775 (15cf4ab) queued as the verification pass)
 
 ## Phase 0 — Scaffold: **DONE WITH EXCEPTION (E1)**
 Exception E1: **CI has never executed** — sandbox has no `gh` CLI and no git remote; `assembleRelease`
@@ -49,6 +48,18 @@ with exponential backoff, still blocked. Harness-only; not on the Phase 1 critic
 - T8 ✅ STATUS rewritten (this file) + toolchain-risk decision requested (below).
 - T1 ❌ **BLOCKED in sandbox** (no gh/remote): Phase 0 keeps the DONE WITH EXCEPTION label;
   **"gates green" is NOT claimed for CI or minified release.**
+
+- **CI RUN 45061168092 (V-037, 2026-11-22)**: instrumented API 27 + 35 GREEN — the V-035
+  KVM repair WORKED (/dev/kvm present on ubuntu-24.04; emulator boots ~37 s; tests run).
+  loadLibrary PASS on API 27 AND 35 (minSdk=27 native floor proven on-device — D-012
+  ratification now has runtime evidence). AAB size MEASURED 55.9 MB universal (≤80 MB target
+  — met with margin; the 77–80 MB estimate is retired). Notices canonical-SHA gate GREEN.
+  Timing decode test SKIPPED — fixture-visibility defect (device cannot see the runner's
+  repo checkout) — fixed in 15cf4ab (adb push to the app's external-files dir + repoFile
+  probes it); run 45061936775 verifies. build RED at coverage gate: Gradle 9 jacoco produced
+  no XML (xml.required default) — fixed in 15cf4ab; the gate correctly hard-failed instead of
+  faking numbers. release gate step crashed on a CSV-parse bug AFTER the measurement — fixed
+  in 15cf4ab; measurement recorded in V-037.
 
 ## Needs from Mo (§18 + Phase 0.6)
 1. **Trigger CI**: push the repo to GitHub (Actions workflow is ready) — closes E1, S2 (emulator

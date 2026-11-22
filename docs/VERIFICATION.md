@@ -596,3 +596,50 @@ final gate loop asserts every notice SHA-256 vs the pinned canonical (exit 1 on 
 (b) NEW scripts/check_notices_sha.py — standalone canonical-SHA gate, wired as an explicit
 release-job step BEFORE assembleRelease (tested: happy exit 0 / degraded exit 1). This
 record supersedes the V-035 "regression repaired" note with the concrete CI-side gate.
+
+### V-037 CI run 45061168092 (commit a0e5021) — instrumented GREEN; size MEASURED (2026-11-22)
+First run with the V-035 repair set + V-036 review fixes. Per-job evidence (API + logs +
+artifacts; token used via GIT_ASKPASS, never in URL/disk; leak gates clean before/after):
+- **secrets-scan GREEN**.
+- **instrumented (27) GREEN + instrumented (35) GREEN** — the P1 repair WORKED:
+  `ls -l /dev/kvm` → `crw-rw-rw- 1 root kvm` (KVM present on ubuntu-24.04; the pre-flight
+  passed), emulator booted in ~37 s (no `-accel off` refusal), `:app:connectedDebugAndroidTest`
+  ran to BUILD SUCCESSFUL in 2m30s on both API levels.
+  Per-test outcomes (from the androidTest-results artifacts):
+  - `loadLibrarySmoke_bothNativeLibsLoad` **PASS on API 27 AND 35** — onnxruntime +
+    sherpa-onnx-jni native libs LOAD on the API-27 floor. **D-012's minSdk=27 decision now has
+    on-device proof** (runtime API-27 evidence, not just .note.android.ident).
+  - `amiriQuranFont_rendersAllTanzilCodepoints_nonEmpty` **PASS on both** — the font asset
+    loads on-device and renders the Tanzil codepoints non-empty.
+  - `sherpaAccuracyDecode_moClip_loudSkipWhenAbsent` SKIPPED (loud, by design — Mo's clip
+    still absent, §0 gate intact).
+  - `sherpaTimingDecode_generatedFixture_secondsAnd40msGrid` **SKIPPED — DEFECT FOUND**:
+    the test looks for `eval/fixtures/timing_fixture.wav` via repo paths (cwd/../), but the
+    DEVICE cannot see the runner's repo checkout; the workflow generates the fixture on the
+    host, never pushes it to the device. Fixed in 15cf4ab: the runner script now
+    `adb push`es the fixture to the app's external-files dir
+    (/sdcard/Android/data/com.example.tasmee/files/…) and repoFile() probes that path +
+    getExternalFilesDir(). NEXT run is the first with a real on-device decode assertion.
+- **release RED (measurement SUCCEEDED, gate step crashed)**: bundletool 1.17.0 (sha-verified)
+  ran `build-apks --mode=universal` (in-job debug keystore) and `get-size total
+  --dimensions=SDK,ABI,SCREEN_DENSITY` printed `27-,,,55900674,55900674` — **MEASURED AAB
+  universal download size = 55,900,674 B ≈ 55.9 MB (min=max), BELOW the 80 MB target and the
+  85 MB ceiling**. The §14 budget is MET with margin (V-018's 77–80 MB estimate superseded by
+  the real measurement; no PAD / drop-tiny / ADR escalation needed). The step then crashed on
+    a parsing bug (see below) — the measurement itself is valid and recorded here.
+  The notices canonical-SHA gate step PASSED (release job reached the bundletool step =
+  generate_notices + check_notices_sha both exit 0 → shipped notices are canonical bytes).
+- **build RED at the coverage gate**: `[FAIL] core:quran/core:align: report missing` —
+  `jacocoTestReport` ran (:core:quran FROM-CACHE, :core:align executed) but NO XML existed on
+  disk: the JVM jacoco plugin under Gradle 9 did not produce the XML (xml.required default
+  false for this setup), so the gate correctly hard-failed on missing reports (no fake pass —
+  the gate does its job). Fixed in 15cf4ab: `xml.required.set(true)` + pinned
+  `reports/jacoco/test/jacocoTestReport.xml` output location in BOTH module builds; the gate
+  now also probes the two known XML layouts.
+- **ktlint step**: skipped (build failed before it); committed baseline + parse-error gates
+  unexercised this run — exercised next run.
+
+**Parsing defect fixed (release)**: the size-step's regex `([\d,]+)` matched the bare comma
+between `MIN` and `MAX` header fields → `int('')` ValueError. Replaced by a proper CSV parse
+(takes the last two numeric columns as MIN/MAX; verified against the exact run output →
+55.9 MB / 55.9 MB). The ≤80 MB warn / >85 MB fail semantics unchanged.
