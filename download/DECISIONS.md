@@ -147,7 +147,7 @@ verified against the value published by services.gradle.org for 9.9.2 (docs/VERI
   verified on the API-27 emulator entry of the CI instrumented job (docs/CI.md) the first time
   it runs. app/build.gradle.kts will change to `minSdk = 27` in Phase 3 (UI) together with the
   emulator evidence, to keep this commit host-side only. [MO] ratification requested.
-- **D-025 trailing-EXTRA root cause** (aligner, not generator): finals aligned against
+- **D-013 trailing-EXTRA root cause** (renumbered from the ad-hoc D-025; 2026-11-22) (aligner, not generator): finals aligned against
   pointer−backWords only. Fixed: finals align with lo=0 (free leading expected skips). The
   synthetic report regenerated: 19/19 CORRECT, MISSED + WRONG fire, hit-rate 96.5%.
 - **Scheduler law implemented** (core:audio): effective cadence = max(partialEveryMs, RTF×W);
@@ -159,6 +159,23 @@ verified against the value published by services.gradle.org for 9.9.2 (docs/VERI
 - **core:session orchestration + calibration**: fake-recognizer driven session; checkpoint
   after each FINAL (§11); calibration = 3 probes, discard first, median → RTF → L0–L3 ladder
   (measured triggers only) + model choice; badge («الوضع الخفيف») from L2 (§8.6/§10.5).
+- **D-014 ABI source sets (2026-11-22)**: release ships arm64-v8a only (D-003); the x86_64
+  pair from the SAME pinned tarball (sha256 087e…5c3e / cdeb…52a8) is extracted into
+  app/src/debug/jniLibs/ ONLY (git-ignored) so the CI x86_64 emulator can System.loadLibrary.
+  Implemented via `androidComponents.onVariants(release)` packaging exclude `lib/x86_64/**`;
+  debug = arm64 + x86_64. Guards: CI unzip assertions on both APKs + check_abi_floor.py
+  (minSdk 27 >= max api_level 27, both ABIs measured). Tarball paths begin "./jniLibs/…" —
+  extraction startswith() fixed (masked earlier by the sidecar skip).
+- **D-015 minSdk applied (2026-11-22)**: app/build.gradle.kts minSdk 26 → 27 now (was deferred
+  to Phase 3 — the known API-26 load failure could not ship even to CI). CI asserts
+  minSdk >= max(.note.android.ident api_level) over every shipped .so via
+  scripts/check_abi_floor.py so a jniLibs bump cannot regress silently. [MO] ratification
+  stays open (D-012).
+- **D-016 CI timing fixture (2026-11-22)**: scripts/make_timing_fixture.py regenerates the
+  V-015 harmonic-complex 8 s / 16 kHz WAV deterministically (code, not a binary; sha256
+  da6798…ec43 verified equal across runs). The instrumented timing test decodes it on-device
+  and asserts seconds-scale timestamps + 40 ms grid. Mo's own clip remains the separate
+  loud-skip ACCURACY test. No gated/third-party audio ever committed.
 - Size options table for Mo (PENDING the CI bundletool measurement — numbers land with the
   first remote run): (a) PAD install-time pack [VERIFY AssetManager access + no INTERNET
   needed], (b) drop tiny −15.6 MB stored (kills the low-end fallback — interacts with §8.6),

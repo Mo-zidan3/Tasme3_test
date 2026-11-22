@@ -417,3 +417,80 @@ Retried twice more this session (90 s + 180 s backoff): HTTP 429 then a 404 on t
 form. The whisper.cpp GGML remains un-fetchable. `eval/run_baseline.py` now exists with the
 §13.2 interface and REFUSES to produce numbers ("baseline NOT YET MEASURED"). Harness-only;
 never blocks Phase 2.
+
+
+### V-028 Record hygiene + supersessions (2026-11-22)
+Superseded entries (kept for history, marked here normatively):
+- V-004 (jniLibs "x86_64 also present" + minSdk guess 24/26) → **superseded by V-016** (floor 27).
+- V-011 (15 modules / ≈84 MB estimate) → **superseded by V-018** (13 modules / 77–80 MB estimate;
+  both estimates to be replaced by the bundletool measurement from the first CI run).
+- V-013 (host timestamps probe) → **superseded by V-015** (seconds + 40 ms grid, golden tests).
+- V-017 ("111 basmalas") → **superseded by V-023** (112; the 111 was a byte-startswith artifact).
+- V-022 (synthetic report v1 metrics) → **superseded by V-025** (app-shaped streams; lo=0 fix).
+- D-025 → renumbered **D-013**.
+
+New host evidence (2026-11-22):
+- check_abi_floor.py over jniLibs: arm64 onnxruntime api_level 27, sherpa-jni 21; x86_64
+  onnxruntime 27, sherpa-jni 21 → max=27 == minSdk 27 (both source sets).
+- make_timing_fixture.py determinism: two runs → identical payload sha256
+  da6798fb059d326d486c86994d2c912113fb6e2ef04bfda1310339236e37ec43.
+- THIRD_PARTY_NOTICES.md Tanzil block now byte-verbatim vs the committed asset (25/25 lines;
+  trailing spaces included); MIT copyright corrected to the fetched LICENSE bytes
+  ("Copyright (c) 2026 Abdou").
+- fetch_native.py: tarball member paths begin "./jniLibs/…" — extraction filter fixed
+  (previous startswith never matched; masked by the sidecar skip).
+- bundletool pinned 1.17.0 (sha256 printed at fetch time into the CI log for the record).
+
+### V-029 JaCoCo re-measured after Phase-2 host-side (2026-11-22, exec-file analysis)
+Re-run after the new tests (basmala OPTIONAL_PREFIX, simulator, scheduler, assembly, session):
+```
+core:quran  LINES covered=67  missed=5  total=72   → 93.1%   (prev 93.6% — real re-measure)
+core:align  LINES covered=372 missed=37 total=409 → 91.0%   (prev 91.7% — real re-measure)
+core:audio / core:asr / core:session: android-library modules — jacoco wiring lands with the
+  CI coverage step (their tests are testDebugUnitTest; html reports exist per-module but are
+  not aggregated host-side this session).
+```
+The two docs quotes (93.6/91.7) were pre-Phase-2 copies; the re-measured numbers above are the
+current truth and are what STATUS must quote.
+
+### V-030 PUSH COMPLETE — first CI run triggered; monitoring blocked by token scope (2026-11-22)
+```
+git remote add origin https://github.com/Mo-zidan3/Tasme3_test.git   (token NEVER in URL)
+GIT_ASKPASS=/tmp/ap.sh git ls-remote origin   → exit 0 (auth OK; remote had ZERO refs)
+GIT_ASKPASS=/tmp/ap.sh git push -u origin main → "* [new branch] main -> main"
+```
+- Leak gates BEFORE and AFTER: repo content clean (no token-shaped string: the scanner's own
+  regex literals excluded by real-shape matching), .git/config clean (no credential in URL),
+  /tmp/ap.sh removed immediately.
+- Workflow confirmed on the remote via contents API: .github/workflows/ci.yml present, 15,849 B.
+- The push touched code+workflow (non-docs paths) → the workflow TRIGGERED (push event on main).
+- **Monitoring BLOCKED**: the fine-grained token lacks the Actions permission —
+  `GET /actions/runs` → 403 "Resource not accessible by personal access token"; same for
+  check-runs, commit statuses, deployments, and workflow_dispatch (403 each). Public HTML
+  actions page → 404 (repo private). Per §3's rule ("If Actions read is denied, ask Mo to paste
+  the logs — do not guess outcomes"): NO gate is marked green from the workflow file alone.
+  E1/AAB/S2/minSdk-on-device remain PENDING Mo pasting the run logs/URLs.
+- What the run will produce when Mo shares it (per-job evidence targets listed in docs/CI.md):
+  secrets-scan + notices check, build (unit tests/manifest/classpath/ABI floor debug),
+  release (R8 guard + arm64-only guard + floor), size (bundletool SDK/ABI/density), instrumented
+  API 27+35 (loadLibrary, generated-fixture timing decode, font smoke).
+
+### V-031 §4 host-side fixes demanded by the measurements (2026-11-22)
+1. **Simulated latency p95 4700 → 950 ms** (p50 750 → 550). Two root causes, both fixed and
+   re-measured: (a) EvalMain's latency metric used the FIRST occurrence's endMs for duplicate-
+   text words (الله ×3, احد ×2 in surah 112) — a metric bug fabricating multi-second latencies;
+   (b) partial windows truncated at segment start (both the Kotlin SegmenterSimulator and
+   run_asr.py's `_stream`) — now drawn from the session ring buffer across segment boundaries.
+2. **EXTRA inflation 6–7/clip → 0**: dedup key (text, startMs/40) [fallback (text, windowEndMs)]
+   + suppression of EXTRA for audio positions previously MATCHED. The 6–7 were re-covered matched
+   audio behind the pointer, not user repeats.
+3. **Repeated identical ayahs (surah 55 refrain ×31 normalized-identical; surah 77 ×10)**:
+   3 new invariants tested (pointer monotonic on earlier identical refrain; nearest-forward
+   re-anchor; segment-initial skip → MISSED). REAL DEFECT FOUND+FIXED: free leading expected
+   skips in lo=0 FINALS recorded NO absence evidence → segment-initial skips could never reach
+   MISSED. Now every skipped k < spanMin in a final records absence (independent of interiority;
+   §9.3's pointer≥3 gate still applies at state level).
+4. **strictOverlapIndependence flag** (default OFF): independence(a,b,strict) — strict mode
+   ignores the isFinal clause. Measured: WRONG fires 1/1 (default) vs 0/1 (strict) on the same
+   كين substitution stream. Default kept per V-025; numbers to Mo before the §13 gate.
+Tests: core:align 39 GREEN (35 + 3 repeated-ayah + 1 independence-rule); full suite 92 green.

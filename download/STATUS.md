@@ -91,9 +91,27 @@ with exponential backoff, still blocked. Harness-only; not on the Phase 1 critic
   (primary model, model space) — with the optional basmala correctly excluded. Indicative (one
   reciter, studio); the §13 phone gate is separate.
 - **S6 baseline STILL BLOCKED** (429/404); run_baseline.py stub refuses to emit numbers (V-027).
-- **D-012**: minSdk 26→27 ADR (native floor measured 27, V-016) pending Mo ratification +
-  emulator verification; size options table deferred until the bundletool measurement (P0 job).
-- Coverage after this session: core:quran 93.6% / core:align 91.7% lines (jacoco).
+- **Pushed to GitHub (V-030)**: repo at https://github.com/Mo-zidan3/Tasme3_test, main branch,
+  leak gates clean before/after. The workflow triggered on push, but the fine-grained token lacks
+  the Actions permission — run monitoring is BLOCKED (403 on /actions/runs, check-runs,
+  workflow_dispatch; public HTML 404). NO gate marked green from the workflow file alone; Mo must
+  paste the run logs/URLs to close E1/AAB/S2-on-device.
+- **Pre-push hardening (V-028/9, D-013–D-016)**: release=arm64-v8a ONLY / debug=arm64+x86_64
+  (unzip-proven on built APKs); minSdk=27 APPLIED (floor assertions in CI over every shipped .so);
+  deterministic code-generated timing fixture + on-device timing/accuracy decode tests; CI
+  hardening (independent jobs, pinned SDK components, bundletool 1.17.0 pin, SHA-keyed caches
+  with backoff + hard-fail, path filters, concurrency cancel, 7-day retention, secrets-scan +
+  notices-placeholder checks); THIRD_PARTY_NOTICES.md Tanzil block byte-verbatim; JaCoCo
+  re-measured (93.1%/91.0%).
+- **§4 host-side fixes (V-031)**: simulated latency p95 4700→950 ms (metric dup-text bug +
+  cross-segment partial windows); EXTRA 7→0 (matched-position suppression + (text,startMs/40)
+  dedup); repeated-ayah invariants on the surah-55 refrain (×31) + segment-initial MISSED
+  defect fixed (leading-skip absence); strictOverlapIndependence flag (default OFF) with
+  WRONG-fire numbers (1 default vs 0 strict) for Mo before the §13 gate.
+- **D-012**: minSdk 26→27 ADR + applied (D-015) pending Mo ratification; size options table
+  deferred until the bundletool measurement from the CI run.
+- Coverage after this session (V-029 re-measured via exec analysis): core:quran 93.1% (67/72) /
+  core:align 91.0% (372/409) lines.
 
 ## Phase 1 — DONE (with two honest pendings) (Quran + align + harness, per §16)
 - **core:quran DONE**: Tanzil asset committed with verbatim notice header (whole-file sha256
