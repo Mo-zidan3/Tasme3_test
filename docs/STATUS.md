@@ -1,12 +1,12 @@
 # STATUS — per phase
 
-Last updated: 2026-11-22 (V-037b: run 45064204429 — ALL FIVE JOBS GREEN, the first fully-green
-pipeline: coverage gate REAL numbers (quran 93.1%, align 91.0% ≥85% PASS); ktlint 0
-out-of-baseline PASS; AAB measured 55,900,663 B = 55.9 MB universal ≤80 MB budget MET (V-018
-estimate retired); all six notices canonical-SHA gates OK; instrumented API 27: loadLibrary +
-font + TIMING DECODE PASS ON-DEVICE (S2 timing closed on API 27); API 35: loadLibrary + font
-PASS, timing decode pending scoped-storage visibility diagnostics (833f4ec). Commit B
-(detekt) HELD: sandbox Maven 429 blocks local ./gradlew help verification — D-017 open)
+Last updated: 2026-11-22 (V-037c: run 45067719380 — ALL FIVE JOBS GREEN with S2 CLOSED ON BOTH
+API FLOORS: timing decode PASS on API 27 (0.597s) AND API 35 (0.598s) via androidTest-APK
+assets (scoped storage hides shell-pushed files on Android 15); loadLibrary PASS both floors
+(minSdk=27 runtime proof); coverage gate REAL numbers (quran 93.1%, align 91.0% ≥85%); ktlint
+0 out-of-baseline; AAB measured 55.9 MB ≤80 MB budget MET; all six notices canonical-SHA gates
+OK; accuracy clip remains the loud §0 skip. Commit B (detekt) HELD: sandbox Maven 429 blocks
+local ./gradlew help verification — D-017 open for Mo)
 
 ## Phase 0 — Scaffold: **DONE WITH EXCEPTION (E1)**
 Exception E1: **CI has never executed** — sandbox has no `gh` CLI and no git remote; `assembleRelease`

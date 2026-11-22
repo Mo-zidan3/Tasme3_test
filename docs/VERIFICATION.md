@@ -691,3 +691,24 @@ API-35 parity pending the visibility diagnostics. minSdk=27 runtime proof: CLOSE
 `./gradlew help` compile verification of the root build-script change. Per the review
 instruction (never couple the evidence-gathering pipeline to an unverified build-script
 change), B waits for a local compile window; D-017 remains open for Mo.
+
+### V-037c API-35 parity CLOSED — full green incl. timing decode on BOTH APIs (2026-11-22, run 45067719380)
+Root cause of the API-35 skip (probed-path evidence from run 45066011428): scoped storage on
+Android 15 hides shell-pushed files under /sdcard/Android/data from the app's File probes —
+even its OWN getExternalFilesDir path stat'd false — while API 27 saw the same path via legacy
+storage. Two more defects were found and fixed along the way:
+- instrumentation-context cacheDir gave `Permission denied` on File.createTempFile (run
+  45066936654, both APIs) → temp file now in the TARGET context's cacheDir.
+- Final channel: the fixture rides INSIDE the androidTest APK assets (CI generates it into
+  app/src/androidTest/assets/eval/fixtures/ — gitignored, deterministic; repoFile() copies it
+  out via assets.open → target-cacheDir temp file; null-safe for Mo's absent accuracy clip).
+
+**Run 45067719380 (commit 177b71e): ALL FIVE JOBS GREEN. Per-test outcomes (artifacts):**
+- API 27: loadLibrarySmoke PASS; amiriQuranFont PASS; **sherpaTimingDecode PASS (0.597s)**;
+  accuracy clip loud-skip (§0 intact).
+- API 35: loadLibrarySmoke PASS; amiriQuranFont PASS; **sherpaTimingDecode PASS (0.598s)**;
+  accuracy clip loud-skip.
+**S2 (on-device decode: JNI path + timing contract) is now CLOSED on BOTH API 27 and API 35.**
+Q8's timing contract (seconds-scale timestamps, 40 ms frame grid) holds on-device at both
+floors; minSdk=27 native-floor proof (loadLibrary) holds at both. The only remaining skip is
+Mo's own accuracy clip (§0 by design).
