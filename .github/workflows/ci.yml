@@ -321,6 +321,10 @@ jobs:
     # accelerator is required") and boot timed out. KVM is REQUIRED; slow TCG is NOT an
     # accepted fallback (would need Mo's explicit sign-off for very long runs). Hosted
     # ubuntu-24.04 runners still expose /dev/kvm to the runner user.
+    # T3a: emulator jobs run ONLY on push-to-main + workflow_dispatch — PRs get
+    # build + release + secrets-scan (emulator minutes on PRs waste the budget; the
+    # merge itself re-runs the full matrix).
+    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-24.04
     timeout-minutes: 75
     strategy:
