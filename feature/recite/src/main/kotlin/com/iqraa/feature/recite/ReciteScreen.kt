@@ -8,12 +8,15 @@ import androidx.compose.material3.AssistChip
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.iqraa.core.designsystem.FeedbackEncoding
 import com.iqraa.core.designsystem.QuranText
+import kotlinx.coroutines.delay
 
 /**
  * F2/F3 Recite — follow-along + tasmee' (§10.3): auto-scroll follows the pointer word;

@@ -30,6 +30,8 @@ android {
 
 dependencies {
     implementation(project(":core:designsystem"))
+    implementation(libs.coroutines.core)
+    implementation(libs.coroutines.android)
     implementation(project(":core:quran"))
     implementation(project(":core:data"))
 
