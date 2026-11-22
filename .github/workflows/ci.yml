@@ -379,9 +379,14 @@ jobs:
           done
 
       # 1.3: the permanent CI decode fixture — deterministic, code-generated, zero licensing risk.
+      # V-037c: ALSO generated into the androidTest APK's ASSETS — scoped storage on API 35
+      # hides shell-pushed external files from the app under File probes (probed-path evidence,
+      # run 45066011428); APK assets are the only channel guaranteed visible on all APIs.
       - name: Generate deterministic timing fixture
         run: |
           python3 scripts/make_timing_fixture.py eval/fixtures/timing_fixture.wav
+          mkdir -p app/src/androidTest/assets/eval/fixtures
+          python3 scripts/make_timing_fixture.py app/src/androidTest/assets/eval/fixtures/timing_fixture.wav
 
       - name: Run instrumented tests on emulator (API ${{ matrix.api-level }})
         uses: reactivecircus/android-emulator-runner@v2
@@ -397,20 +402,6 @@ jobs:
           disable-animations: true
           script: |
             adb shell settings put global window_animation_scale 0
-            # V-037: the DEVICE cannot see the repo checkout — push the generated timing
-            # fixture into BOTH the app's and the instrumentation APK's external-files dirs
-            # (app-readable without permissions; API-35 run 45064204429 skipped the timing
-            # test when only the app dir was probed — instrumentation dir is the canonical
-            # channel for androidTest fixtures).
-            adb shell mkdir -p /sdcard/Android/data/com.example.tasmee/files/eval/fixtures /sdcard/Android/data/com.example.tasmee.test/files/eval/fixtures
-            adb push eval/fixtures/timing_fixture.wav /sdcard/Android/data/com.example.tasmee/files/eval/fixtures/timing_fixture.wav
-            adb push eval/fixtures/timing_fixture.wav /sdcard/Android/data/com.example.tasmee.test/files/eval/fixtures/timing_fixture.wav
-            # diagnostic (V-037): confirm visibility from shell (job log) — if `ls` fails here,
-            # scoped storage hid the dir before the app ever ran.
-            adb shell ls -l /sdcard/Android/data/com.example.tasmee/files/eval/fixtures/ || echo "diag: app-dir listing failed"
-            adb shell ls -l /sdcard/Android/data/com.example.tasmee.test/files/eval/fixtures/ || echo "diag: test-dir listing failed"
-            # from the APP's own uid — what the instrumentation actually sees:
-            adb shell run-as com.example.tasmee ls files/eval/fixtures || echo "diag: run-as listing failed"
             ./gradlew :app:connectedDebugAndroidTest || { echo "instrumented run failed"; exit 1; }
 
       - uses: actions/upload-artifact@v4

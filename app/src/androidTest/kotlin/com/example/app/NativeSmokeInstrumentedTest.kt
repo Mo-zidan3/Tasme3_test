@@ -36,23 +36,20 @@ class NativeSmokeInstrumentedTest {
         // on API 35 the target-context probe alone did not surface the pushed fixture
         // (timing test skipped), while API 27 found it. Both canonical and legacy /sdcard
         // forms are covered by getExternalFilesDir + the explicit legacy path.
-        val legacyDirs = listOf(
-            "/sdcard/Android/data/com.example.tasmee/files",
-            "/storage/emulated/0/Android/data/com.example.tasmee/files",
-        )
-        val externalDirs = listOf(instrumentation.targetContext, instrumentation.context)
-            .mapNotNull { it.getExternalFilesDir(null) }
-        val probed = buildList {
-            addAll(legacyDirs.map { File(it, rel) })
-            addAll(externalDirs.map { File(it, rel) })
-            addAll(listOf(File(rel), File("../$rel")))
-        }
-        lastProbed = probed.joinToString { it.path }
-        return probed.firstOrNull { it.exists() }
+        // V-037c: the RELIABLE channel is the androidTest APK's OWN assets — CI generates
+        // the fixture into app/src/androidTest/assets/<rel>; visible on every API level
+        // (scoped storage on API 35 hides shell-pushed external files from File probes:
+        // probed-path evidence in run 45066011428).
+        val assetStream =
+            try {
+                instrumentation.context.assets.open(rel)
+            } catch (e: java.io.FileNotFoundException) {
+                null // loud skip downstream (§0: Mo's accuracy clip absent by design)
+            } ?: return null
+        val tmp = File.createTempFile("fixture", ".wav", instrumentation.context.cacheDir)
+        tmp.outputStream().use { out -> assetStream.use { it.copyTo(out) } }
+        return tmp
     }
-
-    // V-037 diagnostic: the loud skip message embeds the probed paths.
-    private var lastProbed: String = "n/a"
 
     @Test
     fun loadLibrarySmoke_bothNativeLibsLoad() {
@@ -69,7 +66,7 @@ class NativeSmokeInstrumentedTest {
         val msg = (
             "SKIPPED (loudly): timing fixture absent. Generate it first: " +
                 "python3 scripts/make_timing_fixture.py  (CI does this automatically; " +
-                "locally run it before connectedAndroidTest). Probed: $lastProbed"
+                "locally run it before connectedAndroidTest)."
             )
         assumeTrue(msg, fixture != null)
 

@@ -41,3 +41,4 @@ eval/fixtures/
 
 # secrets scan target (§0 leak gate)
 .secrets/
+app/src/androidTest/assets/
