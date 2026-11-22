@@ -1,14 +1,12 @@
 # STATUS — per phase
 
-Last updated: 2026-11-22 (V-037: run 45061168092 — instrumented (27) and (35) BOTH GREEN:
-KVM pre-flight passed on ubuntu-24.04, emulator booted, connectedDebugAndroidTest ran;
-loadLibrarySmoke PASS on API 27 AND 35 → minSdk=27 native floor proven ON-DEVICE; font
-smoke PASS; timing decode was SKIPPED by a fixture-visibility defect (fixed in 15cf4ab —
-next run asserts it for real). AAB download size MEASURED: 55,900,674 B ≈ 55.9 MB universal,
-min=max, UNDER the 80 MB target — V-018's 77–80 MB estimate superseded, no §14 escalation
-needed. Notices canonical-SHA gate GREEN. build RED only at the coverage gate (jacoco XML
-not produced by Gradle 9 defaults — fixed in 15cf4ab: xml.required + pinned path). Run
-45061936775 (15cf4ab) queued as the verification pass)
+Last updated: 2026-11-22 (V-037b: run 45064204429 — ALL FIVE JOBS GREEN, the first fully-green
+pipeline: coverage gate REAL numbers (quran 93.1%, align 91.0% ≥85% PASS); ktlint 0
+out-of-baseline PASS; AAB measured 55,900,663 B = 55.9 MB universal ≤80 MB budget MET (V-018
+estimate retired); all six notices canonical-SHA gates OK; instrumented API 27: loadLibrary +
+font + TIMING DECODE PASS ON-DEVICE (S2 timing closed on API 27); API 35: loadLibrary + font
+PASS, timing decode pending scoped-storage visibility diagnostics (833f4ec). Commit B
+(detekt) HELD: sandbox Maven 429 blocks local ./gradlew help verification — D-017 open)
 
 ## Phase 0 — Scaffold: **DONE WITH EXCEPTION (E1)**
 Exception E1: **CI has never executed** — sandbox has no `gh` CLI and no git remote; `assembleRelease`

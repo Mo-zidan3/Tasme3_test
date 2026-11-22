@@ -643,3 +643,51 @@ artifacts; token used via GIT_ASKPASS, never in URL/disk; leak gates clean befor
 between `MIN` and `MAX` header fields → `int('')` ValueError. Replaced by a proper CSV parse
 (takes the last two numeric columns as MIN/MAX; verified against the exact run output →
 55.9 MB / 55.9 MB). The ≤80 MB warn / >85 MB fail semantics unchanged.
+
+### V-037b FULL GREEN RUN 45064204429 + follow-ups (2026-11-22, commits 6c6ca1a→833f4ec)
+Run `45064204429` (6c6ca1a): **ALL FIVE JOBS GREEN** — secrets-scan, build, release,
+instrumented (27), instrumented (35). This is the first fully-green pipeline in the project's
+history. Measured evidence harvested from logs + artifacts:
+- **Coverage gate (REAL numbers, report-level counters)**: `core:quran 67/72 lines = 93.1%`,
+  `core:align 383/421 lines = 91.0%` — both above the 85% floor, PASS. (V-029's numbers
+  confirmed live: 93.1% matches; align 91.0% on 383/421 vs the doc's 372/409 — the module
+  grew 12 lines with the test additions and coverage held.)
+- **ktlint**: `violations OUTSIDE the committed baseline: 0` — PASS with the regenerated
+  baseline (ktlint's own baseline format; parse errors would fail).
+- **AAB download size (bundletool 1.17.0, universal apks, CSV-parsed)**:
+  `SDK,ABI,SCREEN_DENSITY,MIN,MAX` → `27-,,,55900663,55900663`;
+  **measured MIN 55.9 MB / MAX 55.9 MB — §14 budget MET with margin** (target 80 MB, ceiling
+  85 MB). V-018's 77–80 MB ESTIMATE is RETIRED; no PAD/drop-tiny/ADR escalation needed.
+  (55,900,663 B this build vs 55,900,674 B in run 45061168092 — 11 B of zip-timestamp noise.)
+- **Notices canonical-SHA gates**: all six `[gate] … OK` in BOTH generate_notices (final
+  in-script gate) and the release-job step (check_notices_sha.py) — the shipped license bytes
+  are byte-exact canonical (Tanzil 1106 B/72493509…, OFL 4389 B/72de68e5…, MIT 1062 B/3a9d7909…,
+  Apache 11358 B/cfc7749b…, tlog 18657 B/9ba9550a…, README 1815 B/c67401e8…).
+- **Instrumented API 27 (all pass)**: `loadLibrarySmoke_bothNativeLibsLoad` PASS (0.001s —
+  minSdk=27 native floor, on-device); `amiriQuranFont…` PASS (0.005s);
+  **`sherpaTimingDecode_generatedFixture_secondsAnd40msGrid` PASS in 0.617–0.724s — the
+  S2 timing contract is now proven ON-DEVICE: real sherpa JNI decode of the pushed fixture,
+  seconds-scale timestamps, 40 ms frame-grid deltas.** Accuracy test loud-skips (Mo's clip
+  still absent — §0 intact).
+- **Instrumented API 35**: loadLibrary + font PASS; timing test SKIPPED — the fixture
+  (pushed to the app's external-files dir, confirmed `1 file pushed`) is not visible to the
+  app under scoped storage on Android 15 from the probed paths (API 27 sees the same path
+  via legacy storage). Follow-ups: push to the instrumentation (.test) dir too, probe both
+  contexts + canonical /storage/emulated/0 path, add shell `ls` + `run-as` diagnostics, and
+  the skip message now embeds the probed paths (833f4ec — the next run yields device-side
+  truth). NOT a decode defect: the same fixture decoded on API 27 and host.
+- Fix history this session (all verified by run output): jacoco XML production (typed
+  `named<JacocoReport>` + `xml.required` + pinned path — two blind DSL typos caught by runs
+  45061936775/45062446816 and fixed); CSV size parser (int('') crash on the header comma);
+  fixture generator upgraded to V-015's syllabic-envelope + pitch-step signal class (the
+  continuous stack decoded to ZERO words — API-27 run 45063204700; host-verified with the
+  pinned model: 5 tokens, ts ≤ dur+40 ms, deltas exact 40 ms multiples).
+
+**S2 status: the timing-decode half of S2 is CLOSED on API 27 (on-device, measured);
+API-35 parity pending the visibility diagnostics. minSdk=27 runtime proof: CLOSED
+(loadLibrarySmoke PASS on API 27 AND 35, runs 45061168092/45064204429/45065160094).**
+
+**Commit B (detekt) remains HELD**: the sandbox's Maven Central 429 (V-035/V-037) blocks
+`./gradlew help` compile verification of the root build-script change. Per the review
+instruction (never couple the evidence-gathering pipeline to an unverified build-script
+change), B waits for a local compile window; D-017 remains open for Mo.

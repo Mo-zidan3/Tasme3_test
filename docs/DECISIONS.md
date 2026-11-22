@@ -181,7 +181,12 @@ verified against the value published by services.gradle.org for 9.9.2 (docs/VERI
   needed], (b) drop tiny −15.6 MB stored (kills the low-end fallback — interacts with §8.6),
   (c) accept with ADR. Do NOT decide before the measurement.
 
-## D-017 — detekt ceiling vs zero-findings [PENDING Mo; wiring = commit B, HELD]
+## D-017 — detekt ceiling vs zero-findings [PENDING Mo; wiring = commit B, HELD — 429]
+Status (V-037b): commit A pipeline is FULLY GREEN (run 45064204429) without the root
+build-script change, exactly as the review split intended. Commit B's typed DetektExtension
+block waits for a sandbox window where `./gradlew help` can compile (Maven Central 429
+currently blocks plugin resolution at config time). When B lands, the first real findings
+count goes to Mo for the ratchet decision.
 detekt 1.23.8 wiring moved to commit B (typed `extensions.configure<DetektExtension>` at the
 root; the untyped setProperty form from V-035 was never compiled and is removed). Commit B is
 held until `./gradlew help` compiles locally — an unverified root build-script change must not
