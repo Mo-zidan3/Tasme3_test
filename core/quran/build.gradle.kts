@@ -28,6 +28,16 @@ jacoco {
     toolVersion = "0.8.13"
 }
 
+// V-036: XML report MUST be produced (Gradle 9 defaults xml.required=false in some setups —
+// run 45061168092 proved the XML was absent and the coverage gate failed on missing files).
+tasks.named("jacocoTestReport") {
+    reports {
+        xml.required.set(true)
+        html.required.set(true)
+        xml.outputLocation.set(layout.buildDirectory.file("reports/jacoco/test/jacocoTestReport.xml"))
+    }
+}
+
 tasks.withType<Test> {
     extensions.configure<JacocoTaskExtension> {
         isEnabled = true

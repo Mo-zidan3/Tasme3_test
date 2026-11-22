@@ -15,9 +15,23 @@ from pathlib import Path
 
 REPO = Path(__file__).resolve().parent.parent
 
+# V-036: the JVM jacoco plugin has emitted the XML under either of these two layouts
+# across Gradle versions — probe both so path drift cannot fail the gate silently.
+CANDIDATE_SUBPATHS = (
+    "build/reports/jacoco/test/jacocoTestReport.xml",
+    "build/reports/jacoco/jacocoTestReport/jacocoTestReport.xml",
+)
+
+def find_report(module_dir: Path) -> Path | None:
+    for sub in CANDIDATE_SUBPATHS:
+        p = module_dir / sub
+        if p.exists():
+            return p
+    return None
+
 DEFAULTS = {
-    "core:quran": REPO / "core/quran/build/reports/jacoco/test/jacocoTestReport.xml",
-    "core:align": REPO / "core/align/build/reports/jacoco/test/jacocoTestReport.xml",
+    "core:quran": REPO / "core/quran",
+    "core:align": REPO / "core/align",
 }
 
 
@@ -42,9 +56,10 @@ def main() -> int:
     paths = DEFAULTS
     print(f"[coverage gate] line-coverage floor: {floor:.1f}%")
     failed = False
-    for module, path in paths.items():
-        if not path.exists():
-            print(f"[FAIL] {module}: report missing at {path}")
+    for module, module_dir in paths.items():
+        path = find_report(module_dir)
+        if path is None:
+            print(f"[FAIL] {module}: no jacoco XML under {module_dir} (probed {CANDIDATE_SUBPATHS})")
             failed = True
             continue
         covered, total = line_coverage(path)

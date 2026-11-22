@@ -279,21 +279,28 @@ jobs:
           cat size-report.txt
           echo "### AAB download size (bundletool 1.17.0, universal apks)" >> $GITHUB_STEP_SUMMARY
           cat size-report.txt >> $GITHUB_STEP_SUMMARY
-          # §14 budget: ≤80 MB target, 85 MB hard ceiling.
+          # §14 budget: ≤80 MB target, 85 MB hard ceiling. V-036: robust CSV parse — plain
+          # `get-size` prints "MIN,MAX" + rows; --dimensions prints SDK,ABI,...,MIN,MAX.
+          # The old regex grabbed the bare comma between header fields → int('') crash.
           python3 - <<'PY'
-          import re, subprocess
+          import csv, io, subprocess
           out = subprocess.run(["java","-jar","bundletool.jar","get-size","total","--apks=app.apks"],
                                capture_output=True, text=True).stdout
-          m = re.search(r"([\d,]+)", out)
-          if m:
-              mb = int(m.group(1).replace(",", "")) / 1e6
-              print(f"measured total download size: {mb:.1f} MB (budget target 80.0 MB)")
-              if mb > 85:
-                  print("FAIL: above 85 MB hard ceiling"); raise SystemExit(1)
-              elif mb > 80:
-                  print("WARN: above the 80 MB target — escalate to Mo (PAD / drop tiny / accept with ADR)")
-          else:
+          rows = list(csv.reader(io.StringIO(out)))
+          mins = []
+          for row in rows:
+              if len(row) >= 2 and row[-1].strip().isdigit() and row[-2].strip().isdigit():
+                  mins.append(int(row[-2]))
+          if not mins:
               print("could not parse size from:", out[:200]); raise SystemExit(1)
+          mb = min(mins) / 1e6
+          mx = max(int(r[-1]) for r in rows if len(r) >= 2 and r[-1].strip().isdigit()) / 1e6
+          print(f"measured total download size: MIN {mb:.1f} MB / MAX {mx:.1f} MB (universal set: min=max)")
+          print(f"budget: target 80.0 MB, hard ceiling 85.0 MB")
+          if mx > 85:
+              print("FAIL: above 85 MB hard ceiling"); raise SystemExit(1)
+          elif mb > 80:
+              print("WARN: above the 80 MB target — escalate to Mo (PAD / drop tiny / accept with ADR)")
           PY
 
       - uses: actions/upload-artifact@v4
@@ -390,6 +397,11 @@ jobs:
           disable-animations: true
           script: |
             adb shell settings put global window_animation_scale 0
+            # V-037: the DEVICE cannot see the repo checkout — push the generated timing
+            # fixture into the app's external-files dir (app-readable without permissions;
+            # /data/local/tmp is shell-owned and not traversable by the app under test).
+            adb shell mkdir -p /sdcard/Android/data/com.example.tasmee/files/eval/fixtures
+            adb push eval/fixtures/timing_fixture.wav /sdcard/Android/data/com.example.tasmee/files/eval/fixtures/timing_fixture.wav
             ./gradlew :app:connectedDebugAndroidTest || { echo "instrumented run failed"; exit 1; }
 
       - uses: actions/upload-artifact@v4

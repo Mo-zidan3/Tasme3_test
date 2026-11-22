@@ -28,7 +28,16 @@ class NativeSmokeInstrumentedTest {
 
     private fun repoFile(rel: String): File? {
         // CI runs from the repo root; on-device cwd varies — probe the known locations.
-        val cands = listOf(File(rel), File("../$rel"))
+        // V-037: CI adb-pushes the generated fixture into the app's external-files dir
+        // (/sdcard/Android/data/<pkg>/files/<rel> — readable by the app under test); that
+        // external-storage path is probed via context.getExternalFilesDir(null) too.
+        val external = InstrumentationRegistry.getInstrumentation()
+            .targetContext.getExternalFilesDir(null)?.let { File(it, rel) }
+        val cands = buildList {
+            addAll(listOf(File(rel), File("../$rel")))
+            add(File("/sdcard/Android/data/com.example.tasmee/files/$rel"))
+            external?.let { add(it) }
+        }
         return cands.firstOrNull { it.exists() }
     }
 
