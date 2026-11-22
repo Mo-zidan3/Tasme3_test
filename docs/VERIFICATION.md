@@ -712,3 +712,39 @@ storage. Two more defects were found and fixed along the way:
 Q8's timing contract (seconds-scale timestamps, 40 ms frame grid) holds on-device at both
 floors; minSdk=27 native-floor proof (loadLibrary) holds at both. The only remaining skip is
 Mo's own accuracy clip (§0 by design).
+
+### V-038 T4 — Mo's clips: authorization of record, committed fixture, real-audio harness (2026-11-22)
+Authorization: Mo uploaded the 6 clips with "Mo states these recitations are permitted for
+use" — recorded verbatim in eval/data/PROVENANCE.md (the authorization of record).
+- Clips identified (decode + best-F1 ayah-window matching): 39:42–43 (Ezz El-Awami, ayah 42
+  repeated), 19:4–7, 5:23, 54:10–12, 25:27–31 (Riad Mostaf ×4), 2:200–201 (Yasser
+  Al-Dossary, hadr-fast). **Classification: 3 speakers × PROFESSIONAL STUDIO recitations
+  (clean AAC, high SNR) — §13 phone-gate criteria NOT met (needs ≥60 held-out clips,
+  ≥3 speakers on PHONE MICS). Every number below is INDICATIVE; studio recitations do not
+  satisfy the phone gate. WRONG stays rendered as CLOSE in the app.**
+- Committed to git: exactly ONE clip — eval/data/fixture_54_10_riadmostaf.wav (10.05 s,
+  16 kHz mono PCM, al-Qamar 54:10, host decode CER 0.0% letters-only) + PROVENANCE.md.
+  All other audio git-ignored (eval/data/* whitelist). No gated/tlog audio anywhere.
+- androidTest `sherpaAccuracyDecode_moClip…` no longer skips in CI: the workflow copies the
+  committed fixture into the androidTest APK assets (same V-037c channel), and the test now
+  asserts the 54:10 letters-only CER ≤ 0.20 on-device (host measured 0.0%).
+- Real-audio harness (scripts/t4_real_audio_report.py; quran-asr-small; model space N()
+  = letters-only + hamza folding; full-clip offline decode — NOT the app's 8 s streaming
+  segmentation, so long clips penalize both sides; honest limitation recorded):
+  ```
+  ezz_elawami_39_42     75.4s WER 25.0% CER 19.3% (repeated ayah → hyp word loss)
+  riadmostaf_19_4_5     68.8s WER  4.3% CER  1.1%
+  riadmostaf_5_23       41.0s WER  0.0% CER  0.0% (perfect)
+  riadmostaf_54_10_12   38.0s WER  5.3% CER  1.2%
+  riadmostaf_25_27_29   70.6s WER  8.3% CER  5.2%
+  yasser_2_200_201      32.1s WER 42.1% CER 34.4% (hadr-fast; decode drops words: hyp 27 vs ref 38)
+  macro WER 14.2% / macro CER 10.2%; micro WER 15.5%
+  clip-level false-alarm rate 6.2% (12/192 hyp word occurrences, bag-level)
+  clip-level detection rate 84.5% (180/213 ref word occurrences)
+  defect clips (CER>0): 5/6 — rule-of-three NOT applicable (defects observed)
+  ```
+- Honest reading: on CLEAN STUDIO audio the model is strong (4/6 clips ≤ 8.3% WER), the two
+  outliers are explained by (a) ayah repetition (Ezz) and (b) hadr-fast pace (Al-Dossary) —
+  the model's weak spot on fast recitation, which the §13 phone gate must re-test on real
+  hardware. FA 6.2% is bag-level, NOT the app's session EXTRA rate. These numbers do NOT
+  certify phone-mic behavior (INDICATIVE label, subset + scoring space stated).

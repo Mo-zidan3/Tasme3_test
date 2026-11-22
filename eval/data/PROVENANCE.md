@@ -13,12 +13,15 @@ No gated benchmark / tlog audio is committed — none of these are from a gated 
 ## Clips (as uploaded, MP3/AAC 44.1 kHz stereo, WhatsApp-forwarded "Original audio")
 | # | File (uploaded) | Duration | Identified content (host decode + ayah match) | Speaker |
 |---|---|---|---|---|
-| 1 | ezz_elawami_Original audio_29017540214573455.mp3 | 75.3 s | 39:42 (az-Zumar, repeated) | Ezz El-Awami (reciter) |
-| 2 | riadmostaf_Original audio_29126780870296850.mp3 | 68.8 s | 19:4–5 (Maryam) | Riad Mostaf (reciter) |
+| 1 | ezz_elawami_Original audio_29017540214573455.mp3 | 75.3 s | 39:42–43 (az-Zumar; ayah 42 repeated/re-covered) | Ezz El-Awami (reciter) |
+| 2 | riadmostaf_Original audio_29126780870296850.mp3 | 68.8 s | 19:4–7 (Maryam) | Riad Mostaf (reciter) |
 | 3 | riadmostaf_Original audio_29710391055313722.mp3 | 41.0 s | 5:23 (al-Ma'idah) | Riad Mostaf |
 | 4 | riadmostaf_Original audio_29734506272823931.mp3 | 38.0 s | 54:10–12 (al-Qamar) | Riad Mostaf |
-| 5 | riadmostaf_Original audio_30208365058757351.mp3 | 70.6 s | 25:27–29 (al-Furqan) | Riad Mostaf |
-| 6 | yasser.al.dossary_Original audio_40504772022471849.mp3 | 32.1 s | 2:200–201 (al-Baqarah) | Yasser Al-Dossary (reciter) |
+| 5 | riadmostaf_Original audio_30208365058757351.mp3 | 70.6 s | 25:27–31 (al-Furqan) | Riad Mostaf |
+| 6 | yasser.al.dossary_Original audio_40504772022471849.mp3 | 32.1 s | 2:200–201 (al-Baqarah; hadr-fast) | Yasser Al-Dossary (reciter) |
+
+(Coverage windows established by best-F1 matching of the decode against candidate ayah
+windows — see scripts/t4_real_audio_report.py; measurements in eval/reports/t4-real-audio-indicative.txt.)
 
 ## Honest classification (this is the §13 gate-relevance statement)
 - **Source type: PROFESSIONAL STUDIO recitations by named reciters** (audio quality

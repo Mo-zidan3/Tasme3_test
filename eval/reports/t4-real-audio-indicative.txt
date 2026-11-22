@@ -1,0 +1,16 @@
+### T4 real-audio harness — Mo's 6 clips, quran-asr-small (model space N())
+### LABEL: INDICATIVE — 3 speakers × STUDIO recitations; §13 phone gate NOT met
+
+ezz_elawami_39_42        audio= 75.4s WER= 25.0% CER= 19.3% refWords=40 hypWords=33
+riadmostaf_19_4_5        audio= 68.8s WER=  4.3% CER=  1.1% refWords=47 hypWords=46
+riadmostaf_5_23          audio= 41.0s WER=  0.0% CER=  0.0% refWords=21 hypWords=21
+riadmostaf_54_10_12      audio= 38.0s WER=  5.3% CER=  1.2% refWords=19 hypWords=19
+riadmostaf_25_27_29      audio= 70.6s WER=  8.3% CER=  5.2% refWords=48 hypWords=46
+yasser_2_200_201         audio= 32.1s WER= 42.1% CER= 34.4% refWords=38 hypWords=27
+
+macro WER 14.2% / macro CER 10.2% over 6 clips (INDICATIVE)
+micro WER (word-weighted) 15.5%
+clip-level false-alarm rate 6.2% (12/192 hyp word occurrences)
+clip-level detection rate 84.5% (180/213 ref word occurrences)
+defect clips (CER>0): 5/6 observed = 83.3% (rule-of-three not applicable — defects observed)
+NOTE: no alignment — repeats/re-covers inflate hyp counts; FA is bag-level, NOT the app's session-level EXTRA rate.
