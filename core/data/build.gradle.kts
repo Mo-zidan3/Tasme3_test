@@ -10,7 +10,12 @@ android {
     compileSdkMinor = 1
 
     defaultConfig {
-        minSdk = 26
+        minSdk = 27
+    }
+
+    // §15: exportSchema=true — schemas land in core/data/schemas for CI migration tests.
+    ksp {
+        arg("room.schema.location", "$projectDir/schemas")
     }
 
     compileOptions {
