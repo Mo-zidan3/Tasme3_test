@@ -218,15 +218,17 @@ class TrackerTest {
     }
 
     @Test
-    fun `EXTRA dedup by text and 250ms bucket`() {
+    fun `EXTRA dedup by text and startMs 40ms grid (V-031)`() {
         val exp = expected("قل", "هو", "الله")
         val t = tracker(exp)
-        // one window with صدق twice at nearby times → same bucket dedup
-        t.onObservation(obs(listOf(word("صدق", 0, 200), word("صدق", 210, 400), word("قل", 0, 400)), 0, 400, isFinal = true))
-        // overlapMs windows: same EXTRA counted once
-        t.onObservation(obs(listOf(word("صدق", 50, 390), word("قل", 50, 390)), 50, 390))
-        val u = t.snapshot()
-        assertEquals(1, u.extras.count { it.text == "صدق" })
+        // صدق twice at nearby times: 0..200 and 240..400 → different keys (0/40=0 vs 240/40=6)
+        t.onObservation(obs(listOf(word("صدق", 0, 200), word("صدق", 240, 400), word("قل", 0, 400)), 0, 400, isFinal = true))
+        val u1 = t.snapshot()
+        assertEquals(2, u1.extras.count { it.text == "صدق" }, "two repeats at different audio positions = two stats entries")
+        // the SAME word at the SAME startMs in an overlapping window dedups to one:
+        t.onObservation(obs(listOf(word("صدق", 0, 200), word("قل", 0, 200)), 50, 390))
+        val u2 = t.snapshot()
+        assertEquals(2, u2.extras.count { it.text == "صدق" }, "re-observation at identical startMs dedups (same key)")
     }
 
     @Test

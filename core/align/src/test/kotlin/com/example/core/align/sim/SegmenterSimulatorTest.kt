@@ -107,3 +107,34 @@ class SegmenterSimulatorTest {
         assertEquals(WordState.WRONG, tracker2.snapshot().states[15], "WRONG (Conservative, ≥2 independent interior) must fire on the app-shaped stream")
     }
 }
+
+/** §4 (V-031): WRONG fire-rate — default rule (final is independent) vs strictOverlapIndependence. */
+class IndependenceRuleTest {
+
+    private val quranWords = listOf(
+        "بسم", "الله", "الرحمن", "الرحيم", "قل", "هو", "الله", "احد", "الله",
+        "الصمد", "لم", "يلد", "ولم", "يولد", "ولم", "يكن", "له", "كفوا", "احد",
+    )
+    private fun exp() = quranWords.mapIndexed { i, t -> ExpectedWord(i, 112, 1, t) }
+
+    private fun wrongCount(strict: Boolean): Int {
+        val sim = SegmenterSimulator(SegmenterConfig(vadPadMs = 300))
+        val words = quranWords.mapIndexed { i, w ->
+            val text = if (i == 15) "كين" else w // persistent substitution يكن→كين (sim 0.333)
+            TimedWord(text, i * 400L, i * 400L + 350)
+        }
+        val obs = sim.simulate(words)
+        val tracker = RecitationTrackerImpl()
+        tracker.reset(exp(), TrackerConfig(strictOverlapIndependence = strict))
+        for (o in obs) tracker.onObservation(o)
+        return tracker.snapshot().states.count { it.value == WordState.WRONG }
+    }
+
+    @Test
+    fun `WRONG fires under default rule and is suppressed under strict overlap`() {
+        val byDefault = wrongCount(strict = false)
+        val byStrict = wrongCount(strict = true)
+        assertEquals(1, byDefault, "default rule (V-025): partial + final = 2 votes → WRONG")
+        assertEquals(0, byStrict, "strict overlap rule: heavily-overlapping final is not independent → only 1 vote → no WRONG")
+    }
+}

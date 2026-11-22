@@ -38,6 +38,11 @@ data class TrackerConfig(
     val reanchorSim: Double = 0.90,
     val lostAfterMs: Long = 6000,
     val minReanchorRun: Int = 3,
+    /** §4 (V-031): when true, independence ignores the isFinal clause — a FINAL over the same
+     *  audio as a partial is NOT independent (strict overlap rule). Default FALSE (spec rule:
+     *  final + windows differ ⇒ independent; V-025 measured that a partial + the final = 2
+     *  votes, which fires WRONG within one segment). Numbers for Mo before the §13 gate. */
+    val strictOverlapIndependence: Boolean = false,
     val preset: Preset = Preset.CONSERVATIVE,
 ) {
     enum class Preset { CONSERVATIVE, BALANCED }
@@ -72,12 +77,13 @@ interface RecitationTracker {
 fun Observation.identity(): String = "$windowStartMs:$windowEndMs:$isFinal:$modelRev"
 
 /** §9.2 independence: overlap < 50% of the shorter window, OR one final and the windows differ. */
-fun independent(a: Observation, b: Observation): Boolean {
+fun independent(a: Observation, b: Observation, strictOverlap: Boolean = false): Boolean {
     val overlapStart = maxOf(a.windowStartMs, b.windowStartMs)
     val overlapEnd = minOf(a.windowEndMs, b.windowEndMs)
     val overlap = (overlapEnd - overlapStart).coerceAtLeast(0)
     val shorter = minOf(a.windowEndMs - a.windowStartMs, b.windowEndMs - b.windowStartMs)
     if (overlap * 2 < shorter) return true
+    if (strictOverlap) return false // strict mode: heavily-overlapping windows are NEVER independent
     // "windows differ" = (start,end) bounds differ — isFinal is part of identity, not of the window.
     val sameBounds = a.windowStartMs == b.windowStartMs && a.windowEndMs == b.windowEndMs
     return (a.isFinal || b.isFinal) && !sameBounds

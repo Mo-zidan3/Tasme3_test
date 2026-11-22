@@ -100,16 +100,20 @@ def assemble_words(result, segment_start_ms, table):
 
 def _stream(words_timed, model_rev="synthetic", partial_window=2500, partial_every=1000,
             pause_final=500, pad=300):
-    """App-shaped observation stream (same law as core:align SegmenterSimulator):
-    trailing partials every partial_every ms; pause-final covering the segment."""
+    """App-shaped observation stream (same law as core:align SegmenterSimulator, V-031):
+    trailing partials every partial_every ms drawn from the SESSION ring buffer — the window
+    extends back across segment boundaries (bounds are session-global); pause-final covering
+    the whole segment. Segment-initial words are interior in an early partial → simulated
+    p95 latency drops (§4)."""
     if not words_timed:
         return []
     obs = []
-    seg_start = words_timed[0][1]
+    session_start = words_timed[0][1]
+    seg_start = session_start
     seg_end = words_timed[-1][2]
     t = seg_start + partial_every
     while t < seg_end:
-        w_start = max(seg_start, t - partial_window)
+        w_start = max(session_start, t - partial_window)
         in_win = [[w, s, e] for (w, s, e) in words_timed if e > w_start and s < t]
         obs.append({"words": in_win, "windowStartMs": w_start - pad, "windowEndMs": t + pad,
                     "isFinal": False, "modelRev": model_rev})

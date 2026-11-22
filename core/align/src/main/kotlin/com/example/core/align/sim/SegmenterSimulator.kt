@@ -47,6 +47,7 @@ class SegmenterSimulator(private val config: SegmenterConfig = SegmenterConfig()
     fun simulate(words: List<TimedWord>): List<Observation> {
         if (words.isEmpty()) return emptyList()
         val out = ArrayList<Observation>()
+        val sessionStartMs = words.first().startMs
         var segmentStart = words.first().startMs
         var i = 0
         while (i < words.size) {
@@ -59,7 +60,7 @@ class SegmenterSimulator(private val config: SegmenterConfig = SegmenterConfig()
                 j++
             }
             val segEnd = words[j].endMs
-            emitSegment(words, i, j, segmentStart, segEnd, isFinal = true, out)
+            emitSegment(words, i, j, segmentStart, segEnd, sessionStartMs, isFinal = true, out)
             // force-cut carries overlap into the next "segment start"
             val cutForced = (segEnd - segmentStart) >= config.maxSegmentMs
             segmentStart = if (cutForced) segEnd - config.overlapMs else words.getOrNull(j + 1)?.startMs ?: segEnd
@@ -79,15 +80,21 @@ class SegmenterSimulator(private val config: SegmenterConfig = SegmenterConfig()
         j: Int,
         segmentStart: Long,
         segmentEnd: Long,
+        sessionStartMs: Long,
         isFinal: Boolean,
         out: MutableList<Observation>,
     ) {
         val segWords = words.subList(i, j + 1)
-        // partials: t = window END. First partial fires at segmentStart + partialEveryMs.
+        // Partials draw their trailing window from the SESSION ring buffer (V-031): the window
+        // EXTENDS BACK ACROSS the segment boundary (bounds are session-global; the 1000 ms
+        // carried overlap is legitimate audio) — only clamped at the very start of the session.
+        // This is what keeps segment-INITIAL words interior in an early partial instead of
+        // waiting for the FINAL (simulated p95 latency fix, §4).
         var t = segmentStart + config.partialEveryMs
         while (t < segmentEnd) {
-            val wStart = maxOf(segmentStart, t - config.partialWindowMs)
-            val inWindow = segWords.filter { it.endMs > wStart && it.startMs < t }
+            val wStart = (t - config.partialWindowMs).coerceAtLeast(sessionStartMs)
+            // words from the WHOLE timeline inside the window (may cross into the previous segment)
+            val inWindow = words.filter { it.endMs > wStart && it.startMs < t }
             out.add(
                 Observation(
                     words = inWindow.map { AsrWord(it.text, it.startMs, it.endMs) },

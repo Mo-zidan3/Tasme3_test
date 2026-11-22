@@ -24,7 +24,10 @@ class RecitationTrackerImpl : RecitationTracker {
     private val seenObservationIds = HashSet<String>()
     private val observations = ArrayList<Observation>()
     private var pointer: Int = 0
-    private val extras = LinkedHashMap<Pair<String, Long>, AsrWord>() // EXTRA dedup key (text, 250ms bucket)
+    private val extras = LinkedHashMap<Pair<String, Long>, AsrWord>() // EXTRA dedup (text, startMs/40)
+    /** (text, startMs/40) keys that were MATCHED (not extra) — re-observed matched audio is
+     *  never EXTRA (V-031: partials legitimately re-cover audio the pointer passed). */
+    private val matchedPositions = HashSet<Pair<String, Long>>()
     private var lostSpeechMs: Long = 0
     private var lastAlignedEndMs: Long = 0
     private var lastWasUsable: Boolean = false
@@ -51,7 +54,7 @@ class RecitationTrackerImpl : RecitationTracker {
         if (id in seenObservationIds) return snapshot()
         seenObservationIds.add(id)
 
-        val isIndependent = observations.any { independent(it, obs) } || observations.isEmpty()
+        val isIndependent = observations.any { independent(it, obs, config.strictOverlapIndependence) } || observations.isEmpty()
         // keep only observations that can contribute independent votes
         observations.add(obs)
 
@@ -143,6 +146,17 @@ class RecitationTrackerImpl : RecitationTracker {
                 if (k in matchedIndices) continue
                 addEvidence(k, 0.0, interior = isSpanInterior(k, spanMin, spanMax, wordCount, obs), obs.isFinal, isIndependent, absence = true)
             }
+            // V-031: free leading expected skips (words BEFORE spanMin in a lo=0 FINAL) must
+            // still record ABSENCE — the recitation is underway past them; a silent free skip
+            // would permanently erase MISSED evidence for segment-initial skips. Interiority
+            // uses the span's inner edge (k < spanMin words are "before the recitation span"):
+            // absence counts when the pointer is ≥3 beyond (§9.3 rule 3 gate at state level).
+            if (obs.isFinal && spanMin > 0) {
+                for (k in 0 until spanMin) {
+                    if (k in matchedIndices) continue
+                    addEvidence(k, 0.0, interior = false, isFinal = true, independent = isIndependent, absence = true)
+                }
+            }
         }
         for (move in alignment.moves) {
             when (move) {
@@ -152,6 +166,9 @@ class RecitationTrackerImpl : RecitationTracker {
                     } else {
                         val oi = obs.words.indexOf(move.observed)
                         isInteriorByTokenIndex(oi, wordCount)
+                    }
+                    if (move.observed.startMs != null) {
+                        matchedPositions.add(move.observed.text to (move.observed.startMs!! / 40))
                     }
                     addEvidence(move.expectedIndex, move.sim, interior && (obs.isFinal || !isAtNaturalCutBoundary(move.observed, obs)), obs.isFinal, isIndependent)
                     if (!interior && obs.isFinal && isAtNaturalCutBoundary(move.observed, obs)) {
@@ -168,13 +185,19 @@ class RecitationTrackerImpl : RecitationTracker {
                     addEvidence(move.expectedIndex, move.sim, interior, obs.isFinal, isIndependent)
                 }
                 is Move.Extra -> {
-                    // §9.4 EXTRA dedup key (normalizedText, 250 ms bucket)
+                    // §9.4 EXTRA dedup (V-031): key = (text, wordStartMs/40) when timing exists —
+                    // the same spoken word has the SAME session-global startMs in every window
+                    // that contains it (partials re-observe identical audio), so overlapping
+                    // partials collapse to ONE entry. Repeats at a NEW audio position get a new
+                    // key. Fallback without timing: (text, windowEndMs) — one per observation.
+                    // A word whose audio position was EVER matched is re-covered matched audio,
+                    // not an EXTRA — suppressed (V-031).
                     if (move.observed.startMs != null) {
-                        val bucket = move.observed.startMs!! / 250
-                        val key = move.observed.text to bucket
-                        if (key !in extras) extras[key] = move.observed
+                        val key = move.observed.text to (move.observed.startMs!! / 40)
+                        if (key !in matchedPositions && key !in extras) extras[key] = move.observed
                     } else {
-                        extras[move.observed.text to (obs.windowEndMs / 250)] = move.observed
+                        val key = move.observed.text to obs.windowEndMs
+                        if (key !in extras) extras[key] = move.observed
                     }
                 }
             }
@@ -186,10 +209,10 @@ class RecitationTrackerImpl : RecitationTracker {
         for (move in alignment.moves) {
             if (move is Move.Extra) {
                 if (move.observed.startMs != null) {
-                    val key = move.observed.text to (move.observed.startMs!! / 250)
+                    val key = move.observed.text to (move.observed.startMs!! / 40)
                     if (key !in extras) extras[key] = move.observed
                 } else {
-                    val key = move.observed.text to (obs.windowEndMs / 250)
+                    val key = move.observed.text to obs.windowEndMs
                     if (key !in extras) extras[key] = move.observed
                 }
             }
@@ -338,6 +361,9 @@ class RecitationTrackerImpl : RecitationTracker {
     fun dumpEvidence(): String = evidence.entries.sortedBy { it.key }.joinToString { (k, v) ->
         "$k(best=${v.bestSim}, interiorBest=${v.bestInteriorSim}, indep=${v.interiorIndependentCount}, finals=${v.interiorFinalCount}, seen=${v.seen})"
     }
+
+    /** Test hook: current pointer (§9.4 monotonic). */
+    fun pointerPublic(): Int = pointer
 
     fun snapshot(): TrackerUpdate =
         TrackerUpdate(states = states.toMap(), pointer = pointer, extras = extras.values.toList())

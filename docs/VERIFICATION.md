@@ -474,3 +474,23 @@ GIT_ASKPASS=/tmp/ap.sh git push -u origin main → "* [new branch] main -> main"
   secrets-scan + notices check, build (unit tests/manifest/classpath/ABI floor debug),
   release (R8 guard + arm64-only guard + floor), size (bundletool SDK/ABI/density), instrumented
   API 27+35 (loadLibrary, generated-fixture timing decode, font smoke).
+
+### V-031 §4 host-side fixes demanded by the measurements (2026-11-22)
+1. **Simulated latency p95 4700 → 950 ms** (p50 750 → 550). Two root causes, both fixed and
+   re-measured: (a) EvalMain's latency metric used the FIRST occurrence's endMs for duplicate-
+   text words (الله ×3, احد ×2 in surah 112) — a metric bug fabricating multi-second latencies;
+   (b) partial windows truncated at segment start (both the Kotlin SegmenterSimulator and
+   run_asr.py's `_stream`) — now drawn from the session ring buffer across segment boundaries.
+2. **EXTRA inflation 6–7/clip → 0**: dedup key (text, startMs/40) [fallback (text, windowEndMs)]
+   + suppression of EXTRA for audio positions previously MATCHED. The 6–7 were re-covered matched
+   audio behind the pointer, not user repeats.
+3. **Repeated identical ayahs (surah 55 refrain ×31 normalized-identical; surah 77 ×10)**:
+   3 new invariants tested (pointer monotonic on earlier identical refrain; nearest-forward
+   re-anchor; segment-initial skip → MISSED). REAL DEFECT FOUND+FIXED: free leading expected
+   skips in lo=0 FINALS recorded NO absence evidence → segment-initial skips could never reach
+   MISSED. Now every skipped k < spanMin in a final records absence (independent of interiority;
+   §9.3's pointer≥3 gate still applies at state level).
+4. **strictOverlapIndependence flag** (default OFF): independence(a,b,strict) — strict mode
+   ignores the isFinal clause. Measured: WRONG fires 1/1 (default) vs 0/1 (strict) on the same
+   كين substitution stream. Default kept per V-025; numbers to Mo before the §13 gate.
+Tests: core:align 39 GREEN (35 + 3 repeated-ayah + 1 independence-rule); full suite 92 green.

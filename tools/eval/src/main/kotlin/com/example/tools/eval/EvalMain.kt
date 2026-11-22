@@ -121,12 +121,16 @@ fun main(args: Array<String>) {
             val before = tracker.snapshot().states
             tracker.onObservation(o)
             lastStates = tracker.snapshot().states
-            // simulated latency: first observation that took the word out of PENDING
+            // simulated latency: first observation that took the word out of PENDING.
+            // Duplicate-text words (الله ×3, ولم ×2, احد ×2 in surah 112): use the occurrence
+            // INSIDE this flipping observation (the last one with endMs ≤ windowEnd) — NOT the
+            // first occurrence globally, which fabricated multi-second latencies (V-031).
             for ((idx, st) in lastStates) {
                 if (st != WordState.PENDING && before[idx] == WordState.PENDING) {
-                    // word end for this expected index: match by text against expected table
                     val text = expected.getOrNull(idx)?.text ?: continue
-                    val end = words.firstOrNull { it.text == text }?.endMs ?: continue
+                    val end = words.filter { it.text == text }
+                        .filter { (it.endMs ?: Long.MAX_VALUE) <= obsEnd }
+                        .maxByOrNull { it.endMs ?: 0L }?.endMs ?: continue
                     latencies.add(obsEnd - (end ?: 0L))
                 }
             }
