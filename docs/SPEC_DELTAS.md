@@ -15,9 +15,9 @@ v1.0 §-reference and a delta disagree, the delta wins; where they agree, the v1
 | 7 | Gates | §13.4 applies **per model AND per preset**; tiny active → «الوضع الخفيف» badge; degraded ladder L0–L3. | STATUS Needs-from-Mo; core:session ladder (Phase 2) |
 | 8 | Tasmee' summary | «صحيحة: X من Y», **X = CORRECT only**, Y = expected − HINTED (− optional-prefix basmala, §7.6/V-023); CLOSE reported separately. | `TasmeeSummary`; summary tests |
 | 9 | Lost timer / EXTRA | Lost timer advances **only while VAD=speech**; EXTRA dedup key `(text, 250ms bucket)`. | `advanceLostTimer()`; EXTRA dedup tests |
-| 10 | Budgets | p95 word-highlight latency ≤1.5 s; AAB download ≤80 MB target; arm64-v8a only. | F2/§14; AAB measurement pending CI (job:size) |
+| 10 | Budgets | p95 word-highlight latency ≤1.5 s; AAB download ≤80 MB target; arm64-v8a only. | F2/§14; **AAB MEASURED 55,900,663 B ≈ 55.9 MB universal (min=max, bundletool 1.17.0, runs 45061168092/45067719380) — budget MET, estimate retired; measurement merged into the release job (V-037)** |
 
 Extra facts confirmed during Phase 0.6–1 (kept normative):
-- Native floor: onnxruntime `.note.android.ident` min API **27** (V-016) → minSdk decision ADR pending Mo.
+- Native floor: onnxruntime `.note.android.ident` min API **27** (V-016) → minSdk 27 **APPLIED (D-012/D-015), RATIFIED by Mo, and runtime-PROVEN on-device (loadLibrarySmoke PASS on API 27 + 35, runs 45067719380 etc.)**.
 - Tanzil Uthmani (txt-2) basmala placement: 112 surahs prefixed (110 plain + 95/97 with `بِّسْمِ`
   shadda-first bytes), Fatihah 1:1 IS the basmala, At-Tawbah none (V-023).

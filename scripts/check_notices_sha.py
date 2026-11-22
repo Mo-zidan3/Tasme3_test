@@ -14,7 +14,8 @@ import hashlib
 import sys
 from pathlib import Path
 
-NOTICES = Path(__file__).resolve().parent.parent / "app" / "src" / "main" / "assets" / "notices"
+REPO = Path(__file__).resolve().parent.parent
+NOTICES = REPO / "app" / "src" / "main" / "assets" / "notices"
 
 CANONICAL_SHA256 = {
     "CC-BY-3.0-Tanzil.txt": "72493509d507314f60c018fd33aa57d9064a0de42be8926745e4953f59925c62",
@@ -25,13 +26,19 @@ CANONICAL_SHA256 = {
     "README.txt": "c67401e86f2802582a4cafdcaeac32d0785d1197bdab3463ea341ffe1089f38e",
 }
 
+# V-037/T2: the derived docs/tanzil-notice.txt must stay byte-identical to the canonical asset
+# (was 1037 B — the truncated variant).
+DOCS_TANZIL = REPO / "docs" / "tanzil-notice.txt"
+
 
 def main() -> int:
     failed = False
-    for name, want in CANONICAL_SHA256.items():
-        p = NOTICES / name
+    targets = {NOTICES / name: want for name, want in CANONICAL_SHA256.items()}
+    targets[DOCS_TANZIL] = CANONICAL_SHA256["CC-BY-3.0-Tanzil.txt"]
+    for p, want in sorted(targets.items()):
+        name = p.relative_to(REPO).as_posix()
         if not p.exists():
-            print(f"[FAIL] {name}: missing from {NOTICES}")
+            print(f"[FAIL] {name}: missing")
             failed = True
             continue
         got = hashlib.sha256(p.read_bytes()).hexdigest()

@@ -8,18 +8,24 @@ assets (scoped storage hides shell-pushed files on Android 15); loadLibrary PASS
 OK; accuracy clip remains the loud §0 skip. Commit B (detekt) HELD: sandbox Maven 429 blocks
 local ./gradlew help verification — D-017 open for Mo)
 
-## Phase 0 — Scaffold: **DONE WITH EXCEPTION (E1)**
-Exception E1: **CI has never executed** — sandbox has no `gh` CLI and no git remote; `assembleRelease`
-with R8 has never succeeded anywhere (sandbox kernel-OOM, V-014). Everything else verified green:
+## Phase 0 — Scaffold: **DONE (E1 CLOSED)**
+E1 is CLOSED (V-030/V-033/V-037): CI executes on GitHub Actions; `assembleRelease` with R8
+succeeds in the release job (mapping.txt guard green); the local sandbox limits (no gh, no
+emulator, R8 OOM at 4 GB) are bypassed by using CI as the verifier. Everything else verified green:
 - 13-module Gradle scaffold per §6.1 (module count corrected this phase from "15" — V-018).
 - `assembleDebug` GREEN (all modules; APK 87.75 MB debug, measured V-018); unit tests GREEN.
 - Merged manifest: RECORD_AUDIO only — no INTERNET / ACCESS_NETWORK_STATE (V-011).
 - CI workflow encodes: reproducible asset pipeline (fetch_native + generate_notices + fetch_models),
   debug+release builds, tests, **release-minify guard** (fails without R8 mapping.txt),
-  merged-manifest offline check, license report. **Unexecuted** until Mo pushes to GitHub.
+  merged-manifest offline check, license report. **EXECUTED green** (runs 45064204429,
+  45066011428, 45067719380 — all five jobs).
 - Docs skeleton per §17 complete.
 
-## Phase 0.5 — Spike: **PARTIAL**
+## Phase 0.5 — Spike: **DONE (S2 CLOSED on-device, V-037c)**
+S2's on-device half is CLOSED: the timing-decode instrumented test PASSES on API 27 (0.597 s)
+and API 35 (0.598 s) in run 45067719380 — real sherpa JNI decode on-device, seconds-scale
+timestamps, 40 ms frame grid. The accuracy-clip half remains §0-gated (Mo's clips land with
+T4). Previously listed partial state:
 Closed: S1 (models pinned+SHA-256), S2 **compile-time only** (kotlin-api vendored from tag v2.0.2,
 arm64 jniLibs extracted, API surface = Q1-CLOSED), S3 (silero_vad pinned), S4 (Tanzil: 6,236/114
 verified; license notice extracted byte-for-byte), S5 (Amiri Quran 1.003 + OFL; host cmap coverage
@@ -145,7 +151,7 @@ with exponential backoff, still blocked. Harness-only; not on the Phase 1 critic
   dedup); repeated-ayah invariants on the surah-55 refrain (×31) + segment-initial MISSED
   defect fixed (leading-skip absence); strictOverlapIndependence flag (default OFF) with
   WRONG-fire numbers (1 default vs 0 strict) for Mo before the §13 gate.
-- **D-012**: minSdk 26→27 ADR + applied (D-015) pending Mo ratification; size options table
+- **D-012**: minSdk 26→27 ADR applied (D-015) + RATIFIED by Mo + runtime-proven (V-037c); size: MEASURED 55.9 MB — budget MET, no options table needed
   deferred until the bundletool measurement from the CI run.
 - Coverage after this session (V-029 re-measured via exec analysis): core:quran 93.1% (67/72) /
   core:align 91.0% (372/409) lines.

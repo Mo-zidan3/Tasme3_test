@@ -140,7 +140,8 @@ verified against the value published by services.gradle.org for 9.9.2 (docs/VERI
 - JaCoCo 0.8.13 for coverage measurement; targets MET (91.9% combined).
 
 ## D-012 Phase-2 host-side + minSdk ADR (2026-11-21)
-- **ADR: raise minSdk 26 → 27.** Measured basis (V-016): the prebuilt `libonnxruntime.so`
+- **ADR: raise minSdk 26 → 27 — RATIFIED by Mo (2026-11-22) and runtime-proven on-device
+  (loadLibrarySmoke PASS API 27+35, V-037c).** Measured basis (V-016): the prebuilt `libonnxruntime.so`
   carries `.note.android.ident` with API floor 27 (NDK r27d); loading it on API 26 is
   undefined. Raising to 27 (Android 8.1) excludes only Android 8.0 devices (API 26) — a small
   slice. This is a §4 deviation forced by a pinned dependency, flagged for Mo ratification;
@@ -204,7 +205,7 @@ with a mandatory /dev/kvm pre-flight (ubuntu-26.04 images carry no KVM; emulator
 -accel off). TCG fallback explicitly rejected pending Mo's sign-off for long runs; if no
 hosted KVM runner is available the escalation is macOS arm64 (10× minutes) or Mo's device.
 
-## D-018 — App identity: Iqraa / «اقرأ», applicationId com.iqraa.tasmee (2026-11-22) [RATIFIED Mo]
+## D-019 — App identity: Iqraa / «اقرأ», applicationId com.iqraa.tasmee (2026-11-22) [RATIFIED Mo]
 - Mo's ratified identity applied (T1): label ar «اقرأ» / en "Iqraa" (strings + values-ar),
   applicationId + namespace com.iqraa.tasmee, all package paths com.example.* → com.iqraa.*
   (app, core:*, feature:*, tools:eval), docs/scripts/workflow references updated.

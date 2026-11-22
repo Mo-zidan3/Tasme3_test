@@ -33,7 +33,7 @@ Probe project `/tmp/probe` with AGP 9.5.2:
 - ✅ Hilt 2.60.1 KSP compile of @Singleton/@Component → generated code works
 → Project uses the ✅ configuration (ADR in DECISIONS D-001).
 
-### V-004 sherpa-onnx v2.0.2 assets (source: GitHub releases API + archive inspection)
+### V-004 sherpa-onnx v2.0.2 assets (source: GitHub releases API + archive inspection) [SUPERSEDED by V-016]
 ```
 release tags (releases?per_page=8): v2.0.2 stable 2026-11-19 (latest stable)
 asset "sherpa-onnx-v2.0.2-android.tar.bz2" 47.9 MB — sha256 08d22f7eb5c49bd161d248633eeb66e84735725706e21202b684800e5081a029
@@ -115,7 +115,7 @@ matches services.gradle.org "checksumUrl … wrapperChecksum" for 9.9.2 (V-001).
 gradlew downloaded from github gradle repo tag v9.9.2 (248 lines, official).
 ```
 
-### V-011 Build gate (own measurement, sandbox: 2 cores / 4 GB RAM)
+### V-011 Build gate (own measurement, sandbox: 2 cores / 4 GB RAM) [SUPERSEDED by V-018; AAB MEASURED 55.9 MB, V-037]
 ```
 ./gradlew assembleDebug → BUILD SUCCESSFUL in 42s (359 tasks) — all 15 modules
 ./gradlew :core:align:test → BUILD SUCCESSFUL (6 contract tests: identity, independence
@@ -134,7 +134,7 @@ whole spike window (8 retries + direct CDN attempts). The file and its published
 un-verified locally. **Baseline is harness-only (§13.2) and not on the critical path**;
 retry scheduled with the Phase 1 eval harness. Flagged in STATUS.
 
-### V-013 Timestamp unit / frame shift (spec Q8) — PENDING
+### V-013 Timestamp unit / frame shift (spec Q8) — PENDING [SUPERSEDED by V-015]
 `OfflineRecognizer.kt` (vendored, v2.0.2) exposes `timestamps: FloatArray` with no documented
 unit in source comments; sherpa convention is seconds. **Fixture confirmation requires a
 decode on device/emulator → Phase 2.** The tracker is built to work in both modes
@@ -201,7 +201,7 @@ Conclusions:
   clean, loses ~1% of devices; or accept 26 with a documented risk). NOT silently ignored.
 - NEEDED confirms V-004's extraction choice (two .so suffice).
 
-### V-017 Basmala embedding + font cmap coverage (own measurement, host)
+### V-017 Basmala embedding + font cmap coverage (own measurement, host) [SUPERSEDED by V-023]
 Tanzil Uthmani (txt-2, marks+sajdah+rub):
 ```
 awk -F'|' '$1==1&&$2==1' → 1|1|بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ      (Al-Fatihah 1:1 IS the basmala)
@@ -312,7 +312,7 @@ Integrity tests (114/6236/sha/notice/basmala-9:1) — GREEN (21 tests in core:qu
   all-EXTRA observation (repeat behind window / ta'awwudh) was discarded as unusable — now
   records EXTRA stats and feeds the lost timer.
 
-### V-022 tools:eval + eval/run_asr.py synthetic run (own measurement)
+### V-022 tools:eval + eval/run_asr.py synthetic run (own measurement) [SUPERSEDED by V-025]
 Pipeline exercised end-to-end: N()(surah 112 = 19 words) → run_asr.py --synthetic → hypotheses.json
 (3 clips: correct/skip/wrong-planted) → tools:eval (same core:align as the app) → report.
 ```
