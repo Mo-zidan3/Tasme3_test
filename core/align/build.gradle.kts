@@ -30,12 +30,15 @@ jacoco {
 
 // V-036: XML report MUST be produced (Gradle 9 defaults xml.required=false in some setups —
 // run 45061168092 proved the XML was absent and the coverage gate failed on missing files).
-tasks.named("jacocoTestReport") {
+// V-037: typed named<JacocoReport> — the untyped tasks.named("…") has no `reports {}`
+// accessor in Kotlin DSL (run 45061936775: "Unresolved reference 'reports'").
+tasks.named<JacocoReport>("jacocoTestReport") {
     reports {
         xml.required.set(true)
         html.required.set(true)
-        xml.outputLocation.set(layout.buildDirectory.file("reports/jacoco/test/jacocoTestReport.xml"))
     }
+    // deterministic location the CI gate probes
+    xml.outputLocation.set(layout.buildDirectory.file("reports/jacoco/test/jacocoTestReport.xml"))
 }
 
 tasks.withType<Test> {
