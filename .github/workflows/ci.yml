@@ -119,7 +119,10 @@ jobs:
           [ "$ACTUAL" = "$EXPECTED" ] || { echo "FAIL: ktlint sha mismatch ($ACTUAL)"; exit 1; }
           chmod +x ktlint
           ./ktlint --version
-          ./ktlint 'core/**/*.kt' 'feature/**/*.kt' 'app/src/**/*.kt' \
+          # V-037 fix: source-set globs ONLY — 'core/**' also matches build/generated/*.kt
+          # (BuildConfig.kt etc. created by the preceding assembleDebug) → 2150 phantom
+          # violations in run 45079846042.
+          ./ktlint 'core/*/src/**/*.kt' 'feature/*/src/**/*.kt' 'app/src/**/*.kt' \
             --baseline=ktlint-baseline.xml > ktlint-report.txt || true
           PARSE=$(grep -c "Not a valid Kotlin file" ktlint-report.txt || true)
           [ "$PARSE" = "0" ] || { echo "FAIL: $PARSE Kotlin file(s) failed to parse"; exit 1; }

@@ -6,6 +6,7 @@ import androidx.test.platform.app.InstrumentationRegistry
 import com.iqraa.core.data.db.IqraaDatabase
 import com.iqraa.core.data.db.SessionEntity
 import com.iqraa.core.data.db.WordFlagEntity
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
@@ -47,7 +48,7 @@ class RoomDbTest {
             // close → leaves history
             db.sessionDao().closeSession(open.id, endedAt = 2000L, durationMs = 1000L)
             assertNull(db.sessionDao().latestOpenSession())
-            val historyFirst = kotlinx.coroutines.flow.first(db.sessionDao().history())
+            val historyFirst = db.sessionDao().history().first()
             assertEquals(1, historyFirst.size)
         } finally {
             db.close()
