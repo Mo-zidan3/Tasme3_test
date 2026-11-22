@@ -1,6 +1,15 @@
 # STATUS — per phase
 
-Last updated: 2026-11-21 (Phase 1 hardening + Phase 2 host-side; CI ready for first push)
+Last updated: 2026-11-22 (V-035: run 45035800627 — secrets/build/release GREEN; FIRST
+minified release + AAB built remotely (E1 build half closed); size job = artifact race →
+job deleted, bundletool measurement merged into release; instrumented 27/35 = no-KVM boot
+timeout on ubuntu-26.04 → ubuntu-24.04 + /dev/kvm pre-flight; quality gates made REAL
+(ktlint pinned+committed baseline.xml, JaCoCo XML 85% floor with report-level counters; detekt
+= commit B, held until it compiles locally — review fix 2.1); Mo's 3b1da0a
+generate_notices rewrite shipped degraded license assets on cold runners (Tanzil 1004 B vs
+canonical 1106 B; OFL 4027 vs 4389) — repaired byte-exact this session; AAB download size
+UNKNOWN until bundletool runs; S2-on-device OPEN; license-BYTES SHA gate added (V-036 §3 — the
+green release had shipped degraded notices); push token revoked — Mo pushes)
 
 ## Phase 0 — Scaffold: **DONE WITH EXCEPTION (E1)**
 Exception E1: **CI has never executed** — sandbox has no `gh` CLI and no git remote; `assembleRelease`
@@ -64,6 +73,25 @@ with exponential backoff, still blocked. Harness-only; not on the Phase 1 critic
 10. Arabic string review; store copy review; release keystore; code license (Apache-2.0 default).
 
 ## Phase 1.5 (hardening) + Phase 2 host-side — 2026-11-21 (this session)
+- **CI RUN 45035800627 (V-035, 2026-11-22)**: secrets-scan/build/release GREEN (unit tests,
+  lint, manifest-offline, classpath, ABI floor all pass; assembleRelease+bundleRelease with
+  R8 mapping.txt; release APK arm64-v8a only; release-outputs uploaded). E1's
+  "never-built-minified-release" exception is CLOSED. size job RED = artifact RACE (CI
+  defect): job deleted, bundletool 1.17.0 (sha-pinned) merged into release after
+  bundleRelease — measurement, ≤80 MB warn / >85 MB fail, report to step summary. AAB size
+  still UNKNOWN. instrumented 27+35 RED = no /dev/kvm on ubuntu-26.04 ("Software CPU
+  emulation is not supported") → ubuntu-24.04 + mandatory kvm pre-flight +
+  disable-linux-hw-accel:false + -no-metrics + boot timeout 900 (NO TCG fallback without
+  Mo's explicit acceptance). S2-on-device OPEN.
+- **Quality gates REAL (V-035 P2)**: ktlint 1.8.0 CLI sha-pinned; parse errors hard-fail;
+  violations ratchet vs baseline 817 (growth fails). detekt 1.23.8 wired at root for all
+  subprojects (the old `|| echo "NOTE"` fake pass is gone; maxIssues ceiling 100000
+  pending Mo's ratchet decision — D-017). JaCoCo XML parsed by scripts/ci_coverage_gate.py:
+  hard fail <85% lines on core:quran/core:align, measured numbers printed.
+- **License-asset regression repaired (V-035 P0b)**: Mo's 3b1da0a generate_notices rewrite
+  produced degraded cold-runner texts (Tanzil 1004 B, OFL 4027 B, README overwritten). Fixed:
+  fallbacks = git-tracked canonical assets; byte-exact verified (1106 B/4389 B, shas
+  72493509…/72de68e5…); README only generated when absent.
 - **Basmala BLOCKER closed (V-023)**: 112 surahs carry the prefix (110 plain + 95/97 with
   `بِّسْمِ` shadda-first bytes); Fatihah = ayah itself; Tawbah none. The earlier "111" was a
   byte-startswith artifact of the CHECK, not the text. OPTIONAL_PREFIX modeled in the derived

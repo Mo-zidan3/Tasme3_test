@@ -70,7 +70,7 @@ class SegmenterSimulator(private val config: SegmenterConfig = SegmenterConfig()
     }
 
     /**
-     * For one segment [i..j]: pause-final observation covering the WHOLE segment, plus
+     * For one segment (i..j): pause-final observation covering the WHOLE segment, plus
      * partial observations every partialEveryMs over the trailing partialWindowMs.
      * Partials are emitted in timeline order BEFORE the final.
      */

@@ -11,72 +11,21 @@ OUT.mkdir(parents=True, exist_ok=True)
 
 TANZIL = REPO / "third_party" / "tanzil" / "quran-uthmani.txt"
 AMIRI_OFL = REPO / "third_party" / "amiri-quran" / "OFL.txt"
+QURAN_RESOURCE = REPO / "core" / "quran" / "src" / "main" / "resources" / "quran-uthmani.txt"
 
-# Fallback blocks (preserved verbatim from V-019/V-028)
-TANZIL_BLOCK = """#  Tanzil Quran Text (Uthmani, Version 1.1)
- #  Copyright (C) 2007-2026 Tanzil Project
- #  License: Creative Commons Attribution 3.0
- #
- #  This copy of the Quran text is carefully produced, highly 
- #  verified and continuously monitored by a group of specialists 
- #  at Tanzil Project.
- #
- #  TERMS OF USE:
- #
- #  - Permission is granted to copy and distribute verbatim copies 
- #    of this text, but CHANGING IT IS NOT ALLOWED.
- #
- #  - This Quran text can be used in any website or application, 
- #    provided that its source (Tanzil Project) is clearly indicated, 
- #    and a link is made to tanzil.net to enable users to keep
- #    track of changes.
- #
- #  - This copyright notice shall be included in all verbatim copies 
- #    of the text, and shall be reproduced appropriately in all files 
- #    derived from or containing substantial portion of this text.
- #
- #  Please check updates at: http://tanzil.net/updates/
- #
- #===================================================================="""
+# V-036: pinned canonical SHA-256 of every shipped notice (the license gate asserts these).
+# Source of truth = the GIT-TRACKED assets; extraction/reconstruction is only a first-boot
+# bootstrap and is byte-asserted against the committed resource header. Hand-retyped or
+# drift-edited license text (Mo's 3b1da0a: Tanzil 1004 B, OFL 4027 B) hard-fails here.
+CANONICAL_SHA256 = {
+    "CC-BY-3.0-Tanzil.txt": "72493509d507314f60c018fd33aa57d9064a0de42be8926745e4953f59925c62",
+    "OFL-1.1-AmiriQuran.txt": "72de68e5954f4fdd24702292ef5a32f003ca960ec9330dc86e5eefb5dffb9b22",
+    "MIT-models.txt": "3a9d79091d3c680c22dfa9af3dc8dfa12e62f6f9eb94bad36361393453a5583c",
+    "Apache-2.0.txt": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+    "CC-BY-4.0-tlog.txt": "9ba9550ad48438d0836ddab3da480b3b69ffa0aac7b7878b5a0039e7ab429411",
+    "README.txt": "c67401e86f2802582a4cafdcaeac32d0785d1197bdab3463ea341ffe1089f38e",
+}
 
-AMIRI_OFL_BLOCK = """SIL OPEN FONT LICENSE
-Version 1.1 - 26 February 2007
-—————
-
-PREAMBLE
-The goals of the Open Font License (OFL) are to stimulate worldwide development of collaborative font projects, to support the font creation efforts of academic and linguistic communities, and to provide a free and open framework in which fonts may be shared and improved in partnership with others.
-
-The OFL allows the licensed fonts to be used, studied, modified and redistributed freely as long as they are not sold by themselves. The fonts, including any derivative works, can be bundled, embedded, redistributed and/or sold with any software provided that any reserved names are not used by derivative works. The fonts and derivatives, however, cannot be released under any other type of license. The requirement for fonts to remain under this license does not apply to any document created using the fonts or their derivatives.
-
-DEFINITIONS
-"Font Software" refers to the set of files released by the Copyright Holder(s) under this license and clearly marked as such. This may include source files, build scripts and documentation.
-
-"Reserved Font Name" refers to any names specified as such under the copyright notice section.
-
-"Original Version" refers to the collection of Font Software components as distributed by the Copyright Holder(s).
-
-"Modified Version" refers to any derivative made by adding to, deleting, or substituting — in part or in whole — any of the components of the Original Version, by changing formats or by porting the Font Software to a new environment.
-
-"Author" refers to any designer, engineer, programmer, technical writer or other person who contributed to the Font Software.
-
-PERMISSION & CONDITIONS
-Permission is hereby granted, free of charge, to any person obtaining a copy of the Font Software, to use, study, copy, merge, embed, modify, redistribute, and sell modified and unmodified copies of the Font Software, subject to the following conditions:
-
-1) Neither the Font Software nor any of its individual components, in Original or Modified Versions, may be sold by itself.
-
-2) Original or Modified Versions of the Font Software may be bundled, redistributed and/or sold with any software, provided that each copy contains the above copyright notice and this license. These can be included either as stand-alone text files, human-readable headers or in the appropriate machine-readable metadata fields within text or binary files as long as those fields can be easily viewed by the user.
-
-3) No Modified Version of the Font Software may use the Reserved Font Name(s) unless explicit written permission is granted by the corresponding Copyright Holder. This restriction only applies to the primary font name as presented to the users.
-
-4) The name(s) of the Copyright Holder(s) or the Author(s) of the Font Software shall not be used to promote, endorse or advertise any Modified Version, except to acknowledge the contribution(s) of the Copyright Holder(s) and the Author(s) or with their explicit written permission.
-
-5) The Font Software, modified or unmodified, in part or in whole, must be distributed entirely under this license, and must not be distributed under any other license. The requirement for fonts to remain under this license does not apply to any document created using the Font Software.
-
-TERMINATION
-This license becomes null and void if any of the above conditions are not met.
-
-DISCLAIMER
-THE FONT SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO ANY WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT OF COPYRIGHT, PATENT, TRADEMARK, OR OTHER RIGHT. IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, INCLUDING ANY GENERAL, SPECIAL, INDIRECT, INCIDENTAL, OR CONSEQUENTIAL DAMAGES, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF THE USE OR INABILITY TO USE THE FONT SOFTWARE OR FROM OTHER DEALINGS IN THE FONT SOFTWARE."""
 
 def sha256_of(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
@@ -117,44 +66,68 @@ def main() -> int:
         print("[bad ] Apache-2.0.txt missing")
         ok = False
 
-    # 3) OFL 1.1 (Amiri Quran) — use fallback block if file missing
+    # 3) OFL 1.1 (Amiri Quran) — V-036: COPY the committed canonical asset (4389 B,
+    # sha256 72de68e5…); when third_party is present it must be byte-identical to the
+    # canonical, otherwise hard-fail. Never regenerate license text.
     amiri_path = OUT / "OFL-1.1-AmiriQuran.txt"
-    if AMIRI_OFL.exists():
-        shutil.copy(AMIRI_OFL, amiri_path)
-    else:
-        # Use the preserved fallback block
-        amiri_path.write_text(AMIRI_OFL_BLOCK, encoding="utf-8")
-        print("[info] Using preserved Amiri OFL fallback block")
-    print(f"[ ok ] OFL-1.1-AmiriQuran.txt sha256={sha256_of(amiri_path)}")
+    canonical_amiri = REPO / "app" / "src" / "main" / "assets" / "notices" / "OFL-1.1-AmiriQuran.txt"
+    if not canonical_amiri.exists():
+        if not AMIRI_OFL.exists():
+            print("[FAIL] canonical OFL asset missing and third_party/amiri-quran/OFL.txt absent")
+            ok = False
+        else:
+            shutil.copy(AMIRI_OFL, canonical_amiri)
+            print("[note] first boot: OFL canonical seeded from third_party/amiri-quran/OFL.txt")
+    elif AMIRI_OFL.exists():
+        if AMIRI_OFL.read_bytes() != canonical_amiri.read_bytes():
+            print("[FAIL] third_party/amiri-quran/OFL.txt is NOT byte-identical to the canonical asset")
+            ok = False
+    if amiri_path.resolve() != canonical_amiri.resolve() and canonical_amiri.exists():
+        shutil.copy(canonical_amiri, amiri_path)
+    if canonical_amiri.exists() and sha256_of(canonical_amiri) != CANONICAL_SHA256["OFL-1.1-AmiriQuran.txt"]:
+        print(f"[FAIL] OFL-1.1-AmiriQuran.txt sha {sha256_of(canonical_amiri)[:16]}… != pinned canonical 72de68e5…")
+        ok = False
+    if canonical_amiri.exists():
+        print(f"[ ok ] OFL-1.1-AmiriQuran.txt sha256={sha256_of(canonical_amiri)}")
 
-    # 4) Tanzil CC-BY-3.0 — use fallback block if extraction fails
+    # 4) Tanzil CC-BY-3.0 — V-036: COPY the committed canonical notice (1106 B, sha256
+    # 72493509…). Bootstrap-only extraction from the committed quran-uthmani.txt resource;
+    # when third_party is present its header block must match the canonical notice
+    # byte-for-byte — any upstream drift hard-fails instead of being silently re-typed.
     tanzil_path = OUT / "CC-BY-3.0-Tanzil.txt"
-    if TANZIL.exists():
-        try:
-            lines = TANZIL.read_text(encoding="utf-8").split("\n")
-            start = next((i for i, l in enumerate(lines) if l.startswith("# PLEASE DO NOT REMOVE")), None)
-            end = next((i for i in range(len(lines) - 1, -1, -1) if lines[i].startswith("#==")), None)
-            
-            if start is not None and end is not None:
-                notice = "\n".join(lines[start : end + 1]) + "\n"
-            else:
-                # Fallback to preserved block
-                notice = TANZIL_BLOCK + "\n"
-                print("[info] Using preserved Tanzil fallback block")
-        except Exception as e:
-            print(f"[warn] Tanzil extraction failed: {e}, using fallback")
-            notice = TANZIL_BLOCK + "\n"
-    else:
-        # Use the preserved fallback block
-        notice = TANZIL_BLOCK + "\n"
-        print("[info] Using preserved Tanzil fallback block (third_party missing)")
-    
-    tanzil_path.write_text(notice, encoding="utf-8")
-    print(f"[ ok ] CC-BY-3.0-Tanzil.txt ({len(notice)} bytes)")
-    
-    # Relaxed assertion (only check if we extracted from file, not fallback)
-    if TANZIL.exists() and "Tanzil Project" not in notice:
-        print("[warn] Tanzil block may be incomplete, but proceeding")
+    canonical_tanzil = REPO / "app" / "src" / "main" / "assets" / "notices" / "CC-BY-3.0-Tanzil.txt"
+    if not canonical_tanzil.exists():
+        src = TANZIL if TANZIL.exists() else QURAN_RESOURCE
+        lines = src.read_text(encoding="utf-8").split("\n")
+        start = next((i for i, l in enumerate(lines) if l.startswith("# PLEASE DO NOT REMOVE")), None)
+        sep = next((i for i, l in enumerate(lines) if start is not None and i > start and l.startswith("# ------")), None)
+        if start is None or sep is None:
+            print(f"[FAIL] Tanzil copyright block not found in {src}")
+            ok = False
+        else:
+            notice = "\n".join(lines[start:sep]) + "\n" + ("#" + "=" * 68) + "\n"
+            canonical_tanzil.write_text(notice, encoding="utf-8")
+            print("[note] first boot: Tanzil notice extracted from the committed resource")
+    elif TANZIL.exists():
+        lines = TANZIL.read_text(encoding="utf-8").split("\n")
+        start = next((i for i, l in enumerate(lines) if l.startswith("# PLEASE DO NOT REMOVE")), None)
+        sep = next((i for i, l in enumerate(lines) if start is not None and i > start and l.startswith("# ------")), None)
+        if start is None or sep is None:
+            print("[FAIL] Tanzil copyright block not found in third_party/tanzil/quran-uthmani.txt")
+            ok = False
+        else:
+            fresh = "\n".join(lines[start:sep]) + "\n"
+            if not canonical_tanzil.read_text(encoding="utf-8").startswith(fresh):
+                print("[FAIL] third_party Tanzil header does not match the canonical notice — upstream changed?")
+                ok = False
+    if tanzil_path.resolve() != canonical_tanzil.resolve() and canonical_tanzil.exists():
+        shutil.copy(canonical_tanzil, tanzil_path)
+    if canonical_tanzil.exists():
+        got = sha256_of(canonical_tanzil)
+        if got != CANONICAL_SHA256["CC-BY-3.0-Tanzil.txt"]:
+            print(f"[FAIL] CC-BY-3.0-Tanzil.txt sha {got[:16]}… != pinned canonical 72493509…")
+            ok = False
+        print(f"[ ok ] CC-BY-3.0-Tanzil.txt ({canonical_tanzil.stat().st_size} bytes, sha256={got})")
 
     # 5) CC-BY-4.0 (tlog)
     tlog_url = "https://creativecommons.org/licenses/by/4.0/legalcode.txt"
@@ -168,9 +141,13 @@ def main() -> int:
         print("[bad ] CC-BY-4.0-tlog.txt missing")
         ok = False
 
-    # 6) README
+    # 6) README — V-036: the rich index (citation + limitations disclosure) is the
+    # TRACKED canonical; only generated when absent (first boot), never overwritten.
     readme = OUT / "README.txt"
-    readme.write_text(
+    if readme.exists():
+        print("[ ok ] README.txt index (tracked version kept)")
+    else:
+        readme.write_text(
         "Third-party notices for bundled assets.\n\n"
         "Files:\n"
         "  MIT-models.txt          — MIT License (Abdou/quran-asr-small + tiny)\n"
@@ -189,10 +166,25 @@ def main() -> int:
         "The model's comparison space is letters-only (29 letters). This makes some\n"
         "distinct Quranic words indistinguishable (e.g. harakat-only variants).\n"
         "This is an inherent property of the model's output alphabet, not a defect.\n",
-        encoding="utf-8",
-    )
-    print(f"[ ok ] README.txt written")
+            encoding="utf-8",
+        )
+        print(f"[ ok ] README.txt written")
 
+    # V-036 §3: FINAL LICENSE GATE — every shipped notice must match its pinned canonical
+    # SHA-256. This is the ellipsis-grep's replacement: secrets-scan passed degraded
+    # notices in run 45035800627 because it only greps for '…'.
+    for name, want in CANONICAL_SHA256.items():
+        p = OUT / name
+        if not p.exists():
+            print(f"[FAIL] notice missing: {name}")
+            ok = False
+            continue
+        got = sha256_of(p)
+        if got != want:
+            print(f"[FAIL] {name} sha256={got} != pinned canonical {want[:16]}… — NON-CANONICAL LICENSE BYTES")
+            ok = False
+        else:
+            print(f"[gate] {name} sha256={got[:16]}… OK")
     return 0 if ok else 1
 
 if __name__ == "__main__":

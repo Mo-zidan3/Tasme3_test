@@ -180,3 +180,21 @@ verified against the value published by services.gradle.org for 9.9.2 (docs/VERI
   first remote run): (a) PAD install-time pack [VERIFY AssetManager access + no INTERNET
   needed], (b) drop tiny −15.6 MB stored (kills the low-end fallback — interacts with §8.6),
   (c) accept with ADR. Do NOT decide before the measurement.
+
+## D-017 — detekt ceiling vs zero-findings [PENDING Mo; wiring = commit B, HELD]
+detekt 1.23.8 wiring moved to commit B (typed `extensions.configure<DetektExtension>` at the
+root; the untyped setProperty form from V-035 was never compiled and is removed). Commit B is
+held until `./gradlew help` compiles locally — an unverified root build-script change must not
+be coupled to the evidence-gathering run (it could kill every job at configuration, including
+the currently-green release job). When B lands: maxIssues 100000 ceiling so legacy findings do
+not instantly redden CI — a REPORT, not a gate, until Mo picks (a) ratchet down, (b) zero-lock,
+(c) curate rules.
+
+## D-018 — size job merged into release; instrumented on ubuntu-24.04 (V-035) [APPLIED]
+The standalone `size` job raced the release-outputs artifact (run 45035800627: "Artifact
+not found for name: release-outputs"). bundletool 1.17.0 (sha256-pinned) now runs inside
+release AFTER bundleRelease: no race by construction, one less job setup, measurement +
+budget gates unchanged (≤80 MB warn / >85 MB fail). instrumented moved to ubuntu-24.04
+with a mandatory /dev/kvm pre-flight (ubuntu-26.04 images carry no KVM; emulator refuses
+-accel off). TCG fallback explicitly rejected pending Mo's sign-off for long runs; if no
+hosted KVM runner is available the escalation is macOS arm64 (10× minutes) or Mo's device.

@@ -98,14 +98,34 @@ jobs:
       - name: Build debug APK
         run: ./gradlew assembleDebug
 
-      - name: Unit tests + coverage
-        run: |
-          ./gradlew test :core:audio:testDebugUnitTest :core:asr:testDebugUnitTest :core:session:testDebugUnitTest
-          ./gradlew :core:quran:jacocoTestReport :core:align:jacocoTestReport || true
+      - name: Unit tests + coverage (jacoco reports are HARD evidence for the gate)
+        run: ./gradlew test :core:audio:testDebugUnitTest :core:asr:testDebugUnitTest :core:session:testDebugUnitTest :core:quran:test :core:align:test :core:quran:jacocoTestReport :core:align:jacocoTestReport
 
-      - name: Static analysis (detekt + ktlint)
+      # V-035 P2: coverage gate is REAL — parses the produced JaCoCo XML, prints the measured
+      # numbers, fails below 85% line coverage on core:quran / core:align. No || true.
+      - name: Coverage gate (core:quran + core:align ≥85% lines, from JaCoCo XML)
+        run: python3 scripts/ci_coverage_gate.py 85
+
+      # V-036 P2: ktlint 1.8.0 CLI pinned by sha256 — standalone runner, no plugin-classpath risk.
+      # Gate semantics: (a) parse errors ("Not a valid Kotlin file") FAIL unconditionally;
+      # (b) the committed ktlint-baseline.xml (V-036: ktlint's OWN baseline format, generated
+      # once with --baseline and committed) holds the existing debt — any NEW violation is
+      # outside the baseline and FAILS the run. Fixes shrink the baseline when regenerated.
+      - name: Static analysis — ktlint (pinned CLI 1.8.0, sha-verified, committed baseline)
         run: |
-          ./gradlew detekt ktlintCheck || echo "NOTE: static-analysis wiring pending - see docs/CI.md"
+          curl -fsSL -o ktlint "https://github.com/pinterest/ktlint/releases/download/1.8.0/ktlint"
+          EXPECTED=a3fd620207d5c40da6ca789b95e7f823c54e854b7fade7f613e91096a3706d75
+          ACTUAL=$(sha256sum ktlint | cut -d' ' -f1)
+          [ "$ACTUAL" = "$EXPECTED" ] || { echo "FAIL: ktlint sha mismatch ($ACTUAL)"; exit 1; }
+          chmod +x ktlint
+          ./ktlint --version
+          ./ktlint 'core/**/*.kt' 'feature/**/*.kt' 'app/src/**/*.kt' \
+            --baseline=ktlint-baseline.xml > ktlint-report.txt || true
+          PARSE=$(grep -c "Not a valid Kotlin file" ktlint-report.txt || true)
+          [ "$PARSE" = "0" ] || { echo "FAIL: $PARSE Kotlin file(s) failed to parse"; exit 1; }
+          VIOL=$(grep -cE ':[0-9]+:[0-9]+: ' ktlint-report.txt || true)
+          echo "ktlint violations OUTSIDE the committed baseline: $VIOL"
+          [ "$VIOL" = "0" ] || { echo "FAIL: new ktlint violations — fix them, or regenerate ktlint-baseline.xml in the same commit"; exit 1; }
 
       - name: Android Lint
         run: ./gradlew :app:lintDebug
@@ -203,6 +223,13 @@ jobs:
             [ "$ok" = 1 ] || { echo "FAIL: $s could not fetch pinned assets after 3 attempts"; exit 1; }
           done
 
+      # V-036 §3: LICENSE-BYTES GATE — every generated notice must be byte-identical to its
+      # pinned canonical SHA-256. The run-45035800627 release shipped DEGRADED notices
+      # (Tanzil 1004 B vs canonical 1106 B; OFL cb4bf64b… vs 72de68e5…) and secrets-scan
+      # passed them because it only greps for '…'. Ellipsis-grep is NOT a license gate.
+      - name: Notices canonical-SHA gate (license bytes, not ellipsis)
+        run: python3 scripts/check_notices_sha.py
+
       - name: Build release APK + AAB (R8 ON)
         run: ./gradlew assembleRelease bundleRelease
 
@@ -229,50 +256,21 @@ jobs:
           fi
           python3 scripts/check_abi_floor.py 27 "$APK"
 
-      - uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: release-outputs
-          retention-days: 7
-          path: |
-            app/build/outputs/apk/release/*.apk
-            app/build/outputs/bundle/release/*.aab
-            app/build/outputs/mapping/release/mapping.txt
-            release-abi.txt
-
-  size:
-    runs-on: ubuntu-latest
-    timeout-minutes: 25
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Download release outputs
-        uses: actions/download-artifact@v4
-        with:
-          name: release-outputs
-          path: release-outputs
-
-      - name: Set up JDK 17
-        uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: '17'
-
-      # bundletool pinned at 1.17.0; sha256 printed into the log at fetch time for the record.
-      - name: Pin + download bundletool
+      # V-035 P0: bundletool measurement lives HERE (was a separate `size` job racing the
+      # release-outputs artifact). Pinned jar + sha verification + in-job debug keystore
+      # (never committed). ≤80 MB target warn, >85 MB hard fail. Prints to the step summary.
+      - name: Measure AAB download size (bundletool 1.17.0, dimensions SDK/ABI/SCREEN_DENSITY)
         run: |
+          AAB=$(find app/build/outputs/bundle/release -name "*.aab" | head -1)
+          test -n "$AAB" || { echo "FAIL: no AAB produced"; exit 1; }
           curl -fsSL -o bundletool.jar "https://github.com/google/bundletool/releases/download/1.17.0/bundletool-all-1.17.0.jar"
+          EXPECTED=54ebee1f1de8367d9ad26b4672bfb2976b0b12142e15d683fc7b8e254fc6cc1b
           ACTUAL=$(sha256sum bundletool.jar | cut -d' ' -f1)
-          echo "bundletool 1.17.0 sha256=$ACTUAL"
+          [ "$ACTUAL" = "$EXPECTED" ] || { echo "FAIL: bundletool sha mismatch ($ACTUAL)"; exit 1; }
           java -jar bundletool.jar version
-
-      - name: Measure AAB download size (bundletool, dimensions SDK/ABI/SCREEN_DENSITY)
-        run: |
-          AAB=$(find release-outputs -name "*.aab" | head -1)
-          test -n "$AAB" || { echo "FAIL: no AAB artifact"; exit 1; }
           keytool -genkeypair -keystore debug.keystore -storepass android \
             -alias androiddebugkey -keypass android -keyalg RSA -keysize 2048 -validity 10000 \
-            -dname "CN=Android Debug,O=Android,C=US" 2>/dev/null || true
+            -dname "CN=Android Debug,O=Android,C=US"
           java -jar bundletool.jar build-apks --bundle="$AAB" --output=app.apks \
             --ks=debug.keystore --ks-pass=pass:android --ks-key-alias=androiddebugkey \
             --key-pass=pass:android --mode=universal
@@ -301,12 +299,22 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: size-report
+          name: release-outputs
           retention-days: 7
-          path: size-report.txt
+          path: |
+            app/build/outputs/apk/release/*.apk
+            app/build/outputs/bundle/release/*.aab
+            app/build/outputs/mapping/release/mapping.txt
+            release-abi.txt
+            size-report.txt
 
   instrumented:
-    runs-on: ubuntu-latest
+    # V-035 P1: ubuntu-latest migrated to ubuntu-26.04 without /dev/kvm — the emulator
+    # refused `-accel off` ("Software CPU emulation is not supported... A hardware CPU
+    # accelerator is required") and boot timed out. KVM is REQUIRED; slow TCG is NOT an
+    # accepted fallback (would need Mo's explicit sign-off for very long runs). Hosted
+    # ubuntu-24.04 runners still expose /dev/kvm to the runner user.
+    runs-on: ubuntu-24.04
     timeout-minutes: 75
     strategy:
       fail-fast: false
@@ -315,6 +323,14 @@ jobs:
         api-level: [27, 35]
     steps:
       - uses: actions/checkout@v4
+
+      # V-035 P1: hard pre-flight — fail FAST and EXPLICITLY if the runner has no KVM,
+      # before minutes of SDK setup + model fetches are spent on a doomed boot.
+      - name: Pre-flight — hardware acceleration (/dev/kvm) is mandatory
+        run: |
+          test -e /dev/kvm || { echo "FAIL: no /dev/kvm on this runner — emulator needs hardware acceleration; refusing slow TCG (V-035). Escalate: macOS arm64 runner or Mo's physical device."; exit 1; }
+          sudo chmod 666 /dev/kvm
+          ls -l /dev/kvm
 
       - name: Set up JDK 17
         uses: actions/setup-java@v4
@@ -366,7 +382,11 @@ jobs:
           api-level: ${{ matrix.api-level }}
           arch: x86_64
           target: default
-          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
+          # V-035 P1: hw accel ON explicitly (the action's default sets -accel off when it
+          # can't detect KVM — the 26.04 failure); -no-metrics removes the metrics warning.
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none -no-metrics
+          disable-linux-hw-accel: false
+          emulator-boot-timeout: 900
           disable-animations: true
           script: |
             adb shell settings put global window_animation_scale 0
