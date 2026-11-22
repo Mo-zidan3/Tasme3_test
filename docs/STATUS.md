@@ -1,6 +1,15 @@
 # STATUS — per phase
 
-Last updated: 2026-11-22 (V-037c: run 45067719380 — ALL FIVE JOBS GREEN with S2 CLOSED ON BOTH
+Last updated: 2026-11-22 (V-040: T1-T5 CLOSED — identity com.iqraa.tasmee on green CI;
+docs swept (T2); detekt ON MAIN via PR with ratchet ceiling = the measured 200 findings
+(T3, D-017 closed — Mo ratchets from here); Mo's clips committed as authorization-of-record
++ ONE 10.05 s 54:10 CI fixture + PROVENANCE (T4: accuracy test now PASSES on-device both
+floors; harness INDICATIVE — studio clips, phone gate NOT met); T5 perf smoke INDICATIVE
+(API27 load 311–375 ms, RTF 0.021–0.029; peakRSS honestly not-yet-measured). Phase 3 first
+slice LANDED + CI-green (V-040, run 45080772312): core:data Room v1 + DataStore keys,
+designsystem §10.2 encoding, SessionLifecycle §10.4 + tests, ar/en strings, screens F1-F6,
+MainActivity+NavHost. Arabic strings UNREVIEWED until Mo signs off.
+V-037c history follows:) run 45067719380 — ALL FIVE JOBS GREEN with S2 CLOSED ON BOTH
 API FLOORS: timing decode PASS on API 27 (0.597s) AND API 35 (0.598s) via androidTest-APK
 assets (scoped storage hides shell-pushed files on Android 15); loadLibrary PASS both floors
 (minSdk=27 runtime proof); coverage gate REAL numbers (quran 93.1%, align 91.0% ≥85%); ktlint

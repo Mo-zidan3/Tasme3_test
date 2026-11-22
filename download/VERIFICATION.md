@@ -33,7 +33,7 @@ Probe project `/tmp/probe` with AGP 9.5.2:
 - ✅ Hilt 2.60.1 KSP compile of @Singleton/@Component → generated code works
 → Project uses the ✅ configuration (ADR in DECISIONS D-001).
 
-### V-004 sherpa-onnx v2.0.2 assets (source: GitHub releases API + archive inspection)
+### V-004 sherpa-onnx v2.0.2 assets (source: GitHub releases API + archive inspection) [SUPERSEDED by V-016]
 ```
 release tags (releases?per_page=8): v2.0.2 stable 2026-11-19 (latest stable)
 asset "sherpa-onnx-v2.0.2-android.tar.bz2" 47.9 MB — sha256 08d22f7eb5c49bd161d248633eeb66e84735725706e21202b684800e5081a029
@@ -115,7 +115,7 @@ matches services.gradle.org "checksumUrl … wrapperChecksum" for 9.9.2 (V-001).
 gradlew downloaded from github gradle repo tag v9.9.2 (248 lines, official).
 ```
 
-### V-011 Build gate (own measurement, sandbox: 2 cores / 4 GB RAM)
+### V-011 Build gate (own measurement, sandbox: 2 cores / 4 GB RAM) [SUPERSEDED by V-018; AAB MEASURED 55.9 MB, V-037]
 ```
 ./gradlew assembleDebug → BUILD SUCCESSFUL in 42s (359 tasks) — all 15 modules
 ./gradlew :core:align:test → BUILD SUCCESSFUL (6 contract tests: identity, independence
@@ -134,7 +134,7 @@ whole spike window (8 retries + direct CDN attempts). The file and its published
 un-verified locally. **Baseline is harness-only (§13.2) and not on the critical path**;
 retry scheduled with the Phase 1 eval harness. Flagged in STATUS.
 
-### V-013 Timestamp unit / frame shift (spec Q8) — PENDING
+### V-013 Timestamp unit / frame shift (spec Q8) — PENDING [SUPERSEDED by V-015]
 `OfflineRecognizer.kt` (vendored, v2.0.2) exposes `timestamps: FloatArray` with no documented
 unit in source comments; sherpa convention is seconds. **Fixture confirmation requires a
 decode on device/emulator → Phase 2.** The tracker is built to work in both modes
@@ -201,7 +201,7 @@ Conclusions:
   clean, loses ~1% of devices; or accept 26 with a documented risk). NOT silently ignored.
 - NEEDED confirms V-004's extraction choice (two .so suffice).
 
-### V-017 Basmala embedding + font cmap coverage (own measurement, host)
+### V-017 Basmala embedding + font cmap coverage (own measurement, host) [SUPERSEDED by V-023]
 Tanzil Uthmani (txt-2, marks+sajdah+rub):
 ```
 awk -F'|' '$1==1&&$2==1' → 1|1|بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ      (Al-Fatihah 1:1 IS the basmala)
@@ -312,7 +312,7 @@ Integrity tests (114/6236/sha/notice/basmala-9:1) — GREEN (21 tests in core:qu
   all-EXTRA observation (repeat behind window / ta'awwudh) was discarded as unusable — now
   records EXTRA stats and feeds the lost timer.
 
-### V-022 tools:eval + eval/run_asr.py synthetic run (own measurement)
+### V-022 tools:eval + eval/run_asr.py synthetic run (own measurement) [SUPERSEDED by V-025]
 Pipeline exercised end-to-end: N()(surah 112 = 19 words) → run_asr.py --synthetic → hypotheses.json
 (3 clips: correct/skip/wrong-planted) → tools:eval (same core:align as the app) → report.
 ```
@@ -618,7 +618,7 @@ artifacts; token used via GIT_ASKPASS, never in URL/disk; leak gates clean befor
     DEVICE cannot see the runner's repo checkout; the workflow generates the fixture on the
     host, never pushes it to the device. Fixed in 15cf4ab: the runner script now
     `adb push`es the fixture to the app's external-files dir
-    (/sdcard/Android/data/com.example.tasmee/files/…) and repoFile() probes that path +
+    (/sdcard/Android/data/com.iqraa.tasmee/files/…) and repoFile() probes that path +
     getExternalFilesDir(). NEXT run is the first with a real on-device decode assertion.
 - **release RED (measurement SUCCEEDED, gate step crashed)**: bundletool 1.17.0 (sha-verified)
   ran `build-apks --mode=universal` (in-job debug keystore) and `get-size total
@@ -712,3 +712,79 @@ storage. Two more defects were found and fixed along the way:
 Q8's timing contract (seconds-scale timestamps, 40 ms frame grid) holds on-device at both
 floors; minSdk=27 native-floor proof (loadLibrary) holds at both. The only remaining skip is
 Mo's own accuracy clip (§0 by design).
+
+### V-038 T4 — Mo's clips: authorization of record, committed fixture, real-audio harness (2026-11-22)
+Authorization: Mo uploaded the 6 clips with "Mo states these recitations are permitted for
+use" — recorded verbatim in eval/data/PROVENANCE.md (the authorization of record).
+- Clips identified (decode + best-F1 ayah-window matching): 39:42–43 (Ezz El-Awami, ayah 42
+  repeated), 19:4–7, 5:23, 54:10–12, 25:27–31 (Riad Mostaf ×4), 2:200–201 (Yasser
+  Al-Dossary, hadr-fast). **Classification: 3 speakers × PROFESSIONAL STUDIO recitations
+  (clean AAC, high SNR) — §13 phone-gate criteria NOT met (needs ≥60 held-out clips,
+  ≥3 speakers on PHONE MICS). Every number below is INDICATIVE; studio recitations do not
+  satisfy the phone gate. WRONG stays rendered as CLOSE in the app.**
+- Committed to git: exactly ONE clip — eval/data/fixture_54_10_riadmostaf.wav (10.05 s,
+  16 kHz mono PCM, al-Qamar 54:10, host decode CER 0.0% letters-only) + PROVENANCE.md.
+  All other audio git-ignored (eval/data/* whitelist). No gated/tlog audio anywhere.
+- androidTest `sherpaAccuracyDecode_moClip…` no longer skips in CI: the workflow copies the
+  committed fixture into the androidTest APK assets (same V-037c channel), and the test now
+  asserts the 54:10 letters-only CER ≤ 0.20 on-device (host measured 0.0%).
+- Real-audio harness (scripts/t4_real_audio_report.py; quran-asr-small; model space N()
+  = letters-only + hamza folding; full-clip offline decode — NOT the app's 8 s streaming
+  segmentation, so long clips penalize both sides; honest limitation recorded):
+  ```
+  ezz_elawami_39_42     75.4s WER 25.0% CER 19.3% (repeated ayah → hyp word loss)
+  riadmostaf_19_4_5     68.8s WER  4.3% CER  1.1%
+  riadmostaf_5_23       41.0s WER  0.0% CER  0.0% (perfect)
+  riadmostaf_54_10_12   38.0s WER  5.3% CER  1.2%
+  riadmostaf_25_27_29   70.6s WER  8.3% CER  5.2%
+  yasser_2_200_201      32.1s WER 42.1% CER 34.4% (hadr-fast; decode drops words: hyp 27 vs ref 38)
+  macro WER 14.2% / macro CER 10.2%; micro WER 15.5%
+  clip-level false-alarm rate 6.2% (12/192 hyp word occurrences, bag-level)
+  clip-level detection rate 84.5% (180/213 ref word occurrences)
+  defect clips (CER>0): 5/6 — rule-of-three NOT applicable (defects observed)
+  ```
+- Honest reading: on CLEAN STUDIO audio the model is strong (4/6 clips ≤ 8.3% WER), the two
+  outliers are explained by (a) ayah repetition (Ezz) and (b) hadr-fast pace (Al-Dossary) —
+  the model's weak spot on fast recitation, which the §13 phone gate must re-test on real
+  hardware. FA 6.2% is bag-level, NOT the app's session EXTRA rate. These numbers do NOT
+  certify phone-mic behavior (INDICATIVE label, subset + scoring space stated).
+
+### V-039 T4+T5 verified on-device — run 45079074846 (21c93ca): ALL 5 JOBS GREEN (2026-11-22)
+Instrumented per-test outcomes (artifacts, both floors, 5 tests each):
+- **`sherpaAccuracyDecode_moClip…` PASS on API 27 (0.473 s) AND API 35 (0.670 s) — NO SKIP**:
+  the committed fixture (al-Qamar 54:10, PROVENANCE-recorded permission) decodes on-device
+  and the letters-only CER ≤ 0.20 assertion HOLDS on both floors. The accuracy test is no
+  longer a §0 skip — it is a real, passing, licensed-fixture assertion.
+- `sherpaTimingDecode…` PASS (0.389 s / 0.621 s); `loadLibrarySmoke` PASS; font smoke PASS.
+- **T5 PERF SMOKE (INDICATIVE — EMULATOR x86_64, NOT a phone; Q7 OPEN for Mo's hardware)**,
+  from the job log's logcat harvest (IqraaPerfSmoke tag):
+  ```
+  API 27: load=311 ms decode=170 ms audio=8000 ms RTF=0.021 coldStartToFirstDecode=481 ms
+  API 35: load=461 ms decode=224 ms audio=8000 ms RTF=0.028 coldStartToFirstDecode=685 ms
+  peakRSS: dumpsys TOTAL-PSS parse returned n/a on this run (parser widened in the follow-up
+  commit — next run reports the value; NOT a measured number, NOT claimed)
+  ```
+  Labels: synthetic non-speech fixture (timing/8 s generated) — proves the JNI path + timing
+  grid + load/decode latency, NOT recognition accuracy; emulator x86_64 with KVM, not a phone.
+
+### V-040 T6a–e verified — run 45080772312 (7312881) ALL FIVE JOBS GREEN (2026-11-22)
+Phase-3 first slice on CI, all jobs green:
+- **build**: ktlint 0 out-of-baseline (globs fixed to core/*/src — 'core/**' matched
+  build/generated/BuildConfig.kt producing 2150 phantom violations in run 45079846042);
+  detekt ≤200 ceiling green (T3 ratchet); coverage gate unchanged (93.1/91.0).
+- **instrumented API 27 + 35**: all tests green — loadLibrary, timing decode, font,
+  accuracy (54:10 fixture), perf smoke, **RoomDbTest dao_roundTrip_checkpoint_and_history +
+  dao_delete_all PASS on-device** (§15 Room v1 schema + checkpoint transaction + history Flow).
+- **T5 perf numbers this run (API 27): load=375 ms, decode=229 ms, RTF=0.029,
+  coldStartToFirstDecode=604 ms — INDICATIVE EMULATOR x86_64, NOT a phone; Q7 OPEN.**
+  peakRSS: dumpsys from the instrumentation process does not return the TOTAL line
+  (non-shell uid) — honestly labeled "TOTAL-line-not-found", NOT a measured number.
+- Defects found & fixed by runs this session: ReciteScreen stripped imports (compile fail
+  45080315624 → restored getValue/setValue/delay + coroutines dep); RoomDbTest first()
+  extension misuse (Unresolved 'first', 45079846042); ktlint glob over build/ dirs.
+- Phase-3 landing state: core:data (Room+DataStore keys+repository), designsystem
+  (§10.2 FeedbackEncoding color+glyph+decoration, M3 theme dark/RTL, font scale 0.8–2.0,
+  QuranText annotated rendering, Amiri runtime font), SessionLifecycle §10.4 machine + 5
+  host tests, full §10/§11 strings ar+en (Arabic UNREVIEWED until Mo signs off), screens
+  F1 reader / F2-F3 recite (auto-scroll pause chip + tasmee-only hint) / F5 history / F6
+  settings, MainActivity + NavHost routes.
