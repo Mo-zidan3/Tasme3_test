@@ -93,7 +93,8 @@ with exponential backoff, still blocked. Harness-only; not on the Phase 1 critic
 - **S6 baseline STILL BLOCKED** (429/404); run_baseline.py stub refuses to emit numbers (V-027).
 - **D-012**: minSdk 26→27 ADR (native floor measured 27, V-016) pending Mo ratification +
   emulator verification; size options table deferred until the bundletool measurement (P0 job).
-- Coverage after this session: core:quran 93.6% / core:align 91.7% lines (jacoco).
+- Coverage after this session (V-029 re-measured via exec analysis): core:quran 93.1% (67/72) /
+  core:align 91.0% (372/409) lines.
 
 ## Phase 1 — DONE (with two honest pendings) (Quran + align + harness, per §16)
 - **core:quran DONE**: Tanzil asset committed with verbatim notice header (whole-file sha256

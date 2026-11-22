@@ -10,8 +10,10 @@ Models by HuggingFace user **Abdou**. Pinned revisions:
 - small @ 0c2744b9d70aaf45ba574c30c5d318c575258e66 (model.int8.onnx 36 MB)
 - tiny @ a291b33fd5a31cc4f212363ee1ba2d56d9710b49 (model.int8.onnx 19 MB)
 
-License: MIT License (Copyright (c) 2025 Abdellah Bakhtaoui — per LICENSE file in the
-model repos; full text: https://huggingface.co/Abdou/quran-asr-small/blob/main/LICENSE).
+License: MIT License (Copyright (c) 2026 Abdou — per the LICENSE file fetched with the
+pinned revisions on 2026-11-21; verbatim text also shipped in
+app/src/main/assets/notices/MIT-models.txt; full text:
+https://huggingface.co/Abdou/quran-asr-small/blob/main/LICENSE).
 
 Training-data credits (per model cards; we reproduce them here):
 - tarteel-ai/tlog (CC-BY-4.0, gated)
@@ -35,19 +37,38 @@ ALLOWED. The full Tanzil copyright notice included in all verbatim copies is rep
 in every derived file containing substantial portions (see assets/quran notice headers).
 App About screen indicates "Tanzil Project" and links to https://tanzil.net.
 
-Notice block (as shipped in the download):
+Notice block (verbatim, byte-for-byte from the committed asset
+core/quran/src/main/resources/quran-uthmani.txt — CHANGING IT IS NOT ALLOWED, CC-BY-3.0):
 ```
-#  Tanzil Quran Text - Uthmani
-#  ----------------------------------------
-#  Copyright (c) 2008-2021 Tanzil Project
-#  All rights reserved.
+#  Tanzil Quran Text (Uthmani, Version 1.1)
+#  Copyright (C) 2007-2026 Tanzil Project
+#  License: Creative Commons Attribution 3.0
 #
-#  … (full notice preserved in the committed asset) …
+#  This copy of the Quran text is carefully produced, highly 
+#  verified and continuously monitored by a group of specialists 
+#  at Tanzil Project.
 #
-#  PLEASE DO NOT REMOVE OR CHANGE THIS COPYRIGHT BLOCK
+#  TERMS OF USE:
+#
+#  - Permission is granted to copy and distribute verbatim copies 
+#    of this text, but CHANGING IT IS NOT ALLOWED.
+#
+#  - This Quran text can be used in any website or application, 
+#    provided that its source (Tanzil Project) is clearly indicated, 
+#    and a link is made to tanzil.net to enable users to keep
+#    track of changes.
+#
+#  - This copyright notice shall be included in all verbatim copies 
+#    of the text, and shall be reproduced appropriately in all files 
+#    derived from or containing substantial portion of this text.
+#
+#  Please check updates at: http://tanzil.net/updates/
+#
+#====================================================================
 ```
-(The exact full block is committed with the asset in Phase 1; this entry records the
-obligation now.)
+(The full block, including the surrounding wrapper, is committed with the asset and
+reproduced in every derived file carrying substantial text — eval/expected-words.json
+included. CI fails on any `…` placeholder inside a notices file or THIRD_PARTY_NOTICES.md.)
 
 ## Amiri Quran font (SIL Open Font License 1.1)
 Amiri Quran from the **Amiri** project by aliftype (https://github.com/aliftype/amiri),

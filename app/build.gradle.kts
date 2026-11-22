@@ -12,25 +12,33 @@ android {
 
     defaultConfig {
         applicationId = "com.example.tasmee"
-        minSdk = 26
+        // D-012/D-013: 26 → 27. Measured floor (V-016): the pinned onnxruntime
+        // libonnxruntime.so carries .note.android.ident api_level 0x1b (27). Loading it on
+        // API 26 is undefined. CI asserts minSdk >= max(api_level) over every shipped .so.
+        minSdk = 27
         targetSdk = 37
         versionCode = 1
         versionName = "0.1.0"
     }
 
-    // §4: arm64-v8a only for release — enforced via packaging (AGP 9 DSL)
-    androidResources {
-        // (no ndk block in AGP 9 new DSL; abiFilters move handled below)
-    }
+    // §4 + D-013: RELEASE ships arm64-v8a only. The DEBUG source set additionally carries the
+    // x86_64 pair (app/src/debug/jniLibs, fetched by scripts/fetch_native.py, git-ignored,
+    // SHA-pinned) so the CI emulator (x86_64 image) can System.loadLibrary it. The excludes
+    // below are scoped to RELEASE builds only; debug APK = arm64 + x86_64.
     packaging {
         jniLibs {
-            // §4: arm64-v8a only — strip .so that androidx deps ship for other ABIs
-            // (our own jniLibs dir contains arm64-v8a only)
             excludes += listOf(
                 "lib/armeabi-v7a/**",
                 "lib/x86/**",
-                "lib/x86_64/**",
             )
+        }
+    }
+    // Release-only x86_64 strip (D-013): packaging{} is variant-global in the AGP 9 DSL, so
+    // the strip is expressed per-variant through androidComponents' packaging extension
+    // (fallback: the CI ABI check fails the build if release ever ships x86_64).
+    androidComponents {
+        onVariants(selector().withBuildType("release")) { variant ->
+            variant.packaging.jniLibs.excludes.add("lib/x86_64/**")
         }
     }
 

@@ -417,3 +417,38 @@ Retried twice more this session (90 s + 180 s backoff): HTTP 429 then a 404 on t
 form. The whisper.cpp GGML remains un-fetchable. `eval/run_baseline.py` now exists with the
 §13.2 interface and REFUSES to produce numbers ("baseline NOT YET MEASURED"). Harness-only;
 never blocks Phase 2.
+
+
+### V-028 Record hygiene + supersessions (2026-11-22)
+Superseded entries (kept for history, marked here normatively):
+- V-004 (jniLibs "x86_64 also present" + minSdk guess 24/26) → **superseded by V-016** (floor 27).
+- V-011 (15 modules / ≈84 MB estimate) → **superseded by V-018** (13 modules / 77–80 MB estimate;
+  both estimates to be replaced by the bundletool measurement from the first CI run).
+- V-013 (host timestamps probe) → **superseded by V-015** (seconds + 40 ms grid, golden tests).
+- V-017 ("111 basmalas") → **superseded by V-023** (112; the 111 was a byte-startswith artifact).
+- V-022 (synthetic report v1 metrics) → **superseded by V-025** (app-shaped streams; lo=0 fix).
+- D-025 → renumbered **D-013**.
+
+New host evidence (2026-11-22):
+- check_abi_floor.py over jniLibs: arm64 onnxruntime api_level 27, sherpa-jni 21; x86_64
+  onnxruntime 27, sherpa-jni 21 → max=27 == minSdk 27 (both source sets).
+- make_timing_fixture.py determinism: two runs → identical payload sha256
+  da6798fb059d326d486c86994d2c912113fb6e2ef04bfda1310339236e37ec43.
+- THIRD_PARTY_NOTICES.md Tanzil block now byte-verbatim vs the committed asset (25/25 lines;
+  trailing spaces included); MIT copyright corrected to the fetched LICENSE bytes
+  ("Copyright (c) 2026 Abdou").
+- fetch_native.py: tarball member paths begin "./jniLibs/…" — extraction filter fixed
+  (previous startswith never matched; masked by the sidecar skip).
+- bundletool pinned 1.17.0 (sha256 printed at fetch time into the CI log for the record).
+
+### V-029 JaCoCo re-measured after Phase-2 host-side (2026-11-22, exec-file analysis)
+Re-run after the new tests (basmala OPTIONAL_PREFIX, simulator, scheduler, assembly, session):
+```
+core:quran  LINES covered=67  missed=5  total=72   → 93.1%   (prev 93.6% — real re-measure)
+core:align  LINES covered=372 missed=37 total=409 → 91.0%   (prev 91.7% — real re-measure)
+core:audio / core:asr / core:session: android-library modules — jacoco wiring lands with the
+  CI coverage step (their tests are testDebugUnitTest; html reports exist per-module but are
+  not aggregated host-side this session).
+```
+The two docs quotes (93.6/91.7) were pre-Phase-2 copies; the re-measured numbers above are the
+current truth and are what STATUS must quote.

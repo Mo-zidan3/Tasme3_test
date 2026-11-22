@@ -18,6 +18,11 @@ from pathlib import Path
 
 REPO = Path(__file__).resolve().parent.parent
 JNI_DIR = REPO / "app" / "src" / "main" / "jniLibs" / "arm64-v8a"
+# Debug-only x86_64 pair for the CI emulator (host ABI). NEVER in release:
+# release packaging strips all non-arm64 ABIs (app/build.gradle.kts packaging.jniLibs.excludes
+# applies to the merged set from main + debug source sets is NOT how AGP works — instead we
+# place the emulator pair in the DEBUG source set only, so releaseRuntimeClasspath never sees it).
+JNI_DIR_DEBUG = REPO / "app" / "src" / "debug" / "jniLibs" / "x86_64"
 ASSET_VAD = REPO / "app" / "src" / "main" / "assets" / "models" / "silero_vad.onnx"
 CACHE = REPO / "third_party" / "sherpa-onnx-v2.0.2"
 
@@ -31,9 +36,13 @@ SO_SHA = {
 VAD_URL = "https://github.com/k2-fsa/sherpa-onnx/releases/download/asr-models/silero_vad.onnx"
 VAD_SHA = "9e2449e1087496d8d4caba907f23e0bd3f78d91fa552479bb9c23ac09cbb1fd6"
 KNOWN_SO_SHA = {
-    # pinned after first verified extraction (V-004/V-016 evidence chain)
+    # pinned after first verified extraction (V-004/V-016 evidence chain); arm64 pair
     "libonnxruntime.so": "33847ad43bffe204699fd4a27f7f3603452a8cdaf2f9a44983a0bc31ffcf2da1",
     "libsherpa-onnx-jni.so": "089fd48ee0218cdb6be0a533e775c80e90c6ae935f5082630695276ad5898084",
+}
+KNOWN_SO_SHA_X86 = {  # debug-only pair (D-013, CI emulator; sha256 measured 2026-11-22)
+    "libonnxruntime.so": "087e84297cad64acb823c3d901d6e0cc934e91add7cdb20da802cd1c0bea5c3e",
+    "libsherpa-onnx-jni.so": "cdeba4da670bcedad490837d34a63d7e3751d275c6d3813068cf52c610a512a8",
 }
 SO_SIDECAR = REPO / "third_party" / "sherpa-onnx-v2.0.2" / "jniLibs.sha256"
 
@@ -92,11 +101,15 @@ def main() -> int:
                 sha, name = line.split()
                 sidecar[name] = sha
 
-    all_present = all((JNI_DIR / n).exists() for n in SO_SHA)
+    all_present = all((JNI_DIR / n).exists() for n in SO_SHA) and all(
+        (JNI_DIR_DEBUG / n).exists() for n in SO_SHA
+    )
     if all_present:
-        verified = all(sha256_of(JNI_DIR / n) == KNOWN_SO_SHA.get(n) for n in SO_SHA)
+        verified = all(sha256_of(JNI_DIR / n) == KNOWN_SO_SHA.get(n) for n in SO_SHA) and all(
+            sha256_of(JNI_DIR_DEBUG / n) == KNOWN_SO_SHA_X86.get(n) for n in SO_SHA
+        )
         if verified:
-            print("[skip] jniLibs arm64 already extracted and sha-pinned-verified")
+            print("[skip] jniLibs arm64 (release) + x86_64 (debug) already extracted and sha-verified")
             return 0 if ok else 1
 
     # 3) download + verify tarball, extract arm64-only pair
@@ -107,10 +120,18 @@ def main() -> int:
     with tarfile.open(tar_path, "r:bz2") as tf:
         for member in tf.getmembers():
             name = member.name.rsplit("/", 1)[-1]
-            if member.name.startswith("jniLibs/arm64-v8a/") and name in SO_SHA:
+            norm = member.name.removeprefix("./")  # tarball paths are "./jniLibs/..."
+            if name in SO_SHA:
                 f = tf.extractfile(member)
-                (JNI_DIR / name).write_bytes(f.read())
-                print(f"[extract] {name} ({member.size} B) → {JNI_DIR / name}")
+                if norm.startswith("jniLibs/arm64-v8a/"):
+                    (JNI_DIR / name).write_bytes(f.read())
+                    print(f"[extract] {name} ({member.size} B) → {JNI_DIR / name}")
+                elif norm.startswith("jniLibs/x86_64/"):
+                    # V-004 (tarball contents) + D-013: x86_64 pair goes to the DEBUG source
+                    # set ONLY (CI emulator boots x86_64). Release ships arm64-v8a only (D-003).
+                    JNI_DIR_DEBUG.mkdir(parents=True, exist_ok=True)
+                    (JNI_DIR_DEBUG / name).write_bytes(f.read())
+                    print(f"[extract] {name} ({member.size} B) → {JNI_DIR_DEBUG / name} (debug-only)")
 
     # 4) write/verify sidecar
     lines = []
