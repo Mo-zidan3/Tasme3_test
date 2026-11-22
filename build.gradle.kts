@@ -13,3 +13,15 @@ plugins {
     alias(libs.plugins.hilt) apply false
     alias(libs.plugins.detekt) apply false
 }
+
+// V-037/T3b: detekt wired for REAL (typed form; verified via CI on this branch — the sandbox's
+// Maven Central 429 blocks local `./gradlew help`, but CI runners resolve fine).
+subprojects {
+    apply(plugin = "io.gitlab.arturbosch.detekt")
+    extensions.configure<io.gitlab.arturbosch.detekt.extensions.DetektExtension>("detekt") {
+        toolVersion = rootProject.libs.versions.detekt.get()
+        buildUponDefaultConfig = true
+        allRules = false
+        config.setFrom(files("$rootDir/config/detekt/detekt.yml"))
+    }
+}
