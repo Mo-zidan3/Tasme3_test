@@ -27,7 +27,6 @@ tmp/
 .env*
 
 # Eval data & labels — git-ignored per §13.1 (Mo's recordings, gated audio)
-eval/data/
 eval/labels/
 eval/hypotheses/
 
@@ -42,3 +41,8 @@ eval/fixtures/
 # secrets scan target (§0 leak gate)
 .secrets/
 app/src/androidTest/assets/
+
+# T4: Mo's clips — ONLY the committed CI fixture + PROVENANCE.md are tracked
+eval/data/*
+!eval/data/PROVENANCE.md
+!eval/data/fixture_54_10_riadmostaf.wav

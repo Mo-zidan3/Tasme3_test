@@ -138,9 +138,47 @@ class NativeSmokeInstrumentedTest {
             val (pcm, _) = readMono16kPcm(clip!!)
             val result = runBlocking { recognizer.decode(pcm, segmentStartMs = 0L) }
             assertTrue("Mo's clip must decode to words", result.words.isNotEmpty())
+            // T4: the committed fixture IS al-Qamar 54:10 (PROVENANCE.md) — assert the decoded
+            // letters-only text covers the expected ayah with a tolerant CER bound.
+            // Model-space expected (letters-only): «فدعا ربه اني مغلوب فانتصر» — the decode
+            // of this exact clip on host measured CER 0.0% (V-038). Bound at ≤0.20 CER:
+            // on-device decode differences (thread count, quantized kernels) stay inside it.
+            val expectedLetters = "فدعاربهانيمغلوبفانتصر"
+            val gotLetters =
+                result.words.joinToString("") { it.text }.filter { it.code in 0x0621..0x064A }
+            val cer = cerLetters(expectedLetters, gotLetters)
+            assertTrue(
+                "fixture 54:10 decode CER $cer > 0.20 (got ${gotLetters.length} letters, want ${expectedLetters.length})",
+                cer <= 0.20,
+            )
         } finally {
             recognizer.close()
         }
+    }
+
+    /** Letters-only CER (edit distance / expected length). */
+    private fun cerLetters(
+        expected: String,
+        got: String,
+    ): Double {
+        if (expected.isEmpty()) {
+            return if (got.isEmpty()) 0.0 else 1.0
+        }
+        val dp = IntArray(expected.length + 1) { it }
+        for (j in 1..got.length) {
+            var prev = dp[0]
+            dp[0] = j
+            for (i in 1..expected.length) {
+                val cur = dp[i]
+                dp[i] = minOf(
+                    dp[i] + 1,
+                    dp[i - 1] + 1,
+                    prev + if (expected[i - 1] == got[j - 1]) 0 else 1,
+                )
+                prev = cur
+            }
+        }
+        return dp[expected.length].toDouble() / expected.length
     }
 
     @Test

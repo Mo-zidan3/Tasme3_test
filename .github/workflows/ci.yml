@@ -398,6 +398,9 @@ jobs:
           python3 scripts/make_timing_fixture.py eval/fixtures/timing_fixture.wav
           mkdir -p app/src/androidTest/assets/eval/fixtures
           python3 scripts/make_timing_fixture.py app/src/androidTest/assets/eval/fixtures/timing_fixture.wav
+          # T4: Mo's committed accuracy fixture rides the same channel (V-037c: APK assets
+          # are the device-visible path; eval/data/fixture… is tracked in git).
+          cp eval/data/fixture_54_10_riadmostaf.wav app/src/androidTest/assets/eval/fixtures/fixture.wav
 
       - name: Run instrumented tests on emulator (API ${{ matrix.api-level }})
         uses: reactivecircus/android-emulator-runner@v2
