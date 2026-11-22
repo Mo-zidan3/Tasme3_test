@@ -6,12 +6,12 @@ plugins {
 }
 
 android {
-    namespace = "com.example.tasmee"   // §4: dev placeholder; Play release blocker — Mo must supply final id (§18)
+    namespace = "com.iqraa.tasmee"   // §4: dev placeholder; Play release blocker — Mo must supply final id (§18)
     compileSdk = 37
     compileSdkMinor = 1
 
     defaultConfig {
-        applicationId = "com.example.tasmee"
+        applicationId = "com.iqraa.tasmee"
         // D-012/D-013: 26 → 27. Measured floor (V-016): the pinned onnxruntime
         // libonnxruntime.so carries .note.android.ident api_level 0x1b (27). Loading it on
         // API 26 is undefined. CI asserts minSdk >= max(api_level) over every shipped .so.

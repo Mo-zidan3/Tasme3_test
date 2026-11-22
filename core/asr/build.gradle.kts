@@ -5,7 +5,7 @@ plugins {
 }
 
 android {
-    namespace = "com.example.core.asr"
+    namespace = "com.iqraa.core.asr"
     compileSdk = 37
     compileSdkMinor = 1
 

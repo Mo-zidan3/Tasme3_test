@@ -4,7 +4,7 @@ plugins {
 }
 
 android {
-    namespace = "com.example.core.designsystem"
+    namespace = "com.iqraa.core.designsystem"
     compileSdk = 37
     compileSdkMinor = 1
 

@@ -6,7 +6,7 @@ plugins {
 }
 
 android {
-    namespace = "com.example.feature.history"
+    namespace = "com.iqraa.feature.history"
     compileSdk = 37
     compileSdkMinor = 1
 

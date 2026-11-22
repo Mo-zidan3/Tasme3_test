@@ -5,7 +5,7 @@ plugins {
 }
 
 android {
-    namespace = "com.example.core.session"
+    namespace = "com.iqraa.core.session"
     compileSdk = 37
     compileSdkMinor = 1
 

@@ -32,5 +32,5 @@ tasks.withType<Test> {
 }
 
 application {
-    mainClass.set("com.example.tools.eval.EvalMainKt")
+    mainClass.set("com.iqraa.tools.eval.EvalMainKt")
 }

@@ -6,7 +6,7 @@ plugins {
 }
 
 android {
-    namespace = "com.example.feature.reader"
+    namespace = "com.iqraa.feature.reader"
     compileSdk = 37
     compileSdkMinor = 1
 

@@ -75,7 +75,7 @@ with exponential backoff, still blocked. Harness-only; not on the Phase 1 critic
 5. Archive location for exact shipped model files + license texts (asked in Phase 0; still open).
 6. Recordings per §13.1 (≥50 first-look; ≥60 held-out correct + ≥25 planted-error; ≥3 speakers)
    — if absent, Phase 2 ends indicative and WRONG ships as CLOSE (§13.4 default).
-7. Final applicationId (Play rejects com.example.*) — Phase 4 blocker.
+7. ~~Final applicationId (Play rejects com.example.*)~~ DONE (T1): com.iqraa.tasmee applied + CI-verified.
 8. Test devices (≥1 low-end 3–4 GB + ≥1 flagship) → docs/DEVICES.md.
 9. Ratification of `[MO]` items: presets §9.5, summary §9.6, Amiri default §7.7,
    tiny shipping policy §8.1, and the CC-BY-3.0 attribution interpretation (§7.1).

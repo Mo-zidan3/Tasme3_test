@@ -6,7 +6,7 @@ plugins {
 }
 
 android {
-    namespace = "com.example.feature.recite"
+    namespace = "com.iqraa.feature.recite"
     compileSdk = 37
     compileSdkMinor = 1
 

@@ -5,7 +5,7 @@ plugins {
 }
 
 android {
-    namespace = "com.example.core.audio"
+    namespace = "com.iqraa.core.audio"
     compileSdk = 37
     compileSdkMinor = 1
 

@@ -6,7 +6,7 @@ plugins {
 }
 
 android {
-    namespace = "com.example.feature.settings"
+    namespace = "com.iqraa.feature.settings"
     compileSdk = 37
     compileSdkMinor = 1
 

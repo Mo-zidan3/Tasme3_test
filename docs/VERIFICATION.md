@@ -618,7 +618,7 @@ artifacts; token used via GIT_ASKPASS, never in URL/disk; leak gates clean befor
     DEVICE cannot see the runner's repo checkout; the workflow generates the fixture on the
     host, never pushes it to the device. Fixed in 15cf4ab: the runner script now
     `adb push`es the fixture to the app's external-files dir
-    (/sdcard/Android/data/com.example.tasmee/files/…) and repoFile() probes that path +
+    (/sdcard/Android/data/com.iqraa.tasmee/files/…) and repoFile() probes that path +
     getExternalFilesDir(). NEXT run is the first with a real on-device decode assertion.
 - **release RED (measurement SUCCEEDED, gate step crashed)**: bundletool 1.17.0 (sha-verified)
   ran `build-apks --mode=universal` (in-job debug keystore) and `get-size total

@@ -105,7 +105,7 @@ verified against the value published by services.gradle.org for 9.9.2 (docs/VERI
 - Presets §9.5 (Conservative default), summary semantics §9.6 — implemented as written.
 - Font §7.7 Amiri default; KFGQPC only after Mo provides its EULA.
 - tiny shipping policy §8.1 (badge «الوضع الخفيف» when active).
-- applicationId still `com.example.tasmee` (dev placeholder; Phase 4 Play blocker).
+- applicationId still `com.iqraa.tasmee` (dev placeholder; Phase 4 Play blocker).
 - Archive location for shipped model files + license texts (asked once; local until answered).
 
 ## D-011 Phase 1 decisions (2026-11-21)
@@ -203,3 +203,14 @@ budget gates unchanged (≤80 MB warn / >85 MB fail). instrumented moved to ubun
 with a mandatory /dev/kvm pre-flight (ubuntu-26.04 images carry no KVM; emulator refuses
 -accel off). TCG fallback explicitly rejected pending Mo's sign-off for long runs; if no
 hosted KVM runner is available the escalation is macOS arm64 (10× minutes) or Mo's device.
+
+## D-018 — App identity: Iqraa / «اقرأ», applicationId com.iqraa.tasmee (2026-11-22) [RATIFIED Mo]
+- Mo's ratified identity applied (T1): label ar «اقرأ» / en "Iqraa" (strings + values-ar),
+  applicationId + namespace com.iqraa.tasmee, all package paths com.example.* → com.iqraa.*
+  (app, core:*, feature:*, tools:eval), docs/scripts/workflow references updated.
+- **No data migration required**: no released build exists (Play blocker
+  com.example.* removed by this very change); Room/DataStore carry no released schema —
+  the first shipped version will be v1 under the new identity. Storage keys are
+  package-independent names from day one (Phase 3 uses explicit file names, not
+  context.packageName-derived ones).
+- CI green post-rename is the verification (T1 done when the run is green).
