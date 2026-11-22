@@ -1,4 +1,9 @@
 build:
-  # V-037/T3b: provisional ceiling — the gate RUNS and REPORTS on every build; findings debt
-  # gets ratcheted down (Mo's D-017 call). 0 = fail on any finding (target state).
-  maxIssues: 100000
+  # V-037/T3d: ratchet START = the FIRST REAL measured count (PR run 45076672261,
+  # commit c0922c6b): 200 findings — MagicNumber 117 (92 of them in the vendored
+  # sherpa OfflineRecognizer.kt API surface), MaxLineLength 33, MatchingDeclarationName 6,
+  # ReturnCount 6, CyclomaticComplexity 5, LoopWithTooManyJumpStatements 5, plus others.
+  # The gate FAILS the build if findings exceed 200; fixes ratchet it DOWN.
+  # Mo's D-017 options from here: (a) ratchet down over time; (b) fix to zero and lock 0;
+  # (c) curate the rule set (e.g. exclude vendored API from MagicNumber).
+  maxIssues: 200
