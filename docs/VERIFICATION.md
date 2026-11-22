@@ -452,3 +452,25 @@ core:audio / core:asr / core:session: android-library modules — jacoco wiring 
 ```
 The two docs quotes (93.6/91.7) were pre-Phase-2 copies; the re-measured numbers above are the
 current truth and are what STATUS must quote.
+
+### V-030 PUSH COMPLETE — first CI run triggered; monitoring blocked by token scope (2026-11-22)
+```
+git remote add origin https://github.com/Mo-zidan3/Tasme3_test.git   (token NEVER in URL)
+GIT_ASKPASS=/tmp/ap.sh git ls-remote origin   → exit 0 (auth OK; remote had ZERO refs)
+GIT_ASKPASS=/tmp/ap.sh git push -u origin main → "* [new branch] main -> main"
+```
+- Leak gates BEFORE and AFTER: repo content clean (no token-shaped string: the scanner's own
+  regex literals excluded by real-shape matching), .git/config clean (no credential in URL),
+  /tmp/ap.sh removed immediately.
+- Workflow confirmed on the remote via contents API: .github/workflows/ci.yml present, 15,849 B.
+- The push touched code+workflow (non-docs paths) → the workflow TRIGGERED (push event on main).
+- **Monitoring BLOCKED**: the fine-grained token lacks the Actions permission —
+  `GET /actions/runs` → 403 "Resource not accessible by personal access token"; same for
+  check-runs, commit statuses, deployments, and workflow_dispatch (403 each). Public HTML
+  actions page → 404 (repo private). Per §3's rule ("If Actions read is denied, ask Mo to paste
+  the logs — do not guess outcomes"): NO gate is marked green from the workflow file alone.
+  E1/AAB/S2/minSdk-on-device remain PENDING Mo pasting the run logs/URLs.
+- What the run will produce when Mo shares it (per-job evidence targets listed in docs/CI.md):
+  secrets-scan + notices check, build (unit tests/manifest/classpath/ABI floor debug),
+  release (R8 guard + arm64-only guard + floor), size (bundletool SDK/ABI/density), instrumented
+  API 27+35 (loadLibrary, generated-fixture timing decode, font smoke).
