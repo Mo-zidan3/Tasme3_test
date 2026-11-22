@@ -68,7 +68,7 @@ core/quran/src/main/resources/quran-uthmani.txt — CHANGING IT IS NOT ALLOWED, 
 ```
 (The full block, including the surrounding wrapper, is committed with the asset and
 reproduced in every derived file carrying substantial text — eval/expected-words.json
-included. CI fails on any `…` placeholder inside a notices file or THIRD_PARTY_NOTICES.md.)
+included. CI fails on any `ellipsis` placeholder inside a notices file or THIRD_PARTY_NOTICES.md.)
 
 ## Amiri Quran font (SIL Open Font License 1.1)
 Amiri Quran from the **Amiri** project by aliftype (https://github.com/aliftype/amiri),

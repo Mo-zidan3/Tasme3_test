@@ -109,12 +109,16 @@ def main() -> int:
     else:
         ok = False
 
-    # 3) OFL 1.1 (Amiri Quran) — from the checked-in upstream OFL.txt copy
-    if AMIRI_OFL.exists():
-        shutil.copy(AMIRI_OFL, OUT / "OFL-1.1-AmiriQuran.txt")
+    # 3) OFL 1.1 (Amiri Quran) — fallback to assets if third_party is missing (cold cache)
+    amiri_ofl_path = AMIRI_OFL
+    if not amiri_ofl_path.exists():
+        amiri_ofl_path = REPO / "app" / "src" / "main" / "assets" / "fonts" / "OFL.txt"
+    
+    if amiri_ofl_path.exists():
+        shutil.copy(amiri_ofl_path, OUT / "OFL-1.1-AmiriQuran.txt")
         print(f"[ ok ] OFL-1.1-AmiriQuran.txt sha256={sha256_of(OUT / 'OFL-1.1-AmiriQuran.txt')}")
     else:
-        print("[bad ] third_party/amiri-quran/OFL.txt missing — run scripts/fetch_native.py first")
+        print("[bad ] Amiri OFL.txt missing in both third_party and assets/fonts")
         ok = False
 
     # 4) Tanzil CC-BY-3.0 — byte-for-byte copyright block from the text file

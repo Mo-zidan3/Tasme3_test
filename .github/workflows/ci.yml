@@ -87,10 +87,10 @@ jobs:
           set -e
           for s in fetch_native generate_notices fetch_models; do
             ok=0
-            for i in 1 2 3; do
+            for delay in 60 120 240 480; do
               if python3 scripts/$s.py; then ok=1; break; fi
-              echo "$s failed (attempt $i); backoff $((i*60))s"
-              sleep $((i*60))
+              echo "$s failed; backoff ${delay}s"
+              sleep $delay
             done
             [ "$ok" = 1 ] || { echo "FAIL: $s could not fetch pinned assets after 3 attempts — rate-limit? See docs/VERIFICATION V-006/V-012/V-027. Retry with re-run; do NOT skip."; exit 1; }
           done
@@ -195,10 +195,10 @@ jobs:
           set -e
           for s in fetch_native generate_notices fetch_models; do
             ok=0
-            for i in 1 2 3; do
+            for delay in 60 120 240 480; do
               if python3 scripts/$s.py; then ok=1; break; fi
-              echo "$s failed (attempt $i); backoff $((i*60))s"
-              sleep $((i*60))
+              echo "$s failed; backoff ${delay}s"
+              sleep $delay
             done
             [ "$ok" = 1 ] || { echo "FAIL: $s could not fetch pinned assets after 3 attempts"; exit 1; }
           done
@@ -347,10 +347,10 @@ jobs:
           set -e
           for s in fetch_native generate_notices fetch_models; do
             ok=0
-            for i in 1 2 3; do
+            for delay in 60 120 240 480; do
               if python3 scripts/$s.py; then ok=1; break; fi
-              echo "$s failed (attempt $i); backoff $((i*60))s"
-              sleep $((i*60))
+              echo "$s failed; backoff ${delay}s"
+              sleep $delay
             done
             [ "$ok" = 1 ] || { echo "FAIL: $s could not fetch pinned assets after 3 attempts"; exit 1; }
           done
