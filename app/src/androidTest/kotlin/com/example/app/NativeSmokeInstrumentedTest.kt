@@ -46,7 +46,11 @@ class NativeSmokeInstrumentedTest {
             } catch (e: java.io.FileNotFoundException) {
                 null // loud skip downstream (§0: Mo's accuracy clip absent by design)
             } ?: return null
-        val tmp = File.createTempFile("fixture", ".wav", instrumentation.context.cacheDir)
+        val tmp = File.createTempFile(
+            "fixture",
+            ".wav",
+            instrumentation.targetContext.cacheDir,
+        )
         tmp.outputStream().use { out -> assetStream.use { it.copyTo(out) } }
         return tmp
     }
