@@ -33,10 +33,11 @@ jobs:
       - uses: actions/checkout@v4
       - name: Scan repo for credential-shaped strings
         run: |
-          if git grep -nE 'github_pat_|ghp_[A-Za-z0-9]{20,}|gho_[A-Za-z0-9]{20,}|ghs_[A-Za-z0-9]{20,}' -- .; then
+          # real token SHAPES (long bodies) — not the short regex literals this scanner itself contains
+          if git grep -nE '(github_pat_[A-Za-z0-9_]{20,}|ghp_[A-Za-z0-9]{36,}|gho_[A-Za-z0-9]{36,}|ghs_[A-Za-z0-9]{36,})' -- .; then
             echo "LEAK — STOP: credential-shaped string committed"; exit 1
           fi
-          if grep -nE 'github_pat_|ghp_[A-Za-z0-9]{20,}' .git/config; then
+          if grep -nE 'github_pat_[A-Za-z0-9_]{20,}|ghp_[A-Za-z0-9]{36,}' .git/config; then
             echo "REMOTE LEAK — credential in git config"; exit 1
           fi
           echo "clean: no credential-shaped strings in tracked files or git config"
