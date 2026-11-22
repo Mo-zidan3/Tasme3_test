@@ -766,3 +766,25 @@ Instrumented per-test outcomes (artifacts, both floors, 5 tests each):
   ```
   Labels: synthetic non-speech fixture (timing/8 s generated) — proves the JNI path + timing
   grid + load/decode latency, NOT recognition accuracy; emulator x86_64 with KVM, not a phone.
+
+### V-040 T6a–e verified — run 45080772312 (7312881) ALL FIVE JOBS GREEN (2026-11-22)
+Phase-3 first slice on CI, all jobs green:
+- **build**: ktlint 0 out-of-baseline (globs fixed to core/*/src — 'core/**' matched
+  build/generated/BuildConfig.kt producing 2150 phantom violations in run 45079846042);
+  detekt ≤200 ceiling green (T3 ratchet); coverage gate unchanged (93.1/91.0).
+- **instrumented API 27 + 35**: all tests green — loadLibrary, timing decode, font,
+  accuracy (54:10 fixture), perf smoke, **RoomDbTest dao_roundTrip_checkpoint_and_history +
+  dao_delete_all PASS on-device** (§15 Room v1 schema + checkpoint transaction + history Flow).
+- **T5 perf numbers this run (API 27): load=375 ms, decode=229 ms, RTF=0.029,
+  coldStartToFirstDecode=604 ms — INDICATIVE EMULATOR x86_64, NOT a phone; Q7 OPEN.**
+  peakRSS: dumpsys from the instrumentation process does not return the TOTAL line
+  (non-shell uid) — honestly labeled "TOTAL-line-not-found", NOT a measured number.
+- Defects found & fixed by runs this session: ReciteScreen stripped imports (compile fail
+  45080315624 → restored getValue/setValue/delay + coroutines dep); RoomDbTest first()
+  extension misuse (Unresolved 'first', 45079846042); ktlint glob over build/ dirs.
+- Phase-3 landing state: core:data (Room+DataStore keys+repository), designsystem
+  (§10.2 FeedbackEncoding color+glyph+decoration, M3 theme dark/RTL, font scale 0.8–2.0,
+  QuranText annotated rendering, Amiri runtime font), SessionLifecycle §10.4 machine + 5
+  host tests, full §10/§11 strings ar+en (Arabic UNREVIEWED until Mo signs off), screens
+  F1 reader / F2-F3 recite (auto-scroll pause chip + tasmee-only hint) / F5 history / F6
+  settings, MainActivity + NavHost routes.
