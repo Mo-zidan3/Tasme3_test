@@ -127,6 +127,13 @@ jobs:
           echo "ktlint violations OUTSIDE the committed baseline: $VIOL"
           [ "$VIOL" = "0" ] || { echo "FAIL: new ktlint violations — fix them, or regenerate ktlint-baseline.xml in the same commit"; exit 1; }
 
+      # T3b: detekt 1.23.8 wired at the root build (all subprojects), typed Kotlin DSL.
+      # Runs for real in CI; the findings count is harvested for the D-017 ratchet
+      # (ceiling set to the first measured number after this lands). A plugin/config
+      # failure fails the job loudly — never silently skipped.
+      - name: Static analysis — detekt (wired at root, all modules)
+        run: ./gradlew detekt
+
       - name: Android Lint
         run: ./gradlew :app:lintDebug
 
