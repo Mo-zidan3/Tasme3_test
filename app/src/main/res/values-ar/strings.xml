@@ -1,4 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- T6d: Arabic — PRIMARY locale. UNREVIEWED until Mo signs off (recorded in STATUS). -->
     <string name="app_name">اقرأ</string>
+
+    <string name="disclaimer_title">حدود التعرّف</string>
+    <string name="mic_rationale">يستمع إقرأ إلى تلاوتك على جهازك فقط لتحديد كل كلمة. الصوت لا يترك جهازك ولا يُخزَّن أبدًا.</string>
+    <string name="riwaya_statement">هذا التطبيق يدعم رواية حفص عن عاصم فقط.</string>
+    <string name="light_mode_badge">الوضع الخفيف</string>
+    <string name="lost_tracking_banner">تعذّر تتبّع التلاوة. اضغط للبدء من آية محددة.</string>
+    <string name="resume_following">العودة للمتابعة</string>
+    <string name="session_paused">الجلسة متوقفة</string>
+    <string name="mic_unavailable">تعذّر الوصول إلى المايك</string>
+    <string name="resume_countdown_fmt">استئناف خلال %1$d…</string>
+    <string name="summary_title">ملخص الجلسة</string>
+    <string name="correct_count_fmt">صحيحة: %1$d من %2$d</string>
+    <string name="close_count_fmt">قريبة من النص: %1$d</string>
+    <string name="previous_session_summary">ملخص الجلسة السابقة</string>
+    <string name="limitations_text">يقارن النموذج حروف التلاوة فقط؛ بعض الكلمات القرآنية المختلفة قد تتطابق لديه. هذه خاصية في أبجدية مخرجات النموذج، وليست خطأً في تلاوتك.</string>
+    <string name="permission_rationale_title">إذن المايكروفون</string>
+    <string name="permission_denied_permanent">تم رفض إذن المايكروفون نهائيًا. فعّله من إعدادات النظام لتتمكن من التلاوة.</string>
+    <string name="open_settings">فتح الإعدادات</string>
+    <string name="model_load_error">تعذّر تحميل محرّك التعرّف. إعادة المحاولة؟</string>
+    <string name="retry">إعادة المحاولة</string>
+    <string name="try_other_model">استخدام النموذج الآخر</string>
+    <string name="hint_button">تلميح</string>
+    <string name="not_recited">لم تُقرأ</string>
+    <string name="delete_all_history">حذف كل السجل</string>
 </resources>

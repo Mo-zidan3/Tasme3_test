@@ -1,4 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Iqraa</string>
+
+    <!-- T6d: §10/§11 strings — ENGLISH (default); Arabic is PRIMARY in values-ar.
+         Arabic strings carry the "UNREVIEWED until Mo signs off" flag in PROVENANCE-style docs. -->
+    <string name="disclaimer_title">Recognition limitations</string>
+    <string name="mic_rationale">Iqraa listens to your recitation locally to mark each word. The audio never leaves your device and is never stored.</string>
+    <string name="riwaya_statement">This app supports the Hafs recitation (from Asim) only.</string>
+    <string name="light_mode_badge">Light mode</string>
+    <string name="lost_tracking_banner">Lost tracking of the recitation. Tap to start from a specific ayah.</string>
+    <string name="resume_following">Return to following</string>
+    <string name="session_paused">Session paused</string>
+    <string name="mic_unavailable">Microphone unavailable</string>
+    <string name="resume_countdown_fmt">Resuming in %1$d…</string>
+    <string name="summary_title">Session summary</string>
+    <string name="correct_count_fmt">Correct: %1$d of %2$d</string>
+    <string name="close_count_fmt">Close to the text: %1$d</string>
+    <string name="previous_session_summary">Previous session summary</string>
+    <string name="limitations_text">The model compares recitation letters only. Some distinct Quranic words can sound identical to it; this is an inherent property of the model\'s output alphabet, not a defect of your recitation.</string>
+    <string name="permission_rationale_title">Microphone permission</string>
+    <string name="permission_denied_permanent">The microphone permission was denied permanently. Enable it in system settings to recite.</string>
+    <string name="open_settings">Open settings</string>
+    <string name="model_load_error">The recognition engine failed to load. Retry?</string>
+    <string name="retry">Retry</string>
+    <string name="try_other_model">Use the other bundled model</string>
+    <string name="hint_button">Hint</string>
+    <string name="not_recited">Not recited</string>
+    <string name="delete_all_history">Delete all history</string>
 </resources>
