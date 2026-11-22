@@ -1,0 +1,4 @@
+build:
+  # V-036: provisional ceiling — the gate RUNS and REPORTS on every build; findings debt
+  # gets ratcheted down (Mo's D-017 call). 0 = fail on any finding (target state).
+  maxIssues: 100000
