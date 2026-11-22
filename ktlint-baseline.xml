@@ -73,7 +73,7 @@
         <error line="69" column="69" source="standard:argument-list-wrapping" />
     </file>
     <file name="app/src/main/kotlin/com/iqraa/tasmee/MainActivity.kt">
-        <error line="15" column="38" source="standard:no-multi-spaces" />
+        <error line="29" column="57" source="standard:chain-method-continuation" />
     </file>
     <file name="core/align/src/main/kotlin/com/iqraa/core/align/Aligner.kt">
         <error line="9" column="22" source="standard:class-signature" />
@@ -1046,17 +1046,5 @@
         <error line="116" column="86" source="standard:no-multi-spaces" />
         <error line="117" column="86" source="standard:no-multi-spaces" />
         <error line="118" column="86" source="standard:no-multi-spaces" />
-    </file>
-    <file name="feature/history/src/main/kotlin/com/iqraa/feature/history/HistoryScreen.kt">
-        <error line="1" column="1" source="standard:filename" />
-    </file>
-    <file name="feature/reader/src/main/kotlin/com/iqraa/feature/reader/ReaderScreen.kt">
-        <error line="1" column="1" source="standard:filename" />
-    </file>
-    <file name="feature/recite/src/main/kotlin/com/iqraa/feature/recite/ReciteScreen.kt">
-        <error line="1" column="1" source="standard:filename" />
-    </file>
-    <file name="feature/settings/src/main/kotlin/com/iqraa/feature/settings/SettingsScreen.kt">
-        <error line="1" column="1" source="standard:filename" />
     </file>
 </baseline>
