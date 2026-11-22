@@ -42,10 +42,17 @@ class NativeSmokeInstrumentedTest {
         )
         val externalDirs = listOf(instrumentation.targetContext, instrumentation.context)
             .mapNotNull { it.getExternalFilesDir(null) }
-        return (legacyDirs.map { File(it, rel) } + externalDirs.map { File(it, rel) })
-            .plus(listOf(File(rel), File("../$rel")))
-            .firstOrNull { it.exists() }
+        val probed = buildList {
+            addAll(legacyDirs.map { File(it, rel) })
+            addAll(externalDirs.map { File(it, rel) })
+            addAll(listOf(File(rel), File("../$rel")))
+        }
+        lastProbed = probed.joinToString { it.path }
+        return probed.firstOrNull { it.exists() }
     }
+
+    // V-037 diagnostic: the loud skip message embeds the probed paths.
+    private var lastProbed: String = "n/a"
 
     @Test
     fun loadLibrarySmoke_bothNativeLibsLoad() {
@@ -62,7 +69,7 @@ class NativeSmokeInstrumentedTest {
         val msg = (
             "SKIPPED (loudly): timing fixture absent. Generate it first: " +
                 "python3 scripts/make_timing_fixture.py  (CI does this automatically; " +
-                "locally run it before connectedAndroidTest)."
+                "locally run it before connectedAndroidTest). Probed: $lastProbed"
             )
         assumeTrue(msg, fixture != null)
 

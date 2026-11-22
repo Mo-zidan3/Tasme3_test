@@ -405,6 +405,12 @@ jobs:
             adb shell mkdir -p /sdcard/Android/data/com.example.tasmee/files/eval/fixtures /sdcard/Android/data/com.example.tasmee.test/files/eval/fixtures
             adb push eval/fixtures/timing_fixture.wav /sdcard/Android/data/com.example.tasmee/files/eval/fixtures/timing_fixture.wav
             adb push eval/fixtures/timing_fixture.wav /sdcard/Android/data/com.example.tasmee.test/files/eval/fixtures/timing_fixture.wav
+            # diagnostic (V-037): confirm visibility from shell (job log) — if `ls` fails here,
+            # scoped storage hid the dir before the app ever ran.
+            adb shell ls -l /sdcard/Android/data/com.example.tasmee/files/eval/fixtures/ || echo "diag: app-dir listing failed"
+            adb shell ls -l /sdcard/Android/data/com.example.tasmee.test/files/eval/fixtures/ || echo "diag: test-dir listing failed"
+            # from the APP's own uid — what the instrumentation actually sees:
+            adb shell run-as com.example.tasmee ls files/eval/fixtures || echo "diag: run-as listing failed"
             ./gradlew :app:connectedDebugAndroidTest || { echo "instrumented run failed"; exit 1; }
 
       - uses: actions/upload-artifact@v4
