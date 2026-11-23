@@ -259,5 +259,5 @@ verified by unfiltered-count comparison against main BEFORE regeneration).
 6. `.env` hygiene: `.env` untracked (present since the initial commit — Mo: rotate the value
    if it was ever real; purging history is Mo's call, not done); `.env.example` placeholders
    only; CI secrets-scan now blocks tracked `.env*` and generic secret shapes
-   (private-key headers, API_KEY=/SECRET=/PASSWORD=/DATABASE_URL= with non-placeholder
-   values). Notices SHA gate untouched.
+   (private-key headers, and API_KEY / SECRET / PASSWORD / DATABASE_URL assignments carrying
+   non-placeholder values). Notices SHA gate untouched.
