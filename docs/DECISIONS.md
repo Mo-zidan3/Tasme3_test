@@ -215,3 +215,49 @@ hosted KVM runner is available the escalation is macOS arm64 (10× minutes) or M
   package-independent names from day one (Phase 3 uses explicit file names, not
   context.packageName-derived ones).
 - CI green post-rename is the verification (T1 done when the run is green).
+
+## D-020 — Aligner/tracker refrain anchoring + per-word set independence (2026-11-23) [V-041, PR-1]
+Fixes Mo's three verified defects. **NO threshold, preset, or default changed** — τ_correct
+0.90, τ_wrong 0.50, MISSED gates (pointer+3, ≥2 independent), Conservative default, and
+`strictOverlapIndependence=false` (D-017 ratchet, detekt 200, ktlint baseline all untouched;
+the ktlint baseline shrank 971→921 entries — pure line-shift + debt removed by the rewrite,
+verified by unfiltered-count comparison against main BEFORE regeneration).
+
+1. **Time-anchored FINAL window (A1a):** expected-index→first-match-ms anchor map. A FINAL
+   aligns from `lo = max(0, lastAnchorAtOrBefore(windowStart) − backWords)` — segment-early
+   words stay reachable (I1/V-025: a whole-segment final has no anchor before its window
+   start, so lo=0 exactly as before), while refrain copies far behind the recitation leave
+   the candidate set. Partials keep the §9.4 pointer back-window.
+2. **Forward tie-break (A1b):** equal-score alignment ends rank FORWARD-nearest to the
+   pointer (absolute expected index), behind-nearest only when no forward candidate ties;
+   never "earliest occurrence in the surah". This matches the established nearest-forward
+   re-anchor semantics (V-031 invariant b).
+3. **Relocalization emits positive evidence only (A1c):** the lost-timer range-wide
+   re-anchor (§9.4, ≥3 consecutive τ_correct, unchanged) no longer records absence votes.
+   Deviation (documented): the proposed "windowed best score below a CLOSE floor triggers
+   immediate global relocalization" was NOT added — a CLOSE-floor constant would be a NEW
+   threshold (forbidden by I4); the lostAfterMs speech timer remains the sole relocalization
+   trigger.
+4. **Absence-slot rules (A1d, implemented as the frozen tests demand):**
+   - interior skips (between matched span words): unchanged — their slots are bracketed by
+     matched audio;
+   - leading ANCHORED skips: absence only when the word's known audio position (its anchor)
+     lies inside the observing window;
+   - leading NEVER-ANCHORED skips: the session-progress channel — the recitation provably
+     advanced past a word that was never heard anywhere (V-031 segment-initial skips).
+   Guards on ALL absence: not settled (CORRECT/HINTED), not optional-prefix.
+   Deviation (documented): the prompt's `k ≥ pointer` / "never k < pointer−backWords" bounds
+   are NOT implemented — V-031's frozen regression test requires a second absence vote from
+   a window far behind the pointer (k ≪ pointer); with those bounds the test cannot pass.
+   The implemented equivalent excludes behind-words via the anchor/settled/optional guards
+   instead; the tests (I1/I2/I3, T1–T3) are the arbiter, per Mo's instruction.
+5. **Per-word SET independence (A2):** each expected word keeps the list of windows whose
+   vote COUNTED for it; a new vote counts only if independent of EVERY window in that list
+   (pairwise §9.2 definition unchanged, flag semantics unchanged). Only counting windows
+   enter the list — non-interior/non-independent evidence never pollutes it. Observation-level
+   `any { independent(...) }` removed.
+6. `.env` hygiene: `.env` untracked (present since the initial commit — Mo: rotate the value
+   if it was ever real; purging history is Mo's call, not done); `.env.example` placeholders
+   only; CI secrets-scan now blocks tracked `.env*` and generic secret shapes
+   (private-key headers, API_KEY=/SECRET=/PASSWORD=/DATABASE_URL= with non-placeholder
+   values). Notices SHA gate untouched.

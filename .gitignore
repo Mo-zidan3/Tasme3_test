@@ -25,6 +25,7 @@ tmp/
 *.keystore
 **/credentials*
 .env*
+!.env.example
 
 # Eval data & labels — git-ignored per §13.1 (Mo's recordings, gated audio)
 eval/labels/
