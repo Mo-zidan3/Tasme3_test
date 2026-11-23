@@ -184,6 +184,12 @@ object Aligner {
 
     private enum class Op { MATCH, SKIP_EXPECTED, EXTRA, MERGE }
 
+    /** behind-span tie-break penalty: any forward candidate outranks any behind one. */
+    private const val BEHIND_PENALTY = 1_000_000L
+
+    /** secondary-key scale: more observed consumed (larger i) wins after the forward rank. */
+    private const val OBSERVED_CONSUMED_SCALE = 1_000L
+
     /**
      * A1 tie-break key for an end candidate (i, j): forward spans (end index j at/after the
      * pointer hint) rank by distance ahead; behind spans rank after ALL forward ones, by
@@ -199,10 +205,5 @@ object Aligner {
             BEHIND_PENALTY + (hint - j).toLong()
         }
         return forward * OBSERVED_CONSUMED_SCALE + (m - i).coerceAtLeast(0).toLong()
-    }
-
-    private companion object {
-        const val BEHIND_PENALTY = 1_000_000L
-        const val OBSERVED_CONSUMED_SCALE = 1_000L
     }
 }
