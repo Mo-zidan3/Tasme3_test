@@ -125,7 +125,8 @@ object Aligner {
         val bi: Int
         val bj: Int
         if (bestScore <= 0.0) {
-            bi = n; bj = 0
+            bi = n
+            bj = 0
         } else {
             val candidates = ArrayList<Triple<Int, Int, Double>>() // (i, j, score)
             for (j in 0..m) {
@@ -135,7 +136,8 @@ object Aligner {
                 if (dp[i][m] == bestScore) candidates.add(Triple(i, m, bestScore))
             }
             if (candidates.isEmpty()) {
-                bi = n; bj = m
+                bi = n
+                bj = m
             } else {
                 // j is window-relative (window cell j = expected index lo+j−1); the hint is ABSOLUTE.
                 val chosen = candidates.minByOrNull { (i, j, _) -> tieBreakKey(i, lo + j - 1, pointerHint, m) }!!
