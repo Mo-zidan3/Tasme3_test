@@ -44,14 +44,23 @@ class ReciteSession(
         return update
     }
 
-    /** Decode one window (the audio layer supplies the request cadence per §8.4). */
+    /**
+     * Decode one window (the audio layer supplies the request cadence per §8.4).
+     *
+     * [decodeStartMs] is the session-ms of [pcm]'s first sample when the decode slice is WIDER
+     * than the observation (V-046 candidate (a): tiny pause-finals decode with ring context):
+     * word timestamps map onto the session timeline from the DECODE start, while the
+     * Observation's word-evidence bounds stay the honest [windowStartMs]/[windowEndMs].
+     * Default = the observation start (the unchanged partial/final path).
+     */
     suspend fun onWindow(
         pcm: FloatArray,
         windowStartMs: Long,
         windowEndMs: Long,
         isFinal: Boolean,
+        decodeStartMs: Long = windowStartMs,
     ): TrackerUpdate {
-        val result: AsrResult = recognizer.decode(pcm, segmentStartMs = windowStartMs)
+        val result: AsrResult = recognizer.decode(pcm, segmentStartMs = decodeStartMs)
         // bridge core:asr words → core:align words (same fields; confidence never used, v2.0 #4)
         val words =
             result.words.map {

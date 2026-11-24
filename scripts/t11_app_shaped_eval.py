@@ -37,6 +37,11 @@ MAX_SEGMENT_MS = 8000
 OVERLAP_MS = 1000
 VAD_PAD_MS = 300
 VAD_THRESHOLD = 0.5
+# V-046 candidate (a) (Mo-approved): a pause-FINAL whose speech is narrower than this decodes
+# with EXTRA leading/trailing ring context (the partial window shape) while the observation's
+# word-evidence bounds stay honest. Mirrors PipelineEngine.DEFAULT_MIN_DECODE_WINDOW_MS (D-021);
+# forced-cut finals are never widened. 0 disables.
+MIN_DECODE_WINDOW_MS = 2500
 
 LETTER_RE = re.compile(r"[^\u0621-\u064A\u0671]")
 FOLD = {"أ": "ا", "إ": "ا", "آ": "ا", "ٱ": "ا", "ى": "ي", "ؤ": "و", "ئ": "ي"}
@@ -243,9 +248,20 @@ def main() -> int:
         observations = []
         for ev in events:
             is_final = ev[0] == "final"
+            forced_cut = ev[3] if is_final else False
             ws = max(0, ev[1] - VAD_PAD_MS)
             we = min(duration_ms, ev[2] + VAD_PAD_MS)
-            words = decode_window(recognizer, pcm, ws, we, spelling)
+            # V-046 candidate (a): widen a TINY pause-final's DECODE slice with ring context
+            # (trailing-first, then leading — the PipelineEngine.widenDecodeWindow law); the
+            # observation's window bounds stay the HONEST [ws, we]. Context words fall outside
+            # the honest bounds, so §9.2 interiority discounts them in the replay.
+            dws, dwe = ws, we
+            if is_final and not forced_cut and (we - ws) < MIN_DECODE_WINDOW_MS:
+                deficit = MIN_DECODE_WINDOW_MS - (we - ws)
+                trail = min(deficit // 2, duration_ms - we)
+                lead = min(deficit - trail, ws)
+                dws, dwe = ws - lead, we + trail
+            words = decode_window(recognizer, pcm, dws, dwe, spelling)
             if words or is_final:
                 observations.append({
                     "words": words, "windowStartMs": ws,
