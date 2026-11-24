@@ -85,9 +85,11 @@ class PipelineEngine(
         val updates = ArrayList<com.iqraa.core.align.TrackerUpdate>(events.size)
         for (e in events) {
             when (e) {
-                is SegmenterEvent.Partial -> updates.add(
-                    session.onWindow(slice(e.windowStartMs, e.windowEndMs), e.windowStartMs, e.windowEndMs, isFinal = false),
-                )
+                is SegmenterEvent.Partial -> {
+                    updates.add(
+                        session.onWindow(slice(e.windowStartMs, e.windowEndMs), e.windowStartMs, e.windowEndMs, isFinal = false),
+                    )
+                }
 
                 is SegmenterEvent.Final -> {
                     // V-046 candidate (a): a TINY pause-final decodes a WIDER slice off the
@@ -121,7 +123,10 @@ class PipelineEngine(
      * the widened window is always within [oldest ring sample, cursor], so [slice] never
      * degrades to empty because of widening. Word evidence bounds are NOT affected.
      */
-    private fun widenDecodeWindow(startMs: Long, endMs: Long): Pair<Long, Long> {
+    private fun widenDecodeWindow(
+        startMs: Long,
+        endMs: Long,
+    ): Pair<Long, Long> {
         val deficit = minDecodeWindowMs - (endMs - startMs)
         if (deficit <= 0) return startMs to endMs
         val oldestMs = sampleToMs(sessionSamples - ringCount)
