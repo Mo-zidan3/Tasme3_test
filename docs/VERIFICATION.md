@@ -852,6 +852,9 @@ at report time is labeled PENDING, never claimed green.
   honestly OPEN in docs/TESTING.md — **Phase 3 NOT claimed DONE until Mo executes them**.
 
 ### V-043 Stage B (T11) — app-shaped §13 harness (PR #7, stacked on T9) (2026-11-24)
+[Superseeded-by note, V-044: the word-union WER numbers quoted below were measured with a
+SCORING BUG and are RETIRED — see the V-043 text; the tracker-replay per-word states are
+the metric. Kept for the record, never quote as a result.]
 - scripts/t11_app_shaped_eval.py: silero VAD (the SHIPPED silero_vad.onnx weights driven
   via onnxruntime directly — the pip sherpa-onnx 2.0.2 python VoiceActivityDetector
   produced ZERO speech segments on every feed pattern tried (whole/chunked/512-aligned,
@@ -868,3 +871,121 @@ at report time is labeled PENDING, never claimed green.
   never gets quoted.
 - Whole-clip baseline (V-038, unchanged): macro WER 14.2% / CER 10.2%.
 - ALL labels INDICATIVE: studio clips; §13 phone gate NOT met; WRONG renders CLOSE.
+
+### V-044 Stage B landed — the chain, every run, and the defects CI caught (2026-11-24)
+Merge order executed with per-run evidence (PR runs: build+release+secrets-scan; instrumented
+runs only on main — the known stacked-PR blind spot, which is exactly where three of the
+defects below hid):
+- **PR #4 (T7)** run 45300215711 GREEN → merged 6485744. Main run 45333042145 caught
+  `runBlocking` used as a RETURN TYPE (the PR never compiles androidTest) → hotfix 4baeb6a;
+  style follow-ups e20aac3→d6af35e (lease-guarded amend of my own 2-min-old commit — noted
+  deviation, no Mo commits touched).
+- **PR #5 (T8)** run 45335602074 GREEN → merged 95a25e0.
+- **PR #6 (T9)** — CI caught: junit-platform-launcher missing for designsystem unit tests
+  (45333188692), the versionless compose ui-test artifacts needing the BOM on
+  androidTest/debug configurations (45335531056/45335602431 — the earlier "metaspace OOM"
+  read was WRONG; corrected in the commit message), and my experimental
+  detekt.yml style-section made per-module detekt fail (45336527102, :core:align:detekt 352
+  weighted issues) → reverted; the D-017 ratchet stays untouched. Run 45339236533 GREEN →
+  merged ae98c79. Main run 45339976550 caught the missing MainActivity import in
+  MainActivityUiTest (30f2416).
+- **PR #7 (T11)** run 45339952042 GREEN **with the replay FATAL and real** (the prior run
+  45339239201 had gone green while all 12 replays silently failed — non-fatal || echo; fixed
+  and recorded) → merged 4c8c71b.
+
+### V-045 Two REAL pipeline defects found by landing the stack (2026-11-24)
+1. **Word-separator mismatch (CRITICAL, found by the E2E instrumented test, run
+   45337588118):** the bundled quran-asr vocab has NO "▁" token — it separates words with
+   the SPACE token (tokens.txt: `<blk>`, letters, `" "`). The Kotlin assembler split on "▁"
+   only ⇒ EVERY live decode produced ONE GIANT WORD — the app's word-level follow-along
+   would have been broken in production. Masked twice: host WordAssemblyTest used synthetic
+   ▁ streams, and eval CER was computed after N() which strips spaces. Fix (main 24e8f2c):
+   assembler accepts BOTH separators + host regression test with the real token shape; the
+   E2E fixture test (all-CORRECT/CLOSE assertion) is the on-device guard. Same bug existed
+   in the T11 python emitter (its first replay's correct=0-1/missed-heavy numbers were that
+   harness artifact — RETIRED, never quote).
+2. **Reanchor crash with zero matches (found by the E2E stream, run 45336537914):**
+   `tryReanchorRangeWide` called `matches.last()` on an empty list (a global alignment can
+   yield zero Match moves) → NoSuchElementException on both API levels. Fix (main a57f3f9):
+   early return + host regression test.
+
+### V-045b THE REAL T11 metric — tracker replay, Mo's 6 studio clips (run 45339952042, PR #7)
+INDICATIVE (3 speakers, studio; §13 phone gate NOT met; WRONG renders CLOSE). Per-word
+states through the REAL RecitationTracker (correct/close/wrong/missed; whole-clip vs
+app-shaped; hit-rate = correct+close over expected):
+
+| clip | whole C/L/W/M | app C/L/W/M | app hit-rate |
+|---|---|---|---|
+| ezz_39_42 (40w) | 16/0/0/0 | 35/5/0/0 | 100% |
+| riad_19_4_7 (47w) | 16/0/0/0 | 46/1/0/0 | 100% |
+| riad_25_27_31 (48w) | 12/4/0/0 | 42/4/0/2 | 95.8% |
+| riad_54_10_12 (19w) | 15/1/0/0 | 14/3/0/2 | 89.5% |
+| riad_5_23 (21w) | 16/0/0/0 | 3/5/0/10 | 38.1% |
+| yasser_2_200_201 (38w) | 6/10/0/0 | 21/6/1/10 | 71.1% |
+| **TOTAL (213w)** | **81/15/0/0** | **161/24/1/24** | **86.9%** |
+
+Reading (honest): the app-shaped stream beats the single whole-clip final on 5/6 clips
+(86.9% tracked vs 45.1%) — partials+finals give interior evidence a lone final cannot
+(V-025's insight, now measured on real audio). NO systematic MISSED/CLOSE collapse; two
+anomalies stay OPEN for investigation before Phase 4: (a) riadmostaf_5_23 — silero VAD
+fragments this clip into 11 finals (21 words) and the app mode falls to 38.1% while
+whole-clip holds 76.2% (VAD threshold/segmentation on this reciter); (b) yasser (known
+worst decoder accuracy of the set) loses 10 words. The 309% word-union number from the
+first local attempt remains RETIRED (V-043).
+
+### V-046 T11 anomaly root cause — riadmostaf_5_23's 38.1% is a REAL per-window-context defect (2026-11-24)
+Run 45340839779 (main, 4c8c71b) re-replayed all 12 T11 files green. The 5_23 app-shaped
+regression (38.1% hit-rate, missed=10, extra=16 vs whole-clip decode WER 0%/CER 1% per
+V-038) was investigated from the COMMITTED hypothesis JSON — not papered over:
+- The clip is pause-heavy: silero VAD (100 ms decisions) + the §6.2 Segmenter law cut ELEVEN
+  pause-finals (≥500 ms silences) across a 37 s recitation of 21 words — speech bursts of
+  0.7–4.3 s. partials=7 only.
+- Isolated decode of those tiny windows COLLAPSES: the finals decode «طه» (not even in
+  surah 5:23 — a hallucinated surah opener on an 876 ms window), «فاموزمون» (a CTC merge of
+  «فإنكم غالبون»), «يلدولم يولد» (merged 112-vocabulary), «بيف», «فتعكلون». The same audio
+  decodes near-perfectly as ONE whole clip (V-038) — the model NEEDS acoustic context.
+- The tracker behaved CORRECTLY on what it was given: words never decoded right never
+  matched → the guarded absence rules fired MISSED (10); the hallucinations surfaced as
+  EXTRA (16). NOT a tracker bug, NOT a harness artifact.
+- Comparison set: yasser_2_200_201's 71.1% is MODEL-limited (whole-clip decode itself only
+  got 27/38 words; app-mode tracked every decodable word — 27/38); the other four clips
+  (89.5–100%) have 33–58 partials whose 2.5 s trailing windows carry enough context.
+- Phase-4 candidate mitigations for MO (product calls — NO threshold change made, I4):
+  (a) widen pause-final windows with trailing context like the partials (window SHAPE, not
+  §9 policy); (b) carry decoder state/context across force-cuts; (c) minimum-speech-length
+  before a pause-final is emitted. All three change latency behavior — Mo decides.
+- Same run: 3 instrumented test bugs (all mine, fixed in 016c3e8) — the grantFlow assertion
+  used the en app_name while the reader renders the hardcoded Arabic «اقرأ»; fontScale2 set
+  content on an already-populated activity rule (moved to a component rule); the tasmee
+  test called setContent twice on one rule (split). Plus 1 ktlint import-order violation
+  from the 30f2416 hotfix. The T11 replay step itself ran 12/12 green in that run.
+
+### V-045c CLOSED — releaseSmoke green on main; the R8 fix chain, every run (2026-11-24)
+The androidTest-APK R8 loop closed on commit e5e3f42; **main run 45370776920 ALL FIVE JOBS
+GREEN** (build 138364174819, release 138364174769, instrumented-27 138364174694,
+instrumented-35 138364174815, secrets-scan 138364174231 — ids from the run's job list).
+
+**Decode proof (the point of T10):** the R8-MINIFIED, debug-signed releaseSmoke APK decoded
+the committed 54:10 fixture ON DEVICE, both emulators, from the job logs:
+- API 27: `IqraaReleaseSmoke: decoded 5 words (R8 build)` (job 138364174694 log)
+- API 35: `IqraaReleaseSmoke: decoded 5 words (R8 build)` (job 138364174815 log)
+5 = فدعا ربه اني مغلوب فانتصر. Minify stayed ON throughout — every failure below was fixed
+in keep/suppression config, never by disabling R8.
+
+The chain the smoke test forced (each = a real run, red→green):
+1. 45365479136 (main, 9e1642ac) RED — connectedReleaseSmokeAndroidTest task-not-found →
+   ef136a2: variant-agnostic `connectedAndroidTest` + `-PiqraaTestBuildType=releaseSmoke`.
+2. 45366457648 RED — backslash continuation became a literal gradle arg ("Task '\' not
+   found") → d2f91c0: single-line invocation.
+3. 45367329394 RED — `minifyReleaseSmokeAndroidTestWithR8` MISSING class
+   `javax.lang.model.element.Modifier` (errorprone compile-only annotations, absent on
+   Android; referenced from IncompatibleModifiers.value()) → 9edc9e7: `-dontwarn`
+   suppression. This is EXACTLY the class of bug T10 exists to catch before Play.
+4. 45368930517 RED — the app-side -dontwarn never reached the TEST APK's minification:
+   its R8 config reads `testProguardFiles`, not `proguardFiles` → 05bd7a9: suppressions in
+   smoke-test-proguard.pro wired via buildType.testProguardFiles.
+5. 45369846137 RED — AGP 9 exposes `testProguardFiles` as a `val MutableList<File>`; the
+   `+= "path"` string form hit the reassignment path (val reassign + type mismatch) →
+   e5e3f42: append `File(...)` elements.
+6. 45370776920 GREEN — see above. §8.2 "release decodes on device" risk CLOSED on emulator;
+   a real-phone decode remains part of H4/Q7 (phone gate), still OPEN.

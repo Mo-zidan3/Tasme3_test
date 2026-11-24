@@ -48,3 +48,4 @@ app/src/androidTest/assets/
 eval/data/*
 !eval/data/PROVENANCE.md
 !eval/data/fixture_54_10_riadmostaf.wav
+scripts/signing/*.properties

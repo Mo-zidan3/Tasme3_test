@@ -66,6 +66,9 @@ artifact):
 
 - M1 install + launch MainActivity
 - M2 onboarding renders (rationale + riwaya + limitations in the hierarchy dump)
+- M3 grant flow — tap «Allow microphone and continue» → the reader opens (the GRANTED path
+  is also a Compose assertion, `MainActivityUiTest.onboarding_grantFlow_reachesReader`;
+  M3 was missing from an earlier draft of this list — restored V-044, not skipped)
 - M4 forced rotation — onboarding content intact after landscape
 - M5 font scale 2.0× — content renders (reset afterwards)
 

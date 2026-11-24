@@ -42,6 +42,16 @@ android {
         }
     }
 
+    // T10/Phase-4: release signing reads a git-ignored properties file OR env vars — a
+    // keystore is NEVER committed. CI builds unsigned release artifacts unless the secrets
+    // are injected; local signed builds: scripts/signing/release-signing.properties
+    // (template committed, real file git-ignored). Env var names for Mo:
+    //   IQRAA_KEYSTORE_PATH, IQRAA_KEYSTORE_PASSWORD, IQRAA_KEY_ALIAS, IQRAA_KEY_PASSWORD
+    val keystorePath = System.getenv("IQRAA_KEYSTORE_PATH")
+    val keystorePassword = System.getenv("IQRAA_KEYSTORE_PASSWORD")
+    val keyAlias = System.getenv("IQRAA_KEY_ALIAS")
+    val keyPassword = System.getenv("IQRAA_KEY_PASSWORD")
+
     buildTypes {
         release {
             // Full R8 minification requires more RAM than the 4 GB sandbox allows
@@ -54,6 +64,14 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro",
             )
+            if (keystorePath != null && keystorePassword != null && keyAlias != null && keyPassword != null) {
+                signingConfig = signingConfigs.create("releaseFromEnv") {
+                    storeFile = file(keystorePath)
+                    storePassword = keystorePassword
+                    this.keyAlias = keyAlias
+                    this.keyPassword = keyPassword
+                }
+            }
         }
         // T10 (V-045): releaseSmoke proves the R8-KEPT build decodes on device — inherits
         // release EXACTLY (minify + shrink + the SAME proguard files) but is debug-signed

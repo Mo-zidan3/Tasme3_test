@@ -21,3 +21,19 @@ space (sim=1.0 → CORRECT). This is a property of the model's output alphabet, 
 N(); no normalization change can recover information the model never emits. Metrics that need
 those distinctions (e.g. harakat-level scoring) must be run in standard-space reference scoring
 via `eval/run_asr.py --standard` (labeled, eval-only).
+
+
+## T11 reproducibility (V-043/V-044)
+- **REPLAY (CI, reproducible)**: `scripts/t11_replay.sh` loops the committed derived text
+  (`eval/hypotheses/t11/*-whole.json` / `*-app.json` + `eval/expected/t11/*.json`) through
+  the REAL `RecitationTracker` via `tools:eval`. No audio needed — this is what CI runs.
+- **REGENERATION (needs Mo's audio)**: `scripts/t11_app_shaped_eval.py` re-decodes Mo's
+  licensed clips through the app-shaped path (silero VAD → Segmenter law → per-window
+  decode). Input layout + template: `eval/data/clips-manifest.template.json`; clips are
+  16 kHz mono WAVs converted with
+  `ffmpeg -v error -y -i in.mp3 -ac 1 -ar 16000 out.wav`.
+  Authorization of record: `eval/data/PROVENANCE.md`. Audio is NEVER committed beyond the
+  one authorized 54:10 fixture.
+- The 309% "app-shaped WER" word-union number from the first local attempt is RETIRED —
+  it was a scoring bug (overlapping partials re-cover audio by design; per-word tracker
+  states are the metric, V-043). Do not quote it.
