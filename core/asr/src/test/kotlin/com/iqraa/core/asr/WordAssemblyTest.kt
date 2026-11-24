@@ -6,9 +6,11 @@ import org.junit.jupiter.api.Test
 
 /** §6.2 word assembly: ▁ separators, seconds→ms, +40 ms frame shift, null-timing fallback. */
 class WordAssemblyTest {
-
-    private fun assemble(tokens: Array<String>, ts: FloatArray, segmentStartMs: Long) =
-        SherpaOnnxRecognizer.assembleStatic(tokens, ts, segmentStartMs)
+    private fun assemble(
+        tokens: Array<String>,
+        ts: FloatArray,
+        segmentStartMs: Long,
+    ) = SherpaOnnxRecognizer.assembleStatic(tokens, ts, segmentStartMs)
 
     @Test
     fun `words assembled between separators with session-global ms and +40ms frame shift`() {
@@ -62,5 +64,22 @@ class WordAssemblyTest {
         assertEquals(listOf("الله"), words.map { it.text })
         assertEquals(100L, words[0].startMs)
         assertEquals(260L, words[0].endMs) // 0.22s + 40ms
+    }
+}
+
+/** V-045: the REAL model's vocab separates words with SPACE tokens, not "▁" — assembly
+ *  must split on both (one giant word otherwise; found by the E2E fixture run 4533758818). */
+class SpaceSeparatorAssemblyTest {
+    @Test
+    fun `space-separated tokens assemble into separate words`() {
+        val tokens = arrayOf("ف", "د", "ع", "ا", " ", "ر", "ب", "ه", " ", "ا", "ن", "ي")
+        val timestamps = floatArrayOf(0.1f, 0.15f, 0.2f, 0.25f, 0.3f, 0.4f, 0.45f, 0.5f, 0.55f, 0.65f, 0.7f, 0.75f)
+        val words =
+            com.iqraa.core.asr.SherpaOnnxRecognizer
+                .assembleStatic(tokens, timestamps, 0)
+        org.junit.jupiter.api.Assertions
+            .assertEquals(3, words.size)
+        org.junit.jupiter.api.Assertions
+            .assertEquals(listOf("فدعا", "ربه", "اني"), words.map { it.text })
     }
 }

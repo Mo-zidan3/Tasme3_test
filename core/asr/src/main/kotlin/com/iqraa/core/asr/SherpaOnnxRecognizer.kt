@@ -25,7 +25,6 @@ class SherpaOnnxRecognizer(
     private val context: Context,
     override val info: ModelInfo,
 ) : RecitationRecognizer {
-
     private var recognizer: OfflineRecognizer? = null
 
     companion object {
@@ -42,25 +41,31 @@ class SherpaOnnxRecognizer(
 
     override suspend fun load() {
         try {
-            val config = OfflineRecognizerConfig(
-                featConfig = FeatureConfig(sampleRate = 16000, featureDim = 80),
-                modelConfig = OfflineModelConfig(
-                    zipformerCtc = OfflineZipformerCtcModelConfig(
-                        model = "models/${info.id}/model.int8.onnx",
-                    ),
-                    tokens = "models/${info.id}/tokens.txt",
-                    numThreads = 2,
-                    provider = "cpu",
-                ),
-                decodingMethod = "greedy_search",
-            )
+            val config =
+                OfflineRecognizerConfig(
+                    featConfig = FeatureConfig(sampleRate = 16000, featureDim = 80),
+                    modelConfig =
+                        OfflineModelConfig(
+                            zipformerCtc =
+                                OfflineZipformerCtcModelConfig(
+                                    model = "models/${info.id}/model.int8.onnx",
+                                ),
+                            tokens = "models/${info.id}/tokens.txt",
+                            numThreads = 2,
+                            provider = "cpu",
+                        ),
+                    decodingMethod = "greedy_search",
+                )
             recognizer = OfflineRecognizer(context.assets, config)
         } catch (t: Throwable) {
             throw ModelLoadException("failed to load ${info.id}@${info.revision}", t)
         }
     }
 
-    override suspend fun decode(pcm: FloatArray, segmentStartMs: Long): AsrResult {
+    override suspend fun decode(
+        pcm: FloatArray,
+        segmentStartMs: Long,
+    ): AsrResult {
         val r = recognizer ?: throw IllegalStateException("decode before load()")
         val t0 = System.currentTimeMillis()
         val stream = r.createStream()
@@ -83,8 +88,10 @@ class SherpaOnnxRecognizer(
         segmentStartMs: Long,
     ): List<AsrWord> = SherpaOnnxAssembler.assemble(tokens, timestamps, segmentStartMs, FRAME_SHIFT_MS)
 
-    private fun assembleWords(result: com.k2fsa.sherpa.onnx.OfflineRecognizerResult, segmentStartMs: Long): List<AsrWord> =
-        assembleWords(result.tokens, result.timestamps, segmentStartMs)
+    private fun assembleWords(
+        result: com.k2fsa.sherpa.onnx.OfflineRecognizerResult,
+        segmentStartMs: Long,
+    ): List<AsrWord> = assembleWords(result.tokens, result.timestamps, segmentStartMs)
 
     override fun close() {
         recognizer?.release()
@@ -105,6 +112,7 @@ internal object SherpaOnnxAssembler {
         val letters = StringBuilder()
         var firstTs: Float? = null
         var lastTs: Float? = null
+
         fun flush() {
             if (letters.isNotEmpty() && firstTs != null && lastTs != null && hasTiming) {
                 words.add(
@@ -124,7 +132,12 @@ internal object SherpaOnnxAssembler {
         }
         for (i in tokens.indices) {
             val tok = tokens[i]
-            if (tok == "▁") {
+            // V-045: the bundled quran-asr vocab has NO "▁" token — it separates words with
+            // the SPACE token (tokens.txt: <blk>, letters, " "). Splitting on "▁" alone
+            // produced ONE GIANT WORD per decode (the E2E fixture run 45337588118 caught
+            // it: states=MMCLL; host tests used synthetic ▁ streams and N()-CER strips
+            // spaces, so both masked it). Accept BOTH separators.
+            if (tok == "▁" || tok == " ") {
                 flush()
             } else {
                 if (firstTs == null && hasTiming) firstTs = timestamps[i]
