@@ -266,3 +266,22 @@ verified by unfiltered-count comparison against main BEFORE regeneration).
   spec §8.4 ceiling 30 s. Rationale: the longest window the Segmenter can request is
   maxSegmentMs (8 s) + overlapMs (1 s) + 2×vadPad (600 ms) ≈ 9.6 s; 12 s adds cadence-jitter
   margin while halving ring memory. Configurable, never a literal.
+
+## D-021 — V-046 candidate (a): minDecodeWindowMs context widening for tiny pause-finals (2026-11-24) [V-047, Mo-approved]
+A pause-FINAL whose speech spans less than `minDecodeWindowMs` (named config, default
+2500 ms = the partial window shape, D-021 line below) decodes a WIDER slice off the session
+ring: trailing context first (the pause's own silence — the CTC right context), then leading
+(the previous segment's tail), clamped to the ring. The OBSERVATION's word-evidence bounds
+stay the HONEST segmenter bounds — context words fall outside them and §9.2 interiority
+discounts them, so no tracker law changed (I4 intact: no §9 threshold/preset/default
+touched). Forced-cut finals are never widened (they only fire at ≥ maxSegmentMs, never
+tiny). 0 disables. Root cause addressed: V-046 — pause-heavy VAD fragmentation fed the CTC
+isolated 0.7–4.3 s bursts; isolated tiny-window decodes hallucinate while whole-clip decode
+of the same audio is near-perfect; per-window CONTEXT was the missing piece. The default
+mirrors the partial window width (SegmenterParams.partialWindowMs = 2500): tiny finals
+decode over the SAME width partials already do, no wider.
+- **D-022 (V-047): minSdk 27 RATIFIED** (Mo) — matches the measured native floor
+  (V-016/D-012: max .note.android.ident api_level = 27) and runtime-proven on the API 27
+  emulator floor across every instrumented run. The old "declared 26" open item is CLOSED.
+- **D-023 (V-047): AAB size CLOSED** — 55.9 MB measured (bundletool), budget ≤80 MB target
+  MET with headroom; V-018's PAD/drop-tiny/accept question is moot. No ADR-bypass needed.

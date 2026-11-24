@@ -78,6 +78,89 @@ class PipelineEngineTest {
             )
         }
 
+    /** Records every decode call (sample count + segment start) for V-046 assertions. */
+    private class RecordingRecognizer : RecitationRecognizer {
+        override val info = ModelInfo("fake", "rev", "sha")
+        val calls = ArrayList<Pair<Int, Long>>() // (pcm samples, segmentStartMs)
+
+        override suspend fun load() {}
+
+        override suspend fun decode(
+            pcm: FloatArray,
+            segmentStartMs: Long,
+        ): AsrResult {
+            calls.add(pcm.size to segmentStartMs)
+            return AsrResult("", emptyList(), audioMs = 0, computeMs = 50)
+        }
+
+        override fun close() {}
+    }
+
+    private fun engineWithRecorder(
+        vad: (FloatArray) -> Boolean,
+        minDecodeWindowMs: Long = 2_500L,
+    ): Triple<PipelineEngine, RecordingRecognizer, ReciteSession> {
+        val tracker = RecitationTrackerImpl().apply { reset(listOf(ExpectedWord(0, 112, 1, "قل")), TrackerConfig()) }
+        val recognizer = RecordingRecognizer()
+        val session = ReciteSession(recognizer, tracker)
+        val engine = PipelineEngine(SAMPLE_RATE, vad, session = session, minDecodeWindowMs = minDecodeWindowMs)
+        return Triple(engine, recognizer, session)
+    }
+
+    @Test
+    fun `tiny pause-final decodes a widened slice, observation bounds stay honest`(): Unit =
+        runTest {
+            val (engine, recognizer, session) = engineWithRecorder(vad = { samples -> samples.any { it > ENERGY } })
+            // 3 s of leading silence (ring context), 800 ms speech, 700 ms silence → pause-final
+            repeat(30) { engine.onChunk(FloatArray(CHUNK)) }
+            repeat(8) { engine.onChunk(FloatArray(CHUNK) { SPEECH_AMP }) }
+            repeat(7) { engine.onChunk(FloatArray(CHUNK)) }
+            // the final fires 500 ms INTO the pause (cursor 4300): speech [3000, 3800] is
+            // 800 ms < 2500 → deficit 1700 = trail 500 (the elapsed pause) + lead 1200 →
+            // decode [1800, 4300] — exactly the 2500 ms partial shape, ring-clamped
+            assertEquals(listOf(40_000 to 1_800L), recognizer.calls, "one WIDENED final decode (2500 ms from 1800 ms)")
+            assertEquals(3_800L, session.checkpoints.single().lastWindowEndMs, "honest observation bounds = speech end")
+        }
+
+    @Test
+    fun `tiny final at session start clamps to available ring audio`(): Unit =
+        runTest {
+            val (engine, recognizer, session) = engineWithRecorder(vad = { samples -> samples.any { it > ENERGY } })
+            // 900 ms of speech from t=0 (no leading context, no cadence partial at 1000 ms
+            // yet), then the pause
+            repeat(9) { engine.onChunk(FloatArray(CHUNK) { SPEECH_AMP }) }
+            repeat(6) { engine.onChunk(FloatArray(CHUNK)) }
+            // the final fires 500 ms into the pause (cursor 1400): speech [0, 900], deficit
+            // 1600 → trail 500 (the elapsed pause), lead 0 (session start) → decode [0, 1400]
+            assertEquals(listOf(22_400 to 0L), recognizer.calls, "widened only by the trailing pause (1400 ms)")
+            assertEquals(900L, session.checkpoints.single().lastWindowEndMs, "honest bounds stay the 900 ms speech end")
+        }
+
+    @Test
+    fun `wide final decodes the honest window unchanged`(): Unit =
+        runTest {
+            val (engine, recognizer, session) = engineWithRecorder(vad = { samples -> samples.any { it > ENERGY } })
+            // 3 s of speech (≥ minDecodeWindowMs) then the pause → final NOT widened
+            repeat(30) { engine.onChunk(FloatArray(CHUNK) { SPEECH_AMP }) }
+            repeat(6) { engine.onChunk(FloatArray(CHUNK)) }
+            val (finalSamples, finalStart) = recognizer.calls.last()
+            assertEquals(48_000 to 0L, finalSamples to finalStart, "3 s final decodes the honest window")
+            assertEquals(3_000L, session.checkpoints.single().lastWindowEndMs, "honest bounds = 3000 ms speech end")
+            assertTrue(recognizer.calls.size > 1, "partials preceded the final (${recognizer.calls.size} decodes)")
+        }
+
+    @Test
+    fun `minDecodeWindowMs zero disables widening (explicit opt-out)`(): Unit =
+        runTest {
+            val (engine, recognizer, session) =
+                engineWithRecorder(vad = { samples -> samples.any { it > ENERGY } }, minDecodeWindowMs = 0)
+            repeat(30) { engine.onChunk(FloatArray(CHUNK)) }
+            repeat(8) { engine.onChunk(FloatArray(CHUNK) { SPEECH_AMP }) }
+            repeat(7) { engine.onChunk(FloatArray(CHUNK)) }
+            assertEquals(listOf(12_800 to 3_000L), recognizer.calls, "no widening: decode = the honest 800 ms speech window")
+            assertEquals(3_800L, session.checkpoints.single().lastWindowEndMs, "honest bounds unchanged")
+        }
+
     private companion object {
         const val SAMPLE_RATE = 16_000
         const val CHUNK = 1_600

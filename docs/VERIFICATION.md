@@ -989,3 +989,46 @@ The chain the smoke test forced (each = a real run, red→green):
    e5e3f42: append `File(...)` elements.
 6. 45370776920 GREEN — see above. §8.2 "release decodes on device" risk CLOSED on emulator;
    a real-phone decode remains part of H4/Q7 (phone gate), still OPEN.
+
+### V-047 V-046 candidate (a) landed + the Mo phone kit (PR #10) (2026-11-24)
+**The fix (D-021, Mo-approved):** PipelineEngine widens a pause-FINAL whose speech spans
+< `minDecodeWindowMs` (new named config, default 2500 ms = the partial window shape):
+trailing context first (the pause's own silence — fire time is exactly 500 ms into the
+pause, so the CTC right context is the elapsed pause), then leading (the previous segment
+tail), clamped to the session ring; the OBSERVATION's word-evidence bounds stay the HONEST
+segmenter bounds, so §9.2 interiority discounts context words and NO §9 threshold, preset,
+or default changed (I4). Forced-cut finals never widen; 0 disables.
+ReciteSession.onWindow gained `decodeStartMs` (default = the observation start, unchanged
+path). scripts/t11_app_shaped_eval.py mirrors the law for regeneration.
+
+**Honest T11 replay scope:** the committed hypotheses are INPUTS recorded before the
+change, and Mo's audio is GONE from the sandbox (regeneration is PROVENANCE-gated, §0) —
+so the replay CANNOT show the 5_23 improvement, and no number is invented for it. What the
+green replay DOES prove: zero tracker-level regression — run 45458565154's replay totals
+are IDENTICAL to V-045b per clip (5_23 app stays 3/5/0/10; yasser 21/6/1/10; the five
+healthy clips unchanged). The real-audio before/after comes from regeneration with Mo's
+audio or from a live session on Mo's phone.
+
+**The run chain (PR #10, branch fix/v-046-context):**
+1. 45455422224 RED — 2 of the 4 new host tests failed: MY expected values were wrong
+   (assumed the final fires 600–700 ms into the pause; the law fires at exactly 500 ms —
+   cursor = speechEnd + 500, trail = the elapsed pause, lead fills the deficit). The
+   IMPLEMENTATION was correct; test arithmetic fixed from the run's own report.
+2. 45457254107 RED — ktlint: 5 new violations (when-entry bracing, function-signature).
+   Fixed in code; the baseline is UNTOUCHED (rule: fix debt, never hide it). Verified
+   locally with the CI-pinned ktlint 1.8.0 (sha a3fd6202…): 0 outside the baseline.
+3. 45458565154 GREEN — build 138674535439, release 138674535514, secrets-scan
+   138674535137 (instrumented PR-skipped by policy): unit tests incl. the 4 new V-046
+   tests, T11 replay, coverage, ktlint, detekt, lint, manifest-offline, classpath, ABI
+   floor all green.
+
+**The phone kit (T1/T2):** the release job now uploads the `app-release-smoke.apk`
+artifact (app + androidTest APKs, R8 ON, debug-signed, arm64-checked; PR-run artifact
+id 14952421462) and the job summary prints the download URL with the TESTING-ONLY
+warning. docs/PHONE_TEST.md is the non-technical H1–H3 checklist (observed/pass-fail
+columns); scripts/phone_perf.sh measures REAL-HARDWARE cold start, load/RTF/RSS, the R8
+decode proof, and a live 60 s session → eval/reports/phone-<device>.md; Q7 closes only
+when that file exists and is pasted back.
+
+**T4 prune:** minSdk 27 (ratified, runtime-proven, D-022) and AAB 55.9 MB (budget MET,
+D-023) removed from Needs-from-Mo — 6 genuinely open items remain.
