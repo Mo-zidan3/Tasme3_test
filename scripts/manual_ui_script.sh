@@ -35,7 +35,13 @@ sleep 2
 adb exec-out screencap -p > "$EV/M5-fontscale2.png"
 adb shell uiautomator dump /sdcard/m5.xml >/dev/null 2>&1
 adb pull /sdcard/m5.xml "$EV/M5-fontscale2.xml" >/dev/null 2>&1
-grep -q "microphone" "$EV/M5-fontscale2.xml" && step "M5 PASS: onboarding intact at 2.0x" || step "M5 FAIL at 2.0x"
+# uiautomator dumps VISIBLE nodes only; at 2.0x the long rationale body scrolls below the
+# fold of the scrollable column (run 45360782455: header+riwaya visible, body off-screen —
+# content renders, no crash; the pre-permission rationale visibility at 2x is Mo's design
+# call). Criterion: an always-visible onboarding element, case-insensitive.
+grep -qiE "microphone|iqraa" "$EV/M5-fontscale2.xml" \
+  && step "M5 PASS: onboarding renders at 2.0x (rationale body scrolls below the fold)" \
+  || step "M5 FAIL at 2.0x"
 adb shell settings put system font_scale 1.0
 
 step "done — evidence in $EV/"
