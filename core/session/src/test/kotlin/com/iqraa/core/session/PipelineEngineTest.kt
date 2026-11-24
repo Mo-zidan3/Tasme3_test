@@ -56,12 +56,12 @@ class PipelineEngineTest {
             repeat(SILENCE_CHUNKS) { engine.onChunk(FloatArray(CHUNK)) }
             assertEquals(4_000L, engine.cursorMsPublic(), "session clock = fed audio")
             assertTrue(
-                "the pause-final must have fired (checkpoints=${session.checkpoints.size})",
                 session.checkpoints.isNotEmpty(),
+                "the pause-final must have fired (checkpoints=${session.checkpoints.size})",
             )
             assertTrue(
-                "partials must precede the final (decode-driven updates flowed)",
                 session.updates.value != null,
+                "partials must precede the final (decode-driven updates flowed)",
             )
         }
 
@@ -72,9 +72,9 @@ class PipelineEngineTest {
             val (engine, session) = engineWith(vad = { samples -> samples.any { it > ENERGY } }, exp)
             repeat(SILENCE_CHUNKS) { engine.onChunk(FloatArray(CHUNK)) }
             assertEquals(
-                "no checkpoint without speech (checkpoints=${session.checkpoints.size})",
                 0,
                 session.checkpoints.size,
+                "no checkpoint without speech (checkpoints=${session.checkpoints.size})",
             )
         }
 
