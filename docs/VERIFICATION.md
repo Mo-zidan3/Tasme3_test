@@ -871,3 +871,64 @@ the metric. Kept for the record, never quote as a result.]
   never gets quoted.
 - Whole-clip baseline (V-038, unchanged): macro WER 14.2% / CER 10.2%.
 - ALL labels INDICATIVE: studio clips; §13 phone gate NOT met; WRONG renders CLOSE.
+
+### V-044 Stage B landed — the chain, every run, and the defects CI caught (2026-11-24)
+Merge order executed with per-run evidence (PR runs: build+release+secrets-scan; instrumented
+runs only on main — the known stacked-PR blind spot, which is exactly where three of the
+defects below hid):
+- **PR #4 (T7)** run 45300215711 GREEN → merged 6485744. Main run 45333042145 caught
+  `runBlocking` used as a RETURN TYPE (the PR never compiles androidTest) → hotfix 4baeb6a;
+  style follow-ups e20aac3→d6af35e (lease-guarded amend of my own 2-min-old commit — noted
+  deviation, no Mo commits touched).
+- **PR #5 (T8)** run 45335602074 GREEN → merged 95a25e0.
+- **PR #6 (T9)** — CI caught: junit-platform-launcher missing for designsystem unit tests
+  (45333188692), the versionless compose ui-test artifacts needing the BOM on
+  androidTest/debug configurations (45335531056/45335602431 — the earlier "metaspace OOM"
+  read was WRONG; corrected in the commit message), and my experimental
+  detekt.yml style-section made per-module detekt fail (45336527102, :core:align:detekt 352
+  weighted issues) → reverted; the D-017 ratchet stays untouched. Run 45339236533 GREEN →
+  merged ae98c79. Main run 45339976550 caught the missing MainActivity import in
+  MainActivityUiTest (30f2416).
+- **PR #7 (T11)** run 45339952042 GREEN **with the replay FATAL and real** (the prior run
+  45339239201 had gone green while all 12 replays silently failed — non-fatal || echo; fixed
+  and recorded) → merged 4c8c71b.
+
+### V-045 Two REAL pipeline defects found by landing the stack (2026-11-24)
+1. **Word-separator mismatch (CRITICAL, found by the E2E instrumented test, run
+   45337588118):** the bundled quran-asr vocab has NO "▁" token — it separates words with
+   the SPACE token (tokens.txt: `<blk>`, letters, `" "`). The Kotlin assembler split on "▁"
+   only ⇒ EVERY live decode produced ONE GIANT WORD — the app's word-level follow-along
+   would have been broken in production. Masked twice: host WordAssemblyTest used synthetic
+   ▁ streams, and eval CER was computed after N() which strips spaces. Fix (main 24e8f2c):
+   assembler accepts BOTH separators + host regression test with the real token shape; the
+   E2E fixture test (all-CORRECT/CLOSE assertion) is the on-device guard. Same bug existed
+   in the T11 python emitter (its first replay's correct=0-1/missed-heavy numbers were that
+   harness artifact — RETIRED, never quote).
+2. **Reanchor crash with zero matches (found by the E2E stream, run 45336537914):**
+   `tryReanchorRangeWide` called `matches.last()` on an empty list (a global alignment can
+   yield zero Match moves) → NoSuchElementException on both API levels. Fix (main a57f3f9):
+   early return + host regression test.
+
+### V-045b THE REAL T11 metric — tracker replay, Mo's 6 studio clips (run 45339952042, PR #7)
+INDICATIVE (3 speakers, studio; §13 phone gate NOT met; WRONG renders CLOSE). Per-word
+states through the REAL RecitationTracker (correct/close/wrong/missed; whole-clip vs
+app-shaped; hit-rate = correct+close over expected):
+
+| clip | whole C/L/W/M | app C/L/W/M | app hit-rate |
+|---|---|---|---|
+| ezz_39_42 (40w) | 16/0/0/0 | 35/5/0/0 | 100% |
+| riad_19_4_7 (47w) | 16/0/0/0 | 46/1/0/0 | 100% |
+| riad_25_27_31 (48w) | 12/4/0/0 | 42/4/0/2 | 95.8% |
+| riad_54_10_12 (19w) | 15/1/0/0 | 14/3/0/2 | 89.5% |
+| riad_5_23 (21w) | 16/0/0/0 | 3/5/0/10 | 38.1% |
+| yasser_2_200_201 (38w) | 6/10/0/0 | 21/6/1/10 | 71.1% |
+| **TOTAL (213w)** | **81/15/0/0** | **161/24/1/24** | **86.9%** |
+
+Reading (honest): the app-shaped stream beats the single whole-clip final on 5/6 clips
+(86.9% tracked vs 45.1%) — partials+finals give interior evidence a lone final cannot
+(V-025's insight, now measured on real audio). NO systematic MISSED/CLOSE collapse; two
+anomalies stay OPEN for investigation before Phase 4: (a) riadmostaf_5_23 — silero VAD
+fragments this clip into 11 finals (21 words) and the app mode falls to 38.1% while
+whole-clip holds 76.2% (VAD threshold/segmentation on this reciter); (b) yasser (known
+worst decoder accuracy of the set) loses 10 words. The 309% word-union number from the
+first local attempt remains RETIRED (V-043).
