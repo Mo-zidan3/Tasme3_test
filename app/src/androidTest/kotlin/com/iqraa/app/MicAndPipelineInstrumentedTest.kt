@@ -15,8 +15,6 @@ import com.iqraa.core.quran.ExpectedWords
 import com.iqraa.core.quran.QuranText
 import com.iqraa.core.session.PipelineEngine
 import com.iqraa.core.session.ReciteSession
-import com.k2fsa.sherpa.onnx.Vad
-import com.k2fsa.sherpa.onnx.VadModelConfig
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -90,19 +88,13 @@ class MicAndPipelineInstrumentedTest {
             try {
                 val tracker = RecitationTrackerImpl().apply { reset(expected, TrackerConfig()) }
                 val session = ReciteSession(recognizer, tracker)
-                val vad =
-                    Vad(
-                        assetManager = ctx.assets,
-                        config =
-                            VadModelConfig().apply {
-                                sampleRate = SAMPLE_RATE
-                                sileroVadModelConfig.model = VAD_ASSET
-                            },
-                    )
+                // T7 fix (run 45334500218): sherpa's Vad.compute takes EXACTLY 512-sample
+                // frames — the SileroVad adapter frames the 1600-sample chunks properly.
+                val vad = SileroVad(ctx.assets, VAD_ASSET)
                 val engine =
                     PipelineEngine(
                         sampleRate = SAMPLE_RATE,
-                        vad = { samples -> vad.compute(samples) > VAD_SPEECH_THRESHOLD },
+                        vad = { samples -> vad.isSpeech(samples) },
                         segmenter = Segmenter(),
                         session = session,
                     )
@@ -118,6 +110,7 @@ class MicAndPipelineInstrumentedTest {
                 }
                 repeat(TRAILING_SILENCE_CHUNKS) { engine.onChunk(FloatArray(CHUNK_SAMPLES)) }
 
+                vad.close()
                 val states = tracker.snapshot().states
                 val stateString =
                     expected.indices.joinToString("") { idx ->
@@ -217,6 +210,5 @@ class MicAndPipelineInstrumentedTest {
         const val SURAH_QAMAR = 54
         const val AYAH_10 = 10
         const val VAD_ASSET = "models/silero_vad.onnx"
-        const val VAD_SPEECH_THRESHOLD = 0.5f
     }
 }
