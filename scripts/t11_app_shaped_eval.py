@@ -147,11 +147,14 @@ def segmenter_windows(frames: list) -> list:
 
 
 def assemble(result, window_start_ms: int, spelling: dict) -> list:
-    """Words between ▁ separators; session-global ms; endMs += frame shift (V-015)."""
+    """Words between SEPARATOR tokens; session-global ms; endMs += frame shift (V-015).
+    V-045: the bundled quran-asr vocab separates words with the SPACE token (no ▁ in
+    tokens.txt) — split on BOTH; ▁-only produced one giant word per window (the first
+    replay's correct=0-1 numbers were that harness artifact, retired in V-044)."""
     words = []
     letters, start, last_ts = [], None, None
     for tok, ts in zip(result.tokens, result.timestamps):
-        if tok == "▁":
+        if tok in ("▁", " "):
             if letters:
                 text = "".join(letters)
                 text = spelling.get(text, text)
