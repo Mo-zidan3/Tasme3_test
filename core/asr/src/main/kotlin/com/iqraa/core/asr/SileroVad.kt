@@ -16,7 +16,6 @@ class SileroVad(
     private val vad: Vad,
     private val threshold: Float = DEFAULT_THRESHOLD,
 ) : AutoCloseable {
-
     constructor(assets: AssetManager, modelPath: String) : this(
         Vad(assets, VadModelConfig().apply { sileroVadModelConfig.model = modelPath }),
     )
