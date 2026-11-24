@@ -58,7 +58,7 @@ class MicAndPipelineInstrumentedTest {
     }
 
     @Test
-    fun pipeline_endToEnd_fixture_realVadSegmenterRecognizerTracker(): runBlocking {
+    fun pipeline_endToEnd_fixture_realVadSegmenterRecognizerTracker(): Unit = runBlocking {
         val ctx = InstrumentationRegistry.getInstrumentation().targetContext
         val fixture = repoAsset("eval/fixtures/fixture.wav")
         org.junit.Assume.assumeTrue(
