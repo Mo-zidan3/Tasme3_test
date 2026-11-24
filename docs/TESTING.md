@@ -57,3 +57,31 @@ instrumented fixture decode (DONE — see above), Room migrations, Compose UI te
 ≥85% lines on core:quran + core:align (DONE — CI-asserted).
 
 Run: `./gradlew test` (host) · CI runs `:app:connectedDebugAndroidTest` on API 27 + 35.
+
+## Manual UI script (T9/B3) — docs/TESTING.md, executed on the CI emulator
+
+The emulator-executable subset runs IN CI after every instrumented job
+(`scripts/manual_ui_script.sh` — evidence lands in the job log + the `instrumented-api*`
+artifact):
+
+- M1 install + launch MainActivity
+- M2 onboarding renders (rationale + riwaya + limitations in the hierarchy dump)
+- M4 forced rotation — onboarding content intact after landscape
+- M5 font scale 2.0× — content renders (reset afterwards)
+
+Steps that need Mo's hands on REAL hardware (honestly OPEN, not faked):
+
+- **H1 permission denied-permanently** — deny twice on a phone; the deep-link card opens the
+  app's system settings page (the emulator system-dialog interaction is locale-flaky; the
+  granted path is covered by `MainActivityUiTest.onboarding_grantFlow_reachesReader`).
+- **H2 true process-death restore** — swipe-away + relaunch mid-session; Home shows
+  «ملخص الجلسة السابقة» from the Room checkpoints (§11). `ActivityScenario.recreate`
+  covers config changes only; the checkpoint persistence itself is covered by
+  `RoomDbTest.dao_roundTrip_checkpoint_and_history` on-device.
+- **H3 real interruptions** — incoming call, audio-focus loss, another app taking the mic
+  (the pause/release/resume path is covered by `ReciteViewModel` + `SessionLifecycleTest`;
+  the PHYSICAL interruption needs hardware).
+- **H4 phone performance (Q7)** — RTF/RSS/cold-start on Mo's device (emulator numbers are
+  INDICATIVE only, V-039/V-040).
+
+**Phase 3 is NOT claimed DONE until H1–H4 are executed and recorded by Mo on hardware.**

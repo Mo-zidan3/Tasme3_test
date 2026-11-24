@@ -25,8 +25,10 @@ fun QuranText(
     textAlign: TextAlign = TextAlign.Right,
 ) {
     require(words.size == states.size) { "words/states size mismatch" }
+    // T9: adapt to the active surface BEFORE building spans (AA contrast on dark too)
+    val adaptedStates = states.map { s -> s?.adapted() }
     Text(
-        text = annotatedQuran(words, states),
+        text = annotatedQuran(words, adaptedStates),
         modifier = modifier,
         fontFamily = fontFamily ?: FontFamily.Default,
         textAlign = textAlign,
@@ -39,35 +41,40 @@ fun QuranText(
 private fun annotatedQuran(
     words: List<String>,
     states: List<FeedbackEncoding?>,
-): AnnotatedString {
-    return buildAnnotatedString {
-    words.forEachIndexed { i, w ->
-        val enc = states.getOrNull(i)
-        if (enc == null) {
-            append(w)
-        } else {
-            withStyle(
-                SpanStyle(
-                    color = enc.color,
-                    textDecoration = enc.decoration.textDecoration(),
-                ),
-            ) {
-                append(enc.decorate(w))
+): AnnotatedString =
+    buildAnnotatedString {
+        words.forEachIndexed { i, w ->
+            val enc = states.getOrNull(i)
+            if (enc == null) {
+                append(w)
+            } else {
+                withStyle(
+                    SpanStyle(
+                        color = enc.color,
+                        textDecoration = enc.decoration.textDecoration(),
+                    ),
+                ) {
+                    append(enc.decorate(w))
+                }
             }
+            if (i != words.lastIndex) append(' ')
         }
-        if (i != words.lastIndex) append(' ')
     }
-    }
-}
 
 /** The glyph/decoration half of the encoding (§10.2: never color-only). */
-private fun FeedbackEncoding.decorate(word: String): String = when (decoration) {
-    FeedbackEncoding.Decoration.CHECK -> "$word✓"
-    FeedbackEncoding.Decoration.TILDE -> "$word≈"
-    FeedbackEncoding.Decoration.DOTTED_UNDERLINE -> word // underline comes via textDecoration
-    FeedbackEncoding.Decoration.OUTLINE -> word
-    FeedbackEncoding.Decoration.BOX -> word
-}
+private fun FeedbackEncoding.decorate(word: String): String =
+    when (decoration) {
+        FeedbackEncoding.Decoration.CHECK -> "$word✓"
+
+        FeedbackEncoding.Decoration.TILDE -> "$word≈"
+
+        FeedbackEncoding.Decoration.DOTTED_UNDERLINE -> word
+
+        // underline comes via textDecoration
+        FeedbackEncoding.Decoration.OUTLINE -> word
+
+        FeedbackEncoding.Decoration.BOX -> word
+    }
 
 private fun FeedbackEncoding.Decoration.textDecoration(): androidx.compose.ui.text.style.TextDecoration? =
     when (this) {

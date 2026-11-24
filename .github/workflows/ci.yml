@@ -451,6 +451,9 @@ jobs:
             ./gradlew :app:connectedDebugAndroidTest || { echo "instrumented run failed"; exit 1; }
             # T5: perf-smoke numbers into the job log (INDICATIVE — emulator, not a phone)
             adb logcat -d -s IqraaPerfSmoke | tail -5 || true
+            # T9: EXECUTE the manual script's emulator subset; evidence lands in the job log
+            # + the instrumented artifact (H1..H4 hardware steps stay OPEN for Mo).
+            bash scripts/manual_ui_script.sh com.iqraa.tasmee manual-ui-evidence
 
       - uses: actions/upload-artifact@v4
         if: always()
@@ -460,3 +463,4 @@ jobs:
           path: |
             app/build/outputs/androidTest-results/**
             app/build/reports/androidTests/**
+            manual-ui-evidence/**

@@ -34,6 +34,13 @@ dependencies {
     api(libs.compose.foundation)
     api(libs.compose.material3)
     implementation(libs.androidx.core.ktx)
+    testImplementation(libs.junit.jupiter)
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher:1.13.4")
+
     debugImplementation(libs.compose.ui.tooling)
     api(libs.compose.ui.tooling.preview)
+}
+
+tasks.withType<Test> {
+    useJUnitPlatform()
 }
