@@ -320,7 +320,17 @@ jobs:
           mkdir -p app/src/androidTest/assets/eval/fixtures
           cp eval/data/fixture_54_10_riadmostaf.wav app/src/androidTest/assets/eval/fixtures/fixture.wav
           python3 scripts/make_timing_fixture.py app/src/androidTest/assets/eval/fixtures/timing_fixture.wav
-          ./gradlew :app:assembleReleaseSmoke :app:assembleReleaseSmokeAndroidTest -PiqraaTestBuildType=releaseSmoke
+          # V-047: run 45459779954's release job died resolving the androidTest runtime
+          # classpath (error_prone via espresso) with Maven 429 — the V-006/V-012 transient
+          # class the fetch steps already back off against. Same treatment here: retry,
+          # never skip; a hard failure after 4 attempts still fails the job loudly.
+          ok=0
+          for delay in 60 120 240 480; do
+            if ./gradlew :app:assembleReleaseSmoke :app:assembleReleaseSmokeAndroidTest -PiqraaTestBuildType=releaseSmoke; then ok=1; break; fi
+            echo "releaseSmoke APK assembly failed (Maven 429 class, V-006/V-012); backoff ${delay}s"
+            sleep $delay
+          done
+          [ "$ok" = 1 ] || { echo "FAIL: releaseSmoke APK assembly failed after 3 retries"; exit 1; }
           APP_APK=$(find app/build/outputs/apk/releaseSmoke -name "*.apk" | head -1)
           TEST_APK=$(find app/build/outputs/apk/androidTest/releaseSmoke -name "*.apk" | head -1)
           test -n "$APP_APK" && test -n "$TEST_APK" || { echo "FAIL: releaseSmoke APK(s) missing"; exit 1; }
