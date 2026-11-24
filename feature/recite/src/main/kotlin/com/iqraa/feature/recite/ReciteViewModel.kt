@@ -2,6 +2,7 @@ package com.iqraa.feature.recite
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewModelScope
 import com.iqraa.core.align.TrackerUpdate
 import com.iqraa.core.audio.AudioCapture
 import com.iqraa.core.session.PauseReason
