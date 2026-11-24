@@ -115,9 +115,10 @@ class PipelineEngineTest {
             repeat(30) { engine.onChunk(FloatArray(CHUNK)) }
             repeat(8) { engine.onChunk(FloatArray(CHUNK) { SPEECH_AMP }) }
             repeat(7) { engine.onChunk(FloatArray(CHUNK)) }
-            // final fires at 4300: speech [3000, 3800] is 800 ms < 2500 → decode widened to
-            // [2000, 4500] (lead 1000 + trail 700 = the 2500 ms partial shape, ring-clamped)
-            assertEquals(listOf(40_000 to 2_000L), recognizer.calls, "one WIDENED final decode (2500 ms from 2000 ms)")
+            // the final fires 500 ms INTO the pause (cursor 4300): speech [3000, 3800] is
+            // 800 ms < 2500 → deficit 1700 = trail 500 (the elapsed pause) + lead 1200 →
+            // decode [1800, 4300] — exactly the 2500 ms partial shape, ring-clamped
+            assertEquals(listOf(40_000 to 1_800L), recognizer.calls, "one WIDENED final decode (2500 ms from 1800 ms)")
             assertEquals(3_800L, session.checkpoints.single().lastWindowEndMs, "honest observation bounds = speech end")
         }
 
@@ -129,8 +130,9 @@ class PipelineEngineTest {
             // yet), then the pause
             repeat(9) { engine.onChunk(FloatArray(CHUNK) { SPEECH_AMP }) }
             repeat(6) { engine.onChunk(FloatArray(CHUNK)) }
-            // speech [0, 900]: deficit 1600 → trail 600 (pause elapsed), lead 0 (session start)
-            assertEquals(listOf(24_000 to 0L), recognizer.calls, "widened only by the trailing pause (1500 ms)")
+            // the final fires 500 ms into the pause (cursor 1400): speech [0, 900], deficit
+            // 1600 → trail 500 (the elapsed pause), lead 0 (session start) → decode [0, 1400]
+            assertEquals(listOf(22_400 to 0L), recognizer.calls, "widened only by the trailing pause (1400 ms)")
             assertEquals(900L, session.checkpoints.single().lastWindowEndMs, "honest bounds stay the 900 ms speech end")
         }
 
