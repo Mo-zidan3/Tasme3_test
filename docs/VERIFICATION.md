@@ -932,3 +932,30 @@ fragments this clip into 11 finals (21 words) and the app mode falls to 38.1% wh
 whole-clip holds 76.2% (VAD threshold/segmentation on this reciter); (b) yasser (known
 worst decoder accuracy of the set) loses 10 words. The 309% word-union number from the
 first local attempt remains RETIRED (V-043).
+
+### V-046 T11 anomaly root cause — riadmostaf_5_23's 38.1% is a REAL per-window-context defect (2026-11-24)
+Run 45340839779 (main, 4c8c71b) re-replayed all 12 T11 files green. The 5_23 app-shaped
+regression (38.1% hit-rate, missed=10, extra=16 vs whole-clip decode WER 0%/CER 1% per
+V-038) was investigated from the COMMITTED hypothesis JSON — not papered over:
+- The clip is pause-heavy: silero VAD (100 ms decisions) + the §6.2 Segmenter law cut ELEVEN
+  pause-finals (≥500 ms silences) across a 37 s recitation of 21 words — speech bursts of
+  0.7–4.3 s. partials=7 only.
+- Isolated decode of those tiny windows COLLAPSES: the finals decode «طه» (not even in
+  surah 5:23 — a hallucinated surah opener on an 876 ms window), «فاموزمون» (a CTC merge of
+  «فإنكم غالبون»), «يلدولم يولد» (merged 112-vocabulary), «بيف», «فتعكلون». The same audio
+  decodes near-perfectly as ONE whole clip (V-038) — the model NEEDS acoustic context.
+- The tracker behaved CORRECTLY on what it was given: words never decoded right never
+  matched → the guarded absence rules fired MISSED (10); the hallucinations surfaced as
+  EXTRA (16). NOT a tracker bug, NOT a harness artifact.
+- Comparison set: yasser_2_200_201's 71.1% is MODEL-limited (whole-clip decode itself only
+  got 27/38 words; app-mode tracked every decodable word — 27/38); the other four clips
+  (89.5–100%) have 33–58 partials whose 2.5 s trailing windows carry enough context.
+- Phase-4 candidate mitigations for MO (product calls — NO threshold change made, I4):
+  (a) widen pause-final windows with trailing context like the partials (window SHAPE, not
+  §9 policy); (b) carry decoder state/context across force-cuts; (c) minimum-speech-length
+  before a pause-final is emitted. All three change latency behavior — Mo decides.
+- Same run: 3 instrumented test bugs (all mine, fixed in 016c3e8) — the grantFlow assertion
+  used the en app_name while the reader renders the hardcoded Arabic «اقرأ»; fontScale2 set
+  content on an already-populated activity rule (moved to a component rule); the tasmee
+  test called setContent twice on one rule (split). Plus 1 ktlint import-order violation
+  from the 30f2416 hotfix. The T11 replay step itself ran 12/12 green in that run.
