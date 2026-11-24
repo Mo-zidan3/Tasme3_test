@@ -68,6 +68,13 @@ android {
         }
     }
 
+    // T10 (V-045): AGP creates ONE androidTest variant, attached to testBuildType
+    // (default "debug"). The discovery run 45362653080 proved a custom build type gets NO
+    // *AndroidTest* tasks of its own. CI re-points the androidTest variant at releaseSmoke
+    // with -PiqraaTestBuildType=releaseSmoke (a separate invocation — the normal
+    // connectedDebugAndroidTest suite is untouched).
+    testBuildType = providers.gradleProperty("iqraaTestBuildType").getOrElse("debug")
+
     buildFeatures {
         compose = true
     }
