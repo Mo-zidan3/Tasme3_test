@@ -1,9 +1,10 @@
 # STATUS — per phase
 
-Last updated: 2026-11-24 (Stage B in flight as STACKED PRs — T7 real pipeline #4,
-T8 MVP features #5, T9 UI tests + WCAG AA + manual script #6, T11 app-shaped harness #7;
-merge order T7→T8→T9→T11; CI per-PR, numbers in V-042/V-043; Phase 3 NOT DONE until Mo
-executes manual steps H1–H4 on hardware. V-041 history follows:) Mo's three verified aligner defects fixed —
+Last updated: 2026-11-24 (V-044: PR #4/T7 LANDED — run 45300215711 green, merged as
+6485744, main run verified; PRs #5/#6/#7 rebased onto the corrected chain and re-running;
+releaseSmoke (V-045) + phase-4 prep (signing, store listing, reproducibility) staged on
+chore branches. Phase 3 NOT DONE until Mo executes H1–H4 on hardware. V-041/042/043
+history follows:) Mo's three verified aligner defects fixed —
 refrain anchoring + forward tie-break, per-word SET independence, .env hygiene; NO threshold
 or default changed (D-020 documents two deviations where the prompt's literal rule could not
 keep the frozen V-025/V-031 tests green); all new results SYNTHETIC (simulator), the §13
@@ -82,28 +83,23 @@ with exponential backoff, still blocked. Harness-only; not on the Phase 1 critic
   faking numbers. release gate step crashed on a CSV-parse bug AFTER the measurement — fixed
   in 15cf4ab; measurement recorded in V-037.
 
-## Needs from Mo (§18 + Phase 0.6)
-1. **Trigger CI**: push the repo to GitHub (Actions workflow is ready) — closes E1, S2 (emulator
-   decode), the AAB size measurement, and the R8 keep-rules gate in ONE run (docs/CI.md).
-2. **A 5–10 s clip you record yourself, with written permission to commit it as a test fixture**
-   (Mo owns the rights → clean, permanent, CI-usable) — permanently enables the on-device decode
-   test. No gated/third-party audio is ever committed.
-2. **Toolchain risk decision [new]**: AGP 9.5.2 / Kotlin 2.4.21 / compileSdk 37.1 / KSP2 is
-   bleeding-edge and already deviated once from the documented KGP-classpath path (D-001).
-   Freeze explicitly, or approve a documented Plan B (AGP 8.x line / compileSdk 36) to be
-   triggered on the next toolchain blocker.
-3. **minSdk decision [new]**: native floor is 27 (V-016) vs declared 26. Recommend raise to 27.
-4. **Size budget decision [new]**: AAB estimate 77–80 MB vs ≤80 MB target (V-018) — PAD, drop
-   tiny (−15.6 MB), or accept with ADR.
-5. Archive location for exact shipped model files + license texts (asked in Phase 0; still open).
-6. Recordings per §13.1 (≥50 first-look; ≥60 held-out correct + ≥25 planted-error; ≥3 speakers)
-   — if absent, Phase 2 ends indicative and WRONG ships as CLOSE (§13.4 default).
-7. ~~Final applicationId (Play rejects com.example.*)~~ DONE (T1): com.iqraa.tasmee applied + CI-verified.
-8. Test devices (≥1 low-end 3–4 GB + ≥1 flagship) → docs/DEVICES.md.
-9. Ratification of `[MO]` items: presets §9.5, summary §9.6, Amiri default §7.7,
-   tiny shipping policy §8.1, and the CC-BY-3.0 attribution interpretation (§7.1).
-10. Arabic string review; store copy review; release keystore; code license (Apache-2.0 default).
-
+## Needs from Mo (current — V-044 prune: closed items removed)
+1. **H1–H4 on hardware** (docs/TESTING.md): denied-permanently deep link, true process-death
+   restore, physical interruptions, phone perf (Q7). Phase 3 is DONE only when recorded.
+2. **Arabic strings review** — all T8/T9 UI strings are UNREVIEWED until Mo signs off.
+3. **Rotate the .env token if it was ever real** (D-020/V-041: tracked since the initial
+   commit 299b869; purging history is Mo's call — not done).
+4. **strictOverlapIndependence numbers** (V-031: WRONG 1/0 on the كين stream) — confirm the
+   default (false) before the §13 phone gate.
+5. **Toolchain risk decision**: AGP 9.5.2 / Kotlin 2.4.21 / compileSdk 37.1 / KSP2 is
+   bleeding-edge and already deviated once (D-001). Freeze explicitly or approve Plan B.
+6. **minSdk decision**: native floor 27 (V-016) vs declared 26 — recommend raise to 27.
+7. **Size budget decision**: AAB estimate 77–80 MB vs ≤80 MB (V-018) — PAD, drop tiny
+   (−15.6 MB), or accept with ADR.
+8. **Release signing for v0.1.0**: create the keystore; set IQRAA_KEYSTORE_PATH /
+   IQRAA_KEYSTORE_PASSWORD / IQRAA_KEY_ALIAS / IQRAA_KEY_PASSWORD as CI secrets
+   (scripts/signing/release-signing.properties.template documents the layout; the real file
+   and the keystore are git-ignored — NEVER committed).
 ## Phase 1.5 (hardening) + Phase 2 host-side — 2026-11-21 (this session)
 - **CI RUN 45035800627 (V-035, 2026-11-22)**: secrets-scan/build/release GREEN (unit tests,
   lint, manifest-offline, classpath, ABI floor all pass; assembleRelease+bundleRelease with

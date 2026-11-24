@@ -1,0 +1,8 @@
+# Copy to scripts/signing/release-signing.properties (git-ignored) or use the env vars:
+# IQRAA_KEYSTORE_PATH / IQRAA_KEYSTORE_PASSWORD / IQRAA_KEY_ALIAS / IQRAA_KEY_PASSWORD
+# NEVER commit the real file or the keystore. CI builds UNSIGNED release artifacts unless
+# the env vars are injected as secrets.
+storeFile=/absolute/path/to/iqraa-release.jks
+storePassword=
+keyAlias=
+keyPassword=

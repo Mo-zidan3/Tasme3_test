@@ -19,6 +19,9 @@ class PipelineEngine(
     private val vad: (samples: FloatArray) -> Boolean,
     private val segmenter: Segmenter = Segmenter(),
     private val session: ReciteSession,
+    /** §8.4 caps the session ring at 30 s; T7 sized it 12 s — the LONGEST window the
+     *  segmenter can request (maxSegment 8 s + overlap 1 s) plus VAD padding and cadence
+     *  jitter margin. Configurable (D-020 ADR line: 12 s default, spec ceiling 30 s). */
     capacityMs: Long = DEFAULT_CAPACITY_MS,
 ) {
     private val capacity = (capacityMs * sampleRate / MS_PER_SECOND).toInt()

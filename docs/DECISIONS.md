@@ -261,3 +261,8 @@ verified by unfiltered-count comparison against main BEFORE regeneration).
    only; CI secrets-scan now blocks tracked `.env*` and generic secret shapes
    (private-key headers, and API_KEY / SECRET / PASSWORD / DATABASE_URL assignments carrying
    non-placeholder values). Notices SHA gate untouched.
+
+- **D-020 line 7 (V-044): session ring = 12 s named default** (PipelineEngine.capacityMs),
+  spec §8.4 ceiling 30 s. Rationale: the longest window the Segmenter can request is
+  maxSegmentMs (8 s) + overlapMs (1 s) + 2×vadPad (600 ms) ≈ 9.6 s; 12 s adds cadence-jitter
+  margin while halving ring memory. Configurable, never a literal.

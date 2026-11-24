@@ -852,6 +852,9 @@ at report time is labeled PENDING, never claimed green.
   honestly OPEN in docs/TESTING.md — **Phase 3 NOT claimed DONE until Mo executes them**.
 
 ### V-043 Stage B (T11) — app-shaped §13 harness (PR #7, stacked on T9) (2026-11-24)
+[Superseeded-by note, V-044: the word-union WER numbers quoted below were measured with a
+SCORING BUG and are RETIRED — see the V-043 text; the tracker-replay per-word states are
+the metric. Kept for the record, never quote as a result.]
 - scripts/t11_app_shaped_eval.py: silero VAD (the SHIPPED silero_vad.onnx weights driven
   via onnxruntime directly — the pip sherpa-onnx 2.0.2 python VoiceActivityDetector
   produced ZERO speech segments on every feed pattern tried (whole/chunked/512-aligned,
