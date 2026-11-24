@@ -959,3 +959,33 @@ V-038) was investigated from the COMMITTED hypothesis JSON — not papered over:
   content on an already-populated activity rule (moved to a component rule); the tasmee
   test called setContent twice on one rule (split). Plus 1 ktlint import-order violation
   from the 30f2416 hotfix. The T11 replay step itself ran 12/12 green in that run.
+
+### V-045c CLOSED — releaseSmoke green on main; the R8 fix chain, every run (2026-11-24)
+The androidTest-APK R8 loop closed on commit e5e3f42; **main run 45370776920 ALL FIVE JOBS
+GREEN** (build 138364174819, release 138364174769, instrumented-27 138364174694,
+instrumented-35 138364174815, secrets-scan 138364174231 — ids from the run's job list).
+
+**Decode proof (the point of T10):** the R8-MINIFIED, debug-signed releaseSmoke APK decoded
+the committed 54:10 fixture ON DEVICE, both emulators, from the job logs:
+- API 27: `IqraaReleaseSmoke: decoded 5 words (R8 build)` (job 138364174694 log)
+- API 35: `IqraaReleaseSmoke: decoded 5 words (R8 build)` (job 138364174815 log)
+5 = فدعا ربه اني مغلوب فانتصر. Minify stayed ON throughout — every failure below was fixed
+in keep/suppression config, never by disabling R8.
+
+The chain the smoke test forced (each = a real run, red→green):
+1. 45365479136 (main, 9e1642ac) RED — connectedReleaseSmokeAndroidTest task-not-found →
+   ef136a2: variant-agnostic `connectedAndroidTest` + `-PiqraaTestBuildType=releaseSmoke`.
+2. 45366457648 RED — backslash continuation became a literal gradle arg ("Task '\' not
+   found") → d2f91c0: single-line invocation.
+3. 45367329394 RED — `minifyReleaseSmokeAndroidTestWithR8` MISSING class
+   `javax.lang.model.element.Modifier` (errorprone compile-only annotations, absent on
+   Android; referenced from IncompatibleModifiers.value()) → 9edc9e7: `-dontwarn`
+   suppression. This is EXACTLY the class of bug T10 exists to catch before Play.
+4. 45368930517 RED — the app-side -dontwarn never reached the TEST APK's minification:
+   its R8 config reads `testProguardFiles`, not `proguardFiles` → 05bd7a9: suppressions in
+   smoke-test-proguard.pro wired via buildType.testProguardFiles.
+5. 45369846137 RED — AGP 9 exposes `testProguardFiles` as a `val MutableList<File>`; the
+   `+= "path"` string form hit the reassignment path (val reassign + type mismatch) →
+   e5e3f42: append `File(...)` elements.
+6. 45370776920 GREEN — see above. §8.2 "release decodes on device" risk CLOSED on emulator;
+   a real-phone decode remains part of H4/Q7 (phone gate), still OPEN.
