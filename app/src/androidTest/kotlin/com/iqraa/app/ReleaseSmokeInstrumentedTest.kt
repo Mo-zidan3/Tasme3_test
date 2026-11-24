@@ -21,7 +21,7 @@ import java.io.InputStream
 @RunWith(AndroidJUnit4::class)
 class ReleaseSmokeInstrumentedTest {
     @Test
-    fun releaseSmoke_minifiedBuild_decodes_fixture() {
+    fun releaseSmoke_minifiedBuild_decodes_fixture(): Unit = kotlinx.coroutines.runBlocking {
         val ctx = InstrumentationRegistry.getInstrumentation().targetContext
         val fixture = repoAsset("eval/fixtures/fixture.wav")
         assumeTrue(
