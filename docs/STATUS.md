@@ -84,9 +84,11 @@ with exponential backoff, still blocked. Harness-only; not on the Phase 1 critic
   faking numbers. release gate step crashed on a CSV-parse bug AFTER the measurement — fixed
   in 15cf4ab; measurement recorded in V-037.
 
-## Needs from Mo (current — V-044 prune: closed items removed)
-1. **H1–H4 on hardware** (docs/TESTING.md): denied-permanently deep link, true process-death
-   restore, physical interruptions, phone perf (Q7). Phase 3 is DONE only when recorded.
+## Needs from Mo (current — V-047 prune: minSdk + size CLOSED, removed)
+1. **H1–H4 on hardware** (docs/PHONE_TEST.md — the one-hour kit; install the CI
+   `app-release-smoke.apk` artifact, no Android Studio needed): denied-permanently deep
+   link, true process-death restore, physical interruptions, phone perf (Q7 via
+   scripts/phone_perf.sh). Phase 3 is DONE only when recorded.
 2. **Arabic strings review** — all T8/T9 UI strings are UNREVIEWED until Mo signs off.
 3. **Rotate the .env token if it was ever real** (D-020/V-041: tracked since the initial
    commit 299b869; purging history is Mo's call — not done).
@@ -94,13 +96,14 @@ with exponential backoff, still blocked. Harness-only; not on the Phase 1 critic
    default (false) before the §13 phone gate.
 5. **Toolchain risk decision**: AGP 9.5.2 / Kotlin 2.4.21 / compileSdk 37.1 / KSP2 is
    bleeding-edge and already deviated once (D-001). Freeze explicitly or approve Plan B.
-6. **minSdk decision**: native floor 27 (V-016) vs declared 26 — recommend raise to 27.
-7. **Size budget decision**: AAB estimate 77–80 MB vs ≤80 MB (V-018) — PAD, drop tiny
-   (−15.6 MB), or accept with ADR.
-8. **Release signing for v0.1.0**: create the keystore; set IQRAA_KEYSTORE_PATH /
+6. **Release signing for v0.1.0**: create the keystore; set IQRAA_KEYSTORE_PATH /
    IQRAA_KEYSTORE_PASSWORD / IQRAA_KEY_ALIAS / IQRAA_KEY_PASSWORD as CI secrets
    (scripts/signing/release-signing.properties.template documents the layout; the real file
    and the keystore are git-ignored — NEVER committed).
+
+CLOSED this round (kept out of the open list): **minSdk** — 27 RATIFIED and
+runtime-proven on the API 27 emulator floor (D-022); **AAB size** — 55.9 MB measured,
+budget ≤80 MB MET (D-023; V-018 closed).
 ## Phase 1.5 (hardening) + Phase 2 host-side — 2026-11-21 (this session)
 - **CI RUN 45035800627 (V-035, 2026-11-22)**: secrets-scan/build/release GREEN (unit tests,
   lint, manifest-offline, classpath, ABI floor all pass; assembleRelease+bundleRelease with
