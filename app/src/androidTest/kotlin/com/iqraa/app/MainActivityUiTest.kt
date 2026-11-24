@@ -6,9 +6,7 @@ import androidx.compose.ui.test.performClick
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.rule.GrantPermissionRule
 import androidx.test.uiautomator.UiDevice
-import com.iqraa.core.designsystem.FeedbackEncoding
 import com.iqraa.tasmee.MainActivity
-import com.iqraa.feature.recite.ReciteScreen
 import org.junit.Rule
 import org.junit.Test
 
@@ -34,9 +32,10 @@ class MainActivityUiTest {
             .onNodeWithText("This app supports the Hafs recitation (from Asim) only.")
             .assertExists()
         activityRule.onNodeWithText("Allow microphone and continue").performClick()
-        // permission is pre-granted via the rule → onGranted → reader (app name header)
+        // permission is pre-granted via the rule → onGranted → reader. The reader's title
+        // is the HARDCODED Arabic «اقرأ» (locale-independent — not the app_name resource).
         activityRule.waitForIdle()
-        activityRule.onNodeWithText("Iqraa").assertExists()
+        activityRule.onNodeWithText("اقرأ").assertExists()
     }
 
     @Test
@@ -50,27 +49,6 @@ class MainActivityUiTest {
         activityRule.onNodeWithText("Allow microphone and continue").assertExists()
     }
 
-    @Test
-    fun fontScale2_rendersWords() {
-        // §10.4 accessibility floor: 2.0× font scale must still render the Quran text.
-        // Applied at the CompositionLocal level (the system setting is covered by the
-        // manual script's `settings put system font_scale 2.0` step).
-        activityRule.setContent {
-            androidx.compose.runtime.CompositionLocalProvider(
-                androidx.compose.ui.platform.LocalDensity provides
-                    androidx.compose.ui.unit
-                        .Density(density = 1f, fontScale = 2f),
-            ) {
-                ReciteScreen(
-                    words = listOf("قل", "هو", "الله", "احد"),
-                    states = listOf<FeedbackEncoding?>(FeedbackEncoding.CORRECT, null, null, null),
-                    isTasmeeMode = true,
-                    pausedBanner = null,
-                    onResume = {},
-                    onHint = {},
-                )
-            }
-        }
-        activityRule.onNodeWithText("قل✓", substring = true).assertExists()
-    }
+    // fontScale2_rendersWords moved to ReciteUiTest (a component rule): a SECOND setContent
+    // on an activity rule throws "has already set content" (run 45340839779, API 27+35).
 }

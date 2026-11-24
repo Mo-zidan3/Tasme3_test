@@ -33,8 +33,10 @@ class ReciteUiTest {
             FeedbackEncoding.WRONG,
         )
 
+    // ONE setContent per test rule (a second call throws "has already set content" —
+    // run 45340839779), so tasmee' vs follow-along are separate tests.
     @Test
-    fun tasmeeMode_showsHintButton_followAlongMode_doesNot() {
+    fun tasmeeMode_showsHintButton() {
         compose.setContent {
             ReciteScreen(
                 words = words,
@@ -49,7 +51,10 @@ class ReciteUiTest {
         // to the ENGLISH defaults; the AR variants are exercised by the manual script.
         compose.onNodeWithText("Hint").assertExists()
         compose.onNodeWithText("Hint").performClick()
+    }
 
+    @Test
+    fun followAlongMode_doesNotShowHintButton() {
         compose.setContent {
             ReciteScreen(
                 words = words,
@@ -63,6 +68,30 @@ class ReciteUiTest {
         compose.onAllNodesWithText("Hint").fetchSemanticsNodes().let { nodes ->
             assertEquals("follow-along mode must NOT show the hint button", 0, nodes.size)
         }
+    }
+
+    @Test
+    fun fontScale2_rendersWords() {
+        // §10.4 accessibility floor: 2.0× font scale must still render the Quran text.
+        // Component rule (no activity content to conflict with); the system-level setting
+        // is covered by the manual script's `settings put system font_scale 2.0` step.
+        compose.setContent {
+            androidx.compose.runtime.CompositionLocalProvider(
+                androidx.compose.ui.platform.LocalDensity provides
+                    androidx.compose.ui.unit
+                        .Density(density = 1f, fontScale = 2f),
+            ) {
+                ReciteScreen(
+                    words = words,
+                    states = states,
+                    isTasmeeMode = true,
+                    pausedBanner = null,
+                    onResume = {},
+                    onHint = {},
+                )
+            }
+        }
+        compose.onNodeWithText("قل✓", substring = true).assertExists()
     }
 
     @Test
