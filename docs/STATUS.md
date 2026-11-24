@@ -1,10 +1,11 @@
 # STATUS — per phase
 
-Last updated: 2026-11-24 (V-044: PR #4/T7 LANDED — run 45300215711 green, merged as
-6485744, main run verified; PRs #5/#6/#7 rebased onto the corrected chain and re-running;
-releaseSmoke (V-045) + phase-4 prep (signing, store listing, reproducibility) staged on
-chore branches. Phase 3 NOT DONE until Mo executes H1–H4 on hardware. V-041/042/043
-history follows:) Mo's three verified aligner defects fixed —
+Last updated: 2026-11-24 (V-044/V-045: PRs #4 T7, #5 T8, #6 T9, #7 T11 ALL MERGED with
+green runs (last: 4c8c71b); TWO REAL pipeline defects fixed on main — the SPACE-token word
+separator (every live decode was one giant word) and the reanchor zero-match crash; THE
+REAL T11 metric harvested (run 45339952042: app-shaped 86.9% tracked vs whole-clip 45.1%,
+INDICATIVE studio); remaining: PR #8 (releaseSmoke) + PR #9 (phase4-prep) + main green
+confirmations. Phase 3 NOT DONE until Mo executes H1–H4 on hardware. History follows:) Mo's three verified aligner defects fixed —
 refrain anchoring + forward tie-break, per-word SET independence, .env hygiene; NO threshold
 or default changed (D-020 documents two deviations where the prompt's literal rule could not
 keep the frozen V-025/V-031 tests green); all new results SYNTHETIC (simulator), the §13
