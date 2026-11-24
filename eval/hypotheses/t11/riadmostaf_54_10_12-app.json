@@ -1,0 +1,513 @@
+{
+ "clips": [
+  {
+   "clipId": "riadmostaf_54_10_12",
+   "observations": [
+    {
+     "words": [
+      [
+       "فدعار",
+       159,
+       1239
+      ]
+     ],
+     "windowStartMs": 0,
+     "windowEndMs": 1492,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "فدعا ربه",
+       159,
+       1959
+      ]
+     ],
+     "windowStartMs": 0,
+     "windowEndMs": 2492,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "فدعا ربه",
+       392,
+       1951
+      ]
+     ],
+     "windowStartMs": 392,
+     "windowEndMs": 3492,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "و اهنون",
+       1392,
+       4432
+      ]
+     ],
+     "windowStartMs": 1392,
+     "windowEndMs": 4492,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "ا",
+       4471,
+       4511
+      ]
+     ],
+     "windowStartMs": 2392,
+     "windowEndMs": 5492,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "فوا اني ماي",
+       3392,
+       6392
+      ]
+     ],
+     "windowStartMs": 3392,
+     "windowEndMs": 6492,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "واني مغلوب",
+       4431,
+       7071
+      ]
+     ],
+     "windowStartMs": 4392,
+     "windowEndMs": 7492,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "الي مغلوب ف",
+       5431,
+       8231
+      ]
+     ],
+     "windowStartMs": 5392,
+     "windowEndMs": 8492,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "فدعا ربه اني مغلوب فاترور",
+       159,
+       8599
+      ]
+     ],
+     "windowStartMs": 0,
+     "windowEndMs": 8652,
+     "isFinal": true
+    },
+    {
+     "words": [
+      [
+       "فق",
+       8292,
+       8531
+      ]
+     ],
+     "windowStartMs": 7052,
+     "windowEndMs": 8652,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "فانتظر",
+       8331,
+       9572
+      ]
+     ],
+     "windowStartMs": 7052,
+     "windowEndMs": 9652,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       " فانتصر",
+       8131,
+       9971
+      ]
+     ],
+     "windowStartMs": 7052,
+     "windowEndMs": 10284,
+     "isFinal": true
+    },
+    {
+     "words": [
+      [
+       "فتنن",
+       10931,
+       11972
+      ]
+     ],
+     "windowStartMs": 10452,
+     "windowEndMs": 12052,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "فتحنا",
+       10931,
+       12611
+      ]
+     ],
+     "windowStartMs": 10452,
+     "windowEndMs": 13052,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "فتحيي",
+       10991,
+       12071
+      ]
+     ],
+     "windowStartMs": 10952,
+     "windowEndMs": 14052,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "واء بوا",
+       11952,
+       14831
+      ]
+     ],
+     "windowStartMs": 11952,
+     "windowEndMs": 15052,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "وا ابواب السمرا",
+       12952,
+       15952
+      ]
+     ],
+     "windowStartMs": 12952,
+     "windowEndMs": 16052,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "اوي ب السماء",
+       14351,
+       16952
+      ]
+     ],
+     "windowStartMs": 13952,
+     "windowEndMs": 17052,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "اتحب السماءب",
+       14952,
+       17751
+      ]
+     ],
+     "windowStartMs": 14952,
+     "windowEndMs": 18052,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "والماء بما ",
+       15952,
+       18391
+      ]
+     ],
+     "windowStartMs": 15952,
+     "windowEndMs": 19052,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "ففتحنا ابوب السماء بمام",
+       10691,
+       18891
+      ]
+     ],
+     "windowStartMs": 10452,
+     "windowEndMs": 19116,
+     "isFinal": true
+    },
+    {
+     "words": [
+      [
+       "الما",
+       17555,
+       18355
+      ]
+     ],
+     "windowStartMs": 17516,
+     "windowEndMs": 19116,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "ال الا",
+       17555,
+       18315
+      ]
+     ],
+     "windowStartMs": 17516,
+     "windowEndMs": 20116,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "الاما",
+       17555,
+       18315
+      ]
+     ],
+     "windowStartMs": 17516,
+     "windowEndMs": 20172,
+     "isFinal": true
+    },
+    {
+     "words": [
+      [
+       "مه مر",
+       20227,
+       21707
+      ]
+     ],
+     "windowStartMs": 20148,
+     "windowEndMs": 21748,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "لا منهمر",
+       20347,
+       22547
+      ]
+     ],
+     "windowStartMs": 20148,
+     "windowEndMs": 22748,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "ا منهمر",
+       20467,
+       22587
+      ]
+     ],
+     "windowStartMs": 20148,
+     "windowEndMs": 22956,
+     "isFinal": true
+    },
+    {
+     "words": [
+      [
+       "وفجر",
+       23923,
+       25004
+      ]
+     ],
+     "windowStartMs": 23604,
+     "windowEndMs": 25204,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "وفجر الارون",
+       23923,
+       26163
+      ]
+     ],
+     "windowStartMs": 23604,
+     "windowEndMs": 26204,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "فجرنا الارض عيون",
+       24303,
+       27104
+      ]
+     ],
+     "windowStartMs": 24104,
+     "windowEndMs": 27204,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "اذا جي الارض عيونا",
+       25104,
+       27663
+      ]
+     ],
+     "windowStartMs": 25104,
+     "windowEndMs": 28204,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "وفجرنا الارض عيونا",
+       23923,
+       27644
+      ]
+     ],
+     "windowStartMs": 23604,
+     "windowEndMs": 28524,
+     "isFinal": true
+    },
+    {
+     "words": [
+      [
+       "فالتق",
+       28780,
+       29579
+      ]
+     ],
+     "windowStartMs": 28500,
+     "windowEndMs": 30100,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "فالتقي المان",
+       28819,
+       30980
+      ]
+     ],
+     "windowStartMs": 28500,
+     "windowEndMs": 31100,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "والتقي المان",
+       29039,
+       32000
+      ]
+     ],
+     "windowStartMs": 29000,
+     "windowEndMs": 32100,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "لا اوعد",
+       30119,
+       32879
+      ]
+     ],
+     "windowStartMs": 30000,
+     "windowEndMs": 33100,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "السماء عهي",
+       31119,
+       33199
+      ]
+     ],
+     "windowStartMs": 31000,
+     "windowEndMs": 34100,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "ل  لا اي",
+       32079,
+       35040
+      ]
+     ],
+     "windowStartMs": 32000,
+     "windowEndMs": 35100,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "لا امر",
+       33119,
+       35399
+      ]
+     ],
+     "windowStartMs": 33000,
+     "windowEndMs": 36100,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "الي امر القلع",
+       34000,
+       36959
+      ]
+     ],
+     "windowStartMs": 34000,
+     "windowEndMs": 37100,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "فالتقي الماء علي امر قدر",
+       28819,
+       36979
+      ]
+     ],
+     "windowStartMs": 28500,
+     "windowEndMs": 37164,
+     "isFinal": true
+    },
+    {
+     "words": [
+      [
+       "القدر",
+       36124,
+       37003
+      ]
+     ],
+     "windowStartMs": 35564,
+     "windowEndMs": 37164,
+     "isFinal": false
+    }
+   ]
+  }
+ ]
+}

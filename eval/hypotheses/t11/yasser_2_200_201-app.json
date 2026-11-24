@@ -1,0 +1,465 @@
+{
+ "clips": [
+  {
+   "clipId": "yasser_2_200_201",
+   "observations": [
+    {
+     "words": [
+      [
+       "فبن",
+       359,
+       759
+      ]
+     ],
+     "windowStartMs": 0,
+     "windowEndMs": 1492,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "فمن الناصمن",
+       359,
+       2399
+      ]
+     ],
+     "windowStartMs": 0,
+     "windowEndMs": 2492,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "ومن الناس مين",
+       392,
+       3432
+      ]
+     ],
+     "windowStartMs": 392,
+     "windowEndMs": 3492,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       " يقون",
+       3711,
+       4432
+      ]
+     ],
+     "windowStartMs": 1392,
+     "windowEndMs": 4492,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "ن يقول ربنا",
+       3632,
+       5231
+      ]
+     ],
+     "windowStartMs": 2392,
+     "windowEndMs": 5492,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "فمن الناس من يقول ر نا امنون",
+       359,
+       5639
+      ]
+     ],
+     "windowStartMs": 0,
+     "windowEndMs": 5676,
+     "isFinal": true
+    },
+    {
+     "words": [
+      [
+       "ا  ال",
+       5691,
+       6771
+      ]
+     ],
+     "windowStartMs": 5652,
+     "windowEndMs": 7252,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "اتنا في الدنيا",
+       5691,
+       7371
+      ]
+     ],
+     "windowStartMs": 5652,
+     "windowEndMs": 8252,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "ا",
+       7392,
+       7432
+      ]
+     ],
+     "windowStartMs": 6152,
+     "windowEndMs": 9252,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "ماله فا",
+       8351,
+       9912
+      ]
+     ],
+     "windowStartMs": 7152,
+     "windowEndMs": 10252,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "وما له في الاخره من خريف",
+       8191,
+       11192
+      ]
+     ],
+     "windowStartMs": 8152,
+     "windowEndMs": 11252,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "في الاخره من خلقا",
+       9511,
+       11871
+      ]
+     ],
+     "windowStartMs": 9152,
+     "windowEndMs": 12252,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "واشره من خلاق",
+       10152,
+       13031
+      ]
+     ],
+     "windowStartMs": 10152,
+     "windowEndMs": 13252,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "ا",
+       11511,
+       11551
+      ]
+     ],
+     "windowStartMs": 11152,
+     "windowEndMs": 14252,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "من ا ا في الدنيا وما له في الاخره من خلق",
+       5691,
+       13051
+      ]
+     ],
+     "windowStartMs": 5652,
+     "windowEndMs": 14316,
+     "isFinal": true
+    },
+    {
+     "words": [
+      [
+       "مهم",
+       13675,
+       14275
+      ]
+     ],
+     "windowStartMs": 12716,
+     "windowEndMs": 14316,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "منهم من ين",
+       13675,
+       15275
+      ]
+     ],
+     "windowStartMs": 12716,
+     "windowEndMs": 15316,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "ومنهم من يقون",
+       13496,
+       16256
+      ]
+     ],
+     "windowStartMs": 13216,
+     "windowEndMs": 16316,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "من يقول ربنا مون",
+       14815,
+       17256
+      ]
+     ],
+     "windowStartMs": 14216,
+     "windowEndMs": 17316,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "يقول ربنا ءاتنا عيفرون",
+       15496,
+       18256
+      ]
+     ],
+     "windowStartMs": 15216,
+     "windowEndMs": 18316,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       " ا ءاتنا في النيا",
+       16575,
+       19015
+      ]
+     ],
+     "windowStartMs": 16216,
+     "windowEndMs": 19316,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "ءاتنا في الدنيا حسنه",
+       17255,
+       19976
+      ]
+     ],
+     "windowStartMs": 17216,
+     "windowEndMs": 20316,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "في الدنيا حسنه",
+       18216,
+       20015
+      ]
+     ],
+     "windowStartMs": 18216,
+     "windowEndMs": 21316,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "ومنهم من يقول ربنا ءاتنا في الدنيا حسنه",
+       13515,
+       19995
+      ]
+     ],
+     "windowStartMs": 12716,
+     "windowEndMs": 21324,
+     "isFinal": true
+    },
+    {
+     "words": [
+      [
+       "ربن",
+       20443,
+       21043
+      ]
+     ],
+     "windowStartMs": 19724,
+     "windowEndMs": 21324,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "ر",
+       20443,
+       20483
+      ]
+     ],
+     "windowStartMs": 19724,
+     "windowEndMs": 21612,
+     "isFinal": true
+    },
+    {
+     "words": [
+      [
+       "تفذبا",
+       21923,
+       23243
+      ]
+     ],
+     "windowStartMs": 21684,
+     "windowEndMs": 23284,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "من انا ف الدنيا حس",
+       21684,
+       24123
+      ]
+     ],
+     "windowStartMs": 21684,
+     "windowEndMs": 24284,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "ن في الدنيا حسنه",
+       22223,
+       24583
+      ]
+     ],
+     "windowStartMs": 22184,
+     "windowEndMs": 25284,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       " الدنيا حسنه وفي الاره",
+       23184,
+       26224
+      ]
+     ],
+     "windowStartMs": 23184,
+     "windowEndMs": 26284,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "ا ن  وفي الاخره حسبا",
+       24223,
+       27224
+      ]
+     ],
+     "windowStartMs": 24184,
+     "windowEndMs": 27284,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "وفي الاخره حسنه",
+       25503,
+       27664
+      ]
+     ],
+     "windowStartMs": 25184,
+     "windowEndMs": 28284,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "والاخره حسنه وقعا",
+       26184,
+       29143
+      ]
+     ],
+     "windowStartMs": 26184,
+     "windowEndMs": 29284,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "حنه وقنا عذابا",
+       27263,
+       30063
+      ]
+     ],
+     "windowStartMs": 27184,
+     "windowEndMs": 30284,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "ومن انا في الدنيا حسنه وفي الاخره حسنه وقنا عذاب ال",
+       21684,
+       30123
+      ]
+     ],
+     "windowStartMs": 21684,
+     "windowEndMs": 30348,
+     "isFinal": true
+    },
+    {
+     "words": [
+      [
+       "قنا عذابا",
+       28827,
+       30067
+      ]
+     ],
+     "windowStartMs": 28748,
+     "windowEndMs": 30348,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "قنا عذابا",
+       28827,
+       30107
+      ]
+     ],
+     "windowStartMs": 28748,
+     "windowEndMs": 31348,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "عذاب النار",
+       29407,
+       31927
+      ]
+     ],
+     "windowStartMs": 29248,
+     "windowEndMs": 32068,
+     "isFinal": false
+    }
+   ]
+  }
+ ]
+}

@@ -1,0 +1,825 @@
+{
+ "clips": [
+  {
+   "clipId": "riadmostaf_25_27_31",
+   "observations": [
+    {
+     "words": [
+      [
+       "ويوم يعض",
+       379,
+       1659
+      ]
+     ],
+     "windowStartMs": 180,
+     "windowEndMs": 1780,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "ويوم يعض الظاعن",
+       379,
+       2739
+      ]
+     ],
+     "windowStartMs": 180,
+     "windowEndMs": 2780,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "يوم يعض الظالع",
+       759,
+       3319
+      ]
+     ],
+     "windowStartMs": 680,
+     "windowEndMs": 3780,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "م ب الظالم علي يسي",
+       1759,
+       4680
+      ]
+     ],
+     "windowStartMs": 1680,
+     "windowEndMs": 4780,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "الم علي يديه يسيم",
+       2879,
+       5720
+      ]
+     ],
+     "windowStartMs": 2680,
+     "windowEndMs": 5780,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "ويوم يعض الظالم علي يديه يقون",
+       379,
+       6700
+      ]
+     ],
+     "windowStartMs": 180,
+     "windowEndMs": 6732,
+     "isFinal": true
+    },
+    {
+     "words": [
+      [
+       "يكود يا",
+       7756,
+       8915
+      ]
+     ],
+     "windowStartMs": 7476,
+     "windowEndMs": 9076,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "يقول يليتي",
+       7756,
+       9956
+      ]
+     ],
+     "windowStartMs": 7476,
+     "windowEndMs": 10076,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "يقول يليتني اتخذ",
+       8015,
+       10855
+      ]
+     ],
+     "windowStartMs": 7976,
+     "windowEndMs": 11076,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "ليتني اتخذت نذرا",
+       9256,
+       11855
+      ]
+     ],
+     "windowStartMs": 8976,
+     "windowEndMs": 12076,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "ياتخذت مع الرسول زا",
+       10055,
+       13016
+      ]
+     ],
+     "windowStartMs": 9976,
+     "windowEndMs": 13076,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "اتمع الرسول سبيلا",
+       11015,
+       13935
+      ]
+     ],
+     "windowStartMs": 10976,
+     "windowEndMs": 14076,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "و الرسول سبيلا",
+       11976,
+       14055
+      ]
+     ],
+     "windowStartMs": 11976,
+     "windowEndMs": 15076,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "سبيا",
+       13135,
+       14095
+      ]
+     ],
+     "windowStartMs": 12976,
+     "windowEndMs": 16076,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "يقول يليتني اتخذت مع الرسول سبيلا",
+       7795,
+       14035
+      ]
+     ],
+     "windowStartMs": 7476,
+     "windowEndMs": 16140,
+     "isFinal": true
+    },
+    {
+     "words": [
+      [
+       "ي",
+       15220,
+       15260
+      ]
+     ],
+     "windowStartMs": 14540,
+     "windowEndMs": 16140,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "يويلتي",
+       15220,
+       16739
+      ]
+     ],
+     "windowStartMs": 14540,
+     "windowEndMs": 17140,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "يويلت",
+       15239,
+       16599
+      ]
+     ],
+     "windowStartMs": 15040,
+     "windowEndMs": 18140,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "اته",
+       16079,
+       19080
+      ]
+     ],
+     "windowStartMs": 16040,
+     "windowEndMs": 19140,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "يويلتي السي",
+       18239,
+       20040
+      ]
+     ],
+     "windowStartMs": 17040,
+     "windowEndMs": 20140,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "يويلتي ليتني",
+       18279,
+       20999
+      ]
+     ],
+     "windowStartMs": 18040,
+     "windowEndMs": 21140,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "قيلليتني لم اسي",
+       19079,
+       22040
+      ]
+     ],
+     "windowStartMs": 19040,
+     "windowEndMs": 22140,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "قال رليتني لم ادخر",
+       20040,
+       22800
+      ]
+     ],
+     "windowStartMs": 20040,
+     "windowEndMs": 23140,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "يويلتي ليتني لم اتخذ ولا",
+       18260,
+       23099
+      ]
+     ],
+     "windowStartMs": 14540,
+     "windowEndMs": 23148,
+     "isFinal": true
+    },
+    {
+     "words": [
+      [
+       "اتخ",
+       21907,
+       22588
+      ]
+     ],
+     "windowStartMs": 21548,
+     "windowEndMs": 23148,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "لم اتخذ فلانا",
+       21627,
+       23947
+      ]
+     ],
+     "windowStartMs": 21548,
+     "windowEndMs": 24148,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "لتخذ فلانا خليلا",
+       22087,
+       25088
+      ]
+     ],
+     "windowStartMs": 22048,
+     "windowEndMs": 25148,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "ملانا قليلا",
+       23127,
+       25367
+      ]
+     ],
+     "windowStartMs": 23048,
+     "windowEndMs": 26148,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "لم اتخذ فلانا خليلا",
+       21627,
+       25347
+      ]
+     ],
+     "windowStartMs": 21548,
+     "windowEndMs": 26220,
+     "isFinal": true
+    },
+    {
+     "words": [
+      [
+       "لقد ض",
+       26523,
+       27524
+      ]
+     ],
+     "windowStartMs": 26484,
+     "windowEndMs": 28084,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "لقد اضلني عبديرا",
+       26523,
+       29043
+      ]
+     ],
+     "windowStartMs": 26484,
+     "windowEndMs": 29084,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "قد اضلني عن الذكر",
+       27023,
+       29903
+      ]
+     ],
+     "windowStartMs": 26984,
+     "windowEndMs": 30084,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "دني عن الذكر بعد",
+       28063,
+       30744
+      ]
+     ],
+     "windowStartMs": 27984,
+     "windowEndMs": 31084,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "ام ك م الذر بعد ا",
+       28984,
+       31024
+      ]
+     ],
+     "windowStartMs": 28984,
+     "windowEndMs": 32084,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "ال ل ي بعد اذ جاءي",
+       29984,
+       32984
+      ]
+     ],
+     "windowStartMs": 29984,
+     "windowEndMs": 33084,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "اذ جاءني",
+       31063,
+       33863
+      ]
+     ],
+     "windowStartMs": 30984,
+     "windowEndMs": 34084,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "لقد اضلني عن الذكر بعد اذ جاءني",
+       26523,
+       34643
+      ]
+     ],
+     "windowStartMs": 26484,
+     "windowEndMs": 34764,
+     "isFinal": true
+    },
+    {
+     "words": [
+      [
+       "وكا مسر",
+       35035,
+       36275
+      ]
+     ],
+     "windowStartMs": 34836,
+     "windowEndMs": 36436,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "وكان الشيطن عذيا",
+       35035,
+       37395
+      ]
+     ],
+     "windowStartMs": 34836,
+     "windowEndMs": 37436,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "كان الشيطن لبين",
+       35415,
+       38376
+      ]
+     ],
+     "windowStartMs": 35336,
+     "windowEndMs": 38436,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "وكان الشيطن للابين",
+       35075,
+       38755
+      ]
+     ],
+     "windowStartMs": 34836,
+     "windowEndMs": 38796,
+     "isFinal": true
+    },
+    {
+     "words": [
+      [
+       "سامقه",
+       39307,
+       40307
+      ]
+     ],
+     "windowStartMs": 38868,
+     "windowEndMs": 40468,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "للانسن خجولا",
+       38868,
+       41067
+      ]
+     ],
+     "windowStartMs": 38868,
+     "windowEndMs": 41468,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "الانسن قجولا",
+       38907,
+       41108
+      ]
+     ],
+     "windowStartMs": 38868,
+     "windowEndMs": 41964,
+     "isFinal": true
+    },
+    {
+     "words": [
+      [
+       "والطل",
+       42267,
+       43067
+      ]
+     ],
+     "windowStartMs": 42228,
+     "windowEndMs": 43828,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "طال الرسول",
+       42508,
+       44268
+      ]
+     ],
+     "windowStartMs": 42228,
+     "windowEndMs": 44556,
+     "isFinal": true
+    },
+    {
+     "words": [
+      [
+       "ب النس",
+       45539,
+       46820
+      ]
+     ],
+     "windowStartMs": 45300,
+     "windowEndMs": 46900,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "ب ان قومك",
+       45539,
+       47659
+      ]
+     ],
+     "windowStartMs": 45300,
+     "windowEndMs": 47900,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "ان قوم التخلون",
+       45879,
+       48840
+      ]
+     ],
+     "windowStartMs": 45800,
+     "windowEndMs": 48900,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "ويقومه اتخذوا هلا",
+       46800,
+       49840
+      ]
+     ],
+     "windowStartMs": 46800,
+     "windowEndMs": 49900,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "فماخذوا ها قرءان ",
+       47839,
+       50639
+      ]
+     ],
+     "windowStartMs": 47800,
+     "windowEndMs": 50900,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "اهذا القرءان مهجور",
+       48839,
+       51840
+      ]
+     ],
+     "windowStartMs": 48800,
+     "windowEndMs": 51900,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "واتقوا القرءان مهجورا",
+       49800,
+       52399
+      ]
+     ],
+     "windowStartMs": 49800,
+     "windowEndMs": 52900,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "رب ان قومي اتخذوا هذا القرءان مهجورا",
+       45339,
+       52379
+      ]
+     ],
+     "windowStartMs": 45300,
+     "windowEndMs": 53292,
+     "isFinal": true
+    },
+    {
+     "words": [
+      [
+       "وكذال",
+       53740,
+       54699
+      ]
+     ],
+     "windowStartMs": 53460,
+     "windowEndMs": 55060,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "وكذلك جعلن سي",
+       53740,
+       55980
+      ]
+     ],
+     "windowStartMs": 53460,
+     "windowEndMs": 56060,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "كذلك جعلنا لكفرين",
+       54119,
+       57000
+      ]
+     ],
+     "windowStartMs": 53960,
+     "windowEndMs": 57060,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "جعلنا لكل نبي",
+       55240,
+       57879
+      ]
+     ],
+     "windowStartMs": 54960,
+     "windowEndMs": 58060,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "ونا لكل نبي عبود",
+       55960,
+       59000
+      ]
+     ],
+     "windowStartMs": 55960,
+     "windowEndMs": 59060,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "وكذلك جعلنا لكل نبي عدوا",
+       53740,
+       59420
+      ]
+     ],
+     "windowStartMs": 53460,
+     "windowEndMs": 60012,
+     "isFinal": true
+    },
+    {
+     "words": [
+      [
+       "ورمين",
+       61236,
+       62795
+      ]
+     ],
+     "windowStartMs": 61236,
+     "windowEndMs": 62836,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "ورمين",
+       61236,
+       62955
+      ]
+     ],
+     "windowStartMs": 61236,
+     "windowEndMs": 62988,
+     "isFinal": true
+    },
+    {
+     "words": [
+      [
+       "والكفاجر",
+       64179,
+       65379
+      ]
+     ],
+     "windowStartMs": 64020,
+     "windowEndMs": 65620,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "وكفي بربك نا",
+       64179,
+       66459
+      ]
+     ],
+     "windowStartMs": 64020,
+     "windowEndMs": 66620,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "صفي بربك ناديا",
+       64719,
+       67280
+      ]
+     ],
+     "windowStartMs": 64520,
+     "windowEndMs": 67620,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "بك هاديا ونر",
+       65959,
+       68560
+      ]
+     ],
+     "windowStartMs": 65520,
+     "windowEndMs": 68620,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "ناديا ونصير",
+       66559,
+       69520
+      ]
+     ],
+     "windowStartMs": 66520,
+     "windowEndMs": 69620,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "وكفي بربك هاديا ونصيرا",
+       64179,
+       69659
+      ]
+     ],
+     "windowStartMs": 64020,
+     "windowEndMs": 69804,
+     "isFinal": true
+    }
+   ]
+  }
+ ]
+}

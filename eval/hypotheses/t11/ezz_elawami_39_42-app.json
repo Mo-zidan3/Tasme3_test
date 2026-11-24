@@ -1,0 +1,849 @@
+{
+ "clips": [
+  {
+   "clipId": "ezz_elawami_39_42",
+   "observations": [
+    {
+     "words": [
+      [
+       "الله اد",
+       159,
+       1280
+      ]
+     ],
+     "windowStartMs": 0,
+     "windowEndMs": 1396,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "الله يتوفي",
+       159,
+       2159
+      ]
+     ],
+     "windowStartMs": 0,
+     "windowEndMs": 2396,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "الله يتوفي الاون",
+       375,
+       3336
+      ]
+     ],
+     "windowStartMs": 296,
+     "windowEndMs": 3396,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "الله يتوفي الان",
+       159,
+       4199
+      ]
+     ],
+     "windowStartMs": 0,
+     "windowEndMs": 4236,
+     "isFinal": true
+    },
+    {
+     "words": [
+      [
+       "صلف سحيم",
+       4331,
+       5691
+      ]
+     ],
+     "windowStartMs": 4212,
+     "windowEndMs": 5812,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "فحن موتي",
+       4571,
+       6571
+      ]
+     ],
+     "windowStartMs": 4212,
+     "windowEndMs": 6812,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "فسحين موتها",
+       4571,
+       6811
+      ]
+     ],
+     "windowStartMs": 4212,
+     "windowEndMs": 7692,
+     "isFinal": true
+    },
+    {
+     "words": [
+      [
+       "الاه",
+       8524,
+       9284
+      ]
+     ],
+     "windowStartMs": 8244,
+     "windowEndMs": 9844,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "الله يتوفي",
+       8563,
+       10603
+      ]
+     ],
+     "windowStartMs": 8244,
+     "windowEndMs": 10844,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "الله يتوكي الاون",
+       8823,
+       11784
+      ]
+     ],
+     "windowStartMs": 8744,
+     "windowEndMs": 11844,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "توفل الانفس",
+       9823,
+       12504
+      ]
+     ],
+     "windowStartMs": 9744,
+     "windowEndMs": 12844,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "لالانفس حينمر",
+       10823,
+       13663
+      ]
+     ],
+     "windowStartMs": 10744,
+     "windowEndMs": 13844,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "وافحين موتيا",
+       11744,
+       14343
+      ]
+     ],
+     "windowStartMs": 11744,
+     "windowEndMs": 14844,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "متهاوالتي",
+       13503,
+       15703
+      ]
+     ],
+     "windowStartMs": 12744,
+     "windowEndMs": 15844,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "وايا التيلم ت",
+       13783,
+       16303
+      ]
+     ],
+     "windowStartMs": 13744,
+     "windowEndMs": 16844,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "الله يتوفي الانفس حين موتها والتيلم م",
+       8603,
+       16563
+      ]
+     ],
+     "windowStartMs": 8244,
+     "windowEndMs": 16908,
+     "isFinal": true
+    },
+    {
+     "words": [
+      [
+       "قي ل",
+       15387,
+       15867
+      ]
+     ],
+     "windowStartMs": 15308,
+     "windowEndMs": 16908,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "ايلم تكت فيم",
+       15387,
+       17548
+      ]
+     ],
+     "windowStartMs": 15308,
+     "windowEndMs": 17908,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "لم تمت في منابيه",
+       15927,
+       18687
+      ]
+     ],
+     "windowStartMs": 15808,
+     "windowEndMs": 18908,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "اي لم تمت في منامها",
+       15387,
+       18828
+      ]
+     ],
+     "windowStartMs": 15308,
+     "windowEndMs": 19500,
+     "isFinal": true
+    },
+    {
+     "words": [
+      [
+       "سيمسكن",
+       20195,
+       21395
+      ]
+     ],
+     "windowStartMs": 19956,
+     "windowEndMs": 21556,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "سيهسك التيطور",
+       20195,
+       22515
+      ]
+     ],
+     "windowStartMs": 19956,
+     "windowEndMs": 22556,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "يمسك التي قضع",
+       20495,
+       23216
+      ]
+     ],
+     "windowStartMs": 20456,
+     "windowEndMs": 23556,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "التي قضي عليها قن",
+       21575,
+       24496
+      ]
+     ],
+     "windowStartMs": 21456,
+     "windowEndMs": 24556,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "وقي عليها الموتي",
+       22456,
+       25175
+      ]
+     ],
+     "windowStartMs": 22456,
+     "windowEndMs": 25556,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "اليها الموت ويرسلون",
+       23495,
+       26496
+      ]
+     ],
+     "windowStartMs": 23456,
+     "windowEndMs": 26556,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "لاوت ويرسل اخري",
+       24495,
+       27375
+      ]
+     ],
+     "windowStartMs": 24456,
+     "windowEndMs": 27556,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "فيمسك التي قضي عليها الموت ويرسل الاخري",
+       20195,
+       27395
+      ]
+     ],
+     "windowStartMs": 19956,
+     "windowEndMs": 28332,
+     "isFinal": true
+    },
+    {
+     "words": [
+      [
+       "ويرصلن",
+       29107,
+       30347
+      ]
+     ],
+     "windowStartMs": 28788,
+     "windowEndMs": 30388,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "ويرسل لاخري",
+       29107,
+       31068
+      ]
+     ],
+     "windowStartMs": 28788,
+     "windowEndMs": 31388,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "يرسل العخراي",
+       29367,
+       31087
+      ]
+     ],
+     "windowStartMs": 29288,
+     "windowEndMs": 32388,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "ويرسل العخرين",
+       29107,
+       33027
+      ]
+     ],
+     "windowStartMs": 28788,
+     "windowEndMs": 33132,
+     "isFinal": true
+    },
+    {
+     "words": [
+      [
+       "طفل",
+       33187,
+       33747
+      ]
+     ],
+     "windowStartMs": 33108,
+     "windowEndMs": 34708,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "اتنا",
+       33227,
+       33947
+      ]
+     ],
+     "windowStartMs": 33108,
+     "windowEndMs": 35708,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "ااجمين",
+       34007,
+       36567
+      ]
+     ],
+     "windowStartMs": 33608,
+     "windowEndMs": 36708,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       " اجن",
+       35647,
+       37648
+      ]
+     ],
+     "windowStartMs": 34608,
+     "windowEndMs": 37708,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "واجللنسي",
+       35608,
+       38247
+      ]
+     ],
+     "windowStartMs": 35608,
+     "windowEndMs": 38708,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "مسم",
+       37647,
+       38287
+      ]
+     ],
+     "windowStartMs": 36608,
+     "windowEndMs": 39708,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "سما",
+       37927,
+       40167
+      ]
+     ],
+     "windowStartMs": 37608,
+     "windowEndMs": 40708,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "رالي اجل مسمي",
+       33187,
+       40187
+      ]
+     ],
+     "windowStartMs": 33108,
+     "windowEndMs": 41004,
+     "isFinal": true
+    },
+    {
+     "words": [
+      [
+       "كن",
+       42355,
+       43076
+      ]
+     ],
+     "windowStartMs": 42036,
+     "windowEndMs": 43636,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "انفي د",
+       42355,
+       44435
+      ]
+     ],
+     "windowStartMs": 42036,
+     "windowEndMs": 44636,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "ان في ذلك ليه",
+       42575,
+       45495
+      ]
+     ],
+     "windowStartMs": 42536,
+     "windowEndMs": 45636,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "ان في ذلك لايه",
+       43575,
+       46296
+      ]
+     ],
+     "windowStartMs": 43536,
+     "windowEndMs": 46636,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "لك لايت القبمي",
+       44855,
+       47536
+      ]
+     ],
+     "windowStartMs": 44536,
+     "windowEndMs": 47636,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "ا ايت لقوم",
+       45735,
+       47895
+      ]
+     ],
+     "windowStartMs": 45536,
+     "windowEndMs": 48636,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       " م يون",
+       46655,
+       49576
+      ]
+     ],
+     "windowStartMs": 46536,
+     "windowEndMs": 49636,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "او من يتفكر",
+       47575,
+       50455
+      ]
+     ],
+     "windowStartMs": 47536,
+     "windowEndMs": 50636,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "ان في ذلك لايت لقوم يتفكرون",
+       42355,
+       50635
+      ]
+     ],
+     "windowStartMs": 42036,
+     "windowEndMs": 50700,
+     "isFinal": true
+    },
+    {
+     "words": [
+      [
+       "يتفكر",
+       49259,
+       50500
+      ]
+     ],
+     "windowStartMs": 49100,
+     "windowEndMs": 50700,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "يتفكرون",
+       49259,
+       51499
+      ]
+     ],
+     "windowStartMs": 49100,
+     "windowEndMs": 51564,
+     "isFinal": true
+    },
+    {
+     "words": [
+      [
+       "ام اتخذون",
+       54371,
+       55691
+      ]
+     ],
+     "windowStartMs": 54132,
+     "windowEndMs": 55732,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "ام اتخذو م",
+       54371,
+       55931
+      ]
+     ],
+     "windowStartMs": 54132,
+     "windowEndMs": 56732,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "اتخذوم",
+       54711,
+       55951
+      ]
+     ],
+     "windowStartMs": 54632,
+     "windowEndMs": 57732,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "ومدون",
+       55711,
+       58351
+      ]
+     ],
+     "windowStartMs": 55632,
+     "windowEndMs": 58732,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       " دون الله شفا",
+       57511,
+       59632
+      ]
+     ],
+     "windowStartMs": 56632,
+     "windowEndMs": 59732,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "ول دون لله شفعا",
+       57632,
+       60112
+      ]
+     ],
+     "windowStartMs": 57632,
+     "windowEndMs": 60732,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "واله شفعا",
+       58632,
+       60111
+      ]
+     ],
+     "windowStartMs": 58632,
+     "windowEndMs": 61732,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "ام اتخذوا من دون الله شفعا",
+       54371,
+       60132
+      ]
+     ],
+     "windowStartMs": 54132,
+     "windowEndMs": 62220,
+     "isFinal": true
+    },
+    {
+     "words": [
+      [
+       "قل اول اي",
+       63916,
+       65156
+      ]
+     ],
+     "windowStartMs": 63636,
+     "windowEndMs": 65236,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "قل اولو كادوا لي",
+       63916,
+       66116
+      ]
+     ],
+     "windowStartMs": 63636,
+     "windowEndMs": 66236,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "اولو كانوا لا يملكون",
+       64335,
+       67176
+      ]
+     ],
+     "windowStartMs": 64136,
+     "windowEndMs": 67236,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "كانوا لا يملكون شيا",
+       65175,
+       68095
+      ]
+     ],
+     "windowStartMs": 65136,
+     "windowEndMs": 68236,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "لا يملكون شيا",
+       66175,
+       68215
+      ]
+     ],
+     "windowStartMs": 66136,
+     "windowEndMs": 69236,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "ان لن شيا",
+       67136,
+       68215
+      ]
+     ],
+     "windowStartMs": 67136,
+     "windowEndMs": 70236,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "ولا يع",
+       70015,
+       71095
+      ]
+     ],
+     "windowStartMs": 68136,
+     "windowEndMs": 71236,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "ولا يعقنون",
+       70015,
+       72176
+      ]
+     ],
+     "windowStartMs": 69136,
+     "windowEndMs": 72236,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "قل اولو كانوا لا يملكون شيا ولا يعقلون",
+       63916,
+       72235
+      ]
+     ],
+     "windowStartMs": 63636,
+     "windowEndMs": 72300,
+     "isFinal": true
+    },
+    {
+     "words": [
+      [
+       "ليعقلون",
+       70739,
+       72259
+      ]
+     ],
+     "windowStartMs": 70700,
+     "windowEndMs": 72300,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "ليعقلون",
+       70739,
+       72539
+      ]
+     ],
+     "windowStartMs": 70700,
+     "windowEndMs": 72588,
+     "isFinal": true
+    }
+   ]
+  }
+ ]
+}

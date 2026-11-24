@@ -1,0 +1,837 @@
+{
+ "clips": [
+  {
+   "clipId": "riadmostaf_19_4_7",
+   "observations": [
+    {
+     "words": [
+      [
+       "قال ر",
+       419,
+       1099
+      ]
+     ],
+     "windowStartMs": 180,
+     "windowEndMs": 1780,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "قال رب اي",
+       419,
+       2700
+      ]
+     ],
+     "windowStartMs": 180,
+     "windowEndMs": 2780,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "قال رب اني وهي",
+       680,
+       3639
+      ]
+     ],
+     "windowStartMs": 680,
+     "windowEndMs": 3780,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "فاب اني وهن العظميم",
+       1680,
+       4720
+      ]
+     ],
+     "windowStartMs": 1680,
+     "windowEndMs": 4780,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "فال ني وهنا العظم مليم",
+       2680,
+       5720
+      ]
+     ],
+     "windowStartMs": 2680,
+     "windowEndMs": 5780,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "اجن العظم مني",
+       3719,
+       6680
+      ]
+     ],
+     "windowStartMs": 3680,
+     "windowEndMs": 6780,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "قال رب اني وهن العظم مني",
+       419,
+       7180
+      ]
+     ],
+     "windowStartMs": 180,
+     "windowEndMs": 7308,
+     "isFinal": true
+    },
+    {
+     "words": [
+      [
+       "والتعبر",
+       7715,
+       8835
+      ]
+     ],
+     "windowStartMs": 7476,
+     "windowEndMs": 9076,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "ااشتعل الروس شيا",
+       7715,
+       9996
+      ]
+     ],
+     "windowStartMs": 7476,
+     "windowEndMs": 10076,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "اتعل الراس شيبا",
+       7976,
+       10496
+      ]
+     ],
+     "windowStartMs": 7976,
+     "windowEndMs": 11076,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "هد شيبا",
+       9536,
+       10535
+      ]
+     ],
+     "windowStartMs": 8976,
+     "windowEndMs": 12076,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "ولم يكن ه كفوا احد",
+       11695,
+       12976
+      ]
+     ],
+     "windowStartMs": 9976,
+     "windowEndMs": 13076,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "ولم اكن بموعين",
+       11695,
+       14016
+      ]
+     ],
+     "windowStartMs": 10976,
+     "windowEndMs": 14076,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "لم اكم بدعي",
+       12055,
+       14295
+      ]
+     ],
+     "windowStartMs": 11976,
+     "windowEndMs": 15076,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "ب دعا",
+       13575,
+       14256
+      ]
+     ],
+     "windowStartMs": 12976,
+     "windowEndMs": 16076,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "واشتعل الراس شيبا فلم اكن بدعاشيا",
+       7675,
+       16075
+      ]
+     ],
+     "windowStartMs": 7476,
+     "windowEndMs": 16140,
+     "isFinal": true
+    },
+    {
+     "words": [
+      [
+       "ن",
+       16059,
+       16099
+      ]
+     ],
+     "windowStartMs": 14540,
+     "windowEndMs": 16140,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "الء الكوثر",
+       14540,
+       17020
+      ]
+     ],
+     "windowStartMs": 14540,
+     "windowEndMs": 17140,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "اني ادعايك رب الشدقي",
+       15079,
+       18040
+      ]
+     ],
+     "windowStartMs": 15040,
+     "windowEndMs": 18140,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "اذك انعيك رب شقيا",
+       16079,
+       18759
+      ]
+     ],
+     "windowStartMs": 16040,
+     "windowEndMs": 19140,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "باني ءانايك رب شقيا",
+       14619,
+       18779
+      ]
+     ],
+     "windowStartMs": 14540,
+     "windowEndMs": 19404,
+     "isFinal": true
+    },
+    {
+     "words": [
+      [
+       "وام",
+       20099,
+       21099
+      ]
+     ],
+     "windowStartMs": 19860,
+     "windowEndMs": 21460,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "واني خفت لراي",
+       20099,
+       22419
+      ]
+     ],
+     "windowStartMs": 19860,
+     "windowEndMs": 22460,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "اني خفت المولي",
+       20439,
+       23279
+      ]
+     ],
+     "windowStartMs": 20360,
+     "windowEndMs": 23460,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "واني خفت المولي",
+       21360,
+       23400
+      ]
+     ],
+     "windowStartMs": 21360,
+     "windowEndMs": 24460,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "موالي من ورا",
+       22559,
+       24919
+      ]
+     ],
+     "windowStartMs": 22360,
+     "windowEndMs": 25460,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "ورام",
+       24439,
+       26400
+      ]
+     ],
+     "windowStartMs": 23360,
+     "windowEndMs": 26460,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "رايي",
+       24759,
+       27279
+      ]
+     ],
+     "windowStartMs": 24360,
+     "windowEndMs": 27460,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "واني خفت المولي من وراءي",
+       20099,
+       27739
+      ]
+     ],
+     "windowStartMs": 19860,
+     "windowEndMs": 27852,
+     "isFinal": true
+    },
+    {
+     "words": [
+      [
+       "وكانت ابويثا",
+       28219,
+       29579
+      ]
+     ],
+     "windowStartMs": 28020,
+     "windowEndMs": 29620,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "وكانت امرات ينا",
+       28219,
+       30579
+      ]
+     ],
+     "windowStartMs": 28020,
+     "windowEndMs": 30620,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "كانت امراتي عاقرا",
+       28679,
+       31520
+      ]
+     ],
+     "windowStartMs": 28520,
+     "windowEndMs": 31620,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "وامراتي عاقرا",
+       29520,
+       31800
+      ]
+     ],
+     "windowStartMs": 29520,
+     "windowEndMs": 32620,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "وكانت امراتي عاقرا",
+       28219,
+       31780
+      ]
+     ],
+     "windowStartMs": 28020,
+     "windowEndMs": 32652,
+     "isFinal": true
+    },
+    {
+     "words": [
+      [
+       "فادني",
+       32867,
+       34067
+      ]
+     ],
+     "windowStartMs": 32628,
+     "windowEndMs": 34228,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "فهد لي ملدو",
+       32908,
+       35108
+      ]
+     ],
+     "windowStartMs": 32628,
+     "windowEndMs": 35228,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "واهاد لي من لدنك شي",
+       33128,
+       36128
+      ]
+     ],
+     "windowStartMs": 33128,
+     "windowEndMs": 36228,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "وانا من لدنك وليا",
+       34128,
+       37087
+      ]
+     ],
+     "windowStartMs": 34128,
+     "windowEndMs": 37228,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "فهب لي من لدنك وليا",
+       32867,
+       37187
+      ]
+     ],
+     "windowStartMs": 32628,
+     "windowEndMs": 37740,
+     "isFinal": true
+    },
+    {
+     "words": [
+      [
+       "يبس",
+       38419,
+       38979
+      ]
+     ],
+     "windowStartMs": 38100,
+     "windowEndMs": 39700,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "يبسني ويرثن",
+       38419,
+       40659
+      ]
+     ],
+     "windowStartMs": 38100,
+     "windowEndMs": 40700,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "ل لثني ويرث من اي",
+       38679,
+       41600
+      ]
+     ],
+     "windowStartMs": 38600,
+     "windowEndMs": 41700,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "ويرث من ءال يعقبون",
+       39799,
+       42640
+      ]
+     ],
+     "windowStartMs": 39600,
+     "windowEndMs": 42700,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "رثاث من ءال يعقبون",
+       40600,
+       43640
+      ]
+     ],
+     "windowStartMs": 40600,
+     "windowEndMs": 43700,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "واليحاقون",
+       41600,
+       44640
+      ]
+     ],
+     "windowStartMs": 41600,
+     "windowEndMs": 44700,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "وجع الخون",
+       44399,
+       45640
+      ]
+     ],
+     "windowStartMs": 42600,
+     "windowEndMs": 45700,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "واجعله رب ريا",
+       44439,
+       46640
+      ]
+     ],
+     "windowStartMs": 43600,
+     "windowEndMs": 46700,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "يرثني ويرث من ءال يعقوب واجعله رب رضيا",
+       38419,
+       46699
+      ]
+     ],
+     "windowStartMs": 38100,
+     "windowEndMs": 46764,
+     "isFinal": true
+    },
+    {
+     "words": [
+      [
+       "ا رب ر",
+       45203,
+       46523
+      ]
+     ],
+     "windowStartMs": 45164,
+     "windowEndMs": 46764,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "قاذ راه رب رضيا",
+       45164,
+       47483
+      ]
+     ],
+     "windowStartMs": 45164,
+     "windowEndMs": 47764,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "قال رل رب رضيا",
+       45164,
+       47523
+      ]
+     ],
+     "windowStartMs": 45164,
+     "windowEndMs": 48492,
+     "isFinal": true
+    },
+    {
+     "words": [
+      [
+       "يزكري",
+       48844,
+       50003
+      ]
+     ],
+     "windowStartMs": 48564,
+     "windowEndMs": 50164,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "يزكريا",
+       48844,
+       50643
+      ]
+     ],
+     "windowStartMs": 48564,
+     "windowEndMs": 51164,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       " زكريا",
+       49383,
+       50623
+      ]
+     ],
+     "windowStartMs": 49064,
+     "windowEndMs": 52164,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "ليا",
+       50143,
+       50743
+      ]
+     ],
+     "windowStartMs": 50064,
+     "windowEndMs": 53164,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "الا انا نبر",
+       51103,
+       54064
+      ]
+     ],
+     "windowStartMs": 51064,
+     "windowEndMs": 54164,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "ا انا نبشرك يدير",
+       52263,
+       55104
+      ]
+     ],
+     "windowStartMs": 52064,
+     "windowEndMs": 55164,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "انا نبشرك بغلي",
+       53064,
+       55824
+      ]
+     ],
+     "windowStartMs": 53064,
+     "windowEndMs": 56164,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "يزكريا انا نبشرك بغلم",
+       48844,
+       56523
+      ]
+     ],
+     "windowStartMs": 48564,
+     "windowEndMs": 56652,
+     "isFinal": true
+    },
+    {
+     "words": [
+      [
+       "بغلم",
+       57827,
+       58707
+      ]
+     ],
+     "windowStartMs": 57588,
+     "windowEndMs": 59188,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "لغلم اسمهون",
+       57827,
+       60147
+      ]
+     ],
+     "windowStartMs": 57588,
+     "windowEndMs": 60188,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "والمن اسمه يحيي",
+       58088,
+       60927
+      ]
+     ],
+     "windowStartMs": 58088,
+     "windowEndMs": 61188,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "وظلم اسمه يحيي",
+       57827,
+       60947
+      ]
+     ],
+     "windowStartMs": 57588,
+     "windowEndMs": 61548,
+     "isFinal": true
+    },
+    {
+     "words": [
+      [
+       "لالنجعر",
+       62092,
+       63131
+      ]
+     ],
+     "windowStartMs": 61812,
+     "windowEndMs": 63412,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "لم نجعل له ن",
+       62092,
+       64371
+      ]
+     ],
+     "windowStartMs": 61812,
+     "windowEndMs": 64412,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "منجعل له مفا",
+       62471,
+       65352
+      ]
+     ],
+     "windowStartMs": 62312,
+     "windowEndMs": 65412,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "ان له من قبل سمي",
+       63351,
+       66312
+      ]
+     ],
+     "windowStartMs": 63312,
+     "windowEndMs": 66412,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "من قبل سمي",
+       64431,
+       67271
+      ]
+     ],
+     "windowStartMs": 64312,
+     "windowEndMs": 67412,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "لم نجعل له من قبل سميا",
+       62092,
+       67252
+      ]
+     ],
+     "windowStartMs": 61812,
+     "windowEndMs": 67788,
+     "isFinal": true
+    }
+   ]
+  }
+ ]
+}
