@@ -9,6 +9,7 @@ import com.iqraa.core.align.TrackerConfig
 import com.iqraa.core.align.WordState
 import com.iqraa.core.asr.ModelInfo
 import com.iqraa.core.asr.SherpaOnnxRecognizer
+import com.iqraa.core.asr.SileroVad
 import com.iqraa.core.audio.AudioCapture
 import com.iqraa.core.audio.Segmenter
 import com.iqraa.core.quran.ExpectedWords
