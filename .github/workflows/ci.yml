@@ -311,6 +311,57 @@ jobs:
           fi
           python3 scripts/check_abi_floor.py 27 "$APK"
 
+      # T1 (phone kit): an INSTALLABLE releaseSmoke APK for Mo's real-phone tests — the
+      # same R8-minified, debug-signed build CI decodes on the emulator (V-045c), packaged
+      # with its androidTest APK so scripts/phone_perf.sh can run the instrumented probes
+      # (H4/Q7) on real hardware. Debug-signed = TESTING ONLY, never the Play artifact.
+      - name: Build installable releaseSmoke APKs (app + androidTest, R8 ON)
+        run: |
+          mkdir -p app/src/androidTest/assets/eval/fixtures
+          cp eval/data/fixture_54_10_riadmostaf.wav app/src/androidTest/assets/eval/fixtures/fixture.wav
+          python3 scripts/make_timing_fixture.py app/src/androidTest/assets/eval/fixtures/timing_fixture.wav
+          ./gradlew :app:assembleReleaseSmoke :app:assembleReleaseSmokeAndroidTest -PiqraaTestBuildType=releaseSmoke
+          APP_APK=$(find app/build/outputs/apk/releaseSmoke -name "*.apk" | head -1)
+          TEST_APK=$(find app/build/outputs/apk/androidTest/releaseSmoke -name "*.apk" | head -1)
+          test -n "$APP_APK" && test -n "$TEST_APK" || { echo "FAIL: releaseSmoke APK(s) missing"; exit 1; }
+          mkdir -p phone-kit
+          cp "$APP_APK" phone-kit/app-release-smoke.apk
+          cp "$TEST_APK" phone-kit/app-release-smoke-androidTest.apk
+          unzip -l "$APP_APK" | grep -q 'lib/arm64-v8a/' || { echo "FAIL: smoke APK missing arm64 (Mo's phone is arm64)"; exit 1; }
+          cat > phone-kit/PHONE-KIT-README.txt <<'EOT'
+          iqraa phone kit (releaseSmoke)
+          ==============================
+          app-release-smoke.apk          - the APP: R8/minify ON, DEBUG-SIGNED.
+                                          TESTING ONLY — NOT for Play.
+          app-release-smoke-androidTest.apk - perf probes (scripts/phone_perf.sh), H4/Q7.
+
+          Install WITHOUT Android Studio:
+            1. unzip this artifact
+            2. copy app-release-smoke.apk to the phone (USB / cloud / any file transfer)
+            3. tap it in the phone's Files app; allow "install from this source" when asked
+            (or: adb install -r app-release-smoke.apk on a computer with USB debugging)
+
+          Then follow docs/PHONE_TEST.md (H1-H4) in the repo.
+          EOT
+
+      - uses: actions/upload-artifact@v4
+        id: smoke_apk
+        with:
+          name: app-release-smoke.apk
+          retention-days: 7
+          path: phone-kit/
+
+      - name: Phone-kit summary (download URL + signing warning)
+        run: |
+          echo "### Phone kit — installable app-release-smoke.apk" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Download: ${{ steps.smoke_apk.outputs.artifact-url }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Contents: app-release-smoke.apk (the app) + app-release-smoke-androidTest.apk (H4 perf probes for scripts/phone_perf.sh) + PHONE-KIT-README.txt." >> $GITHUB_STEP_SUMMARY
+          echo "R8/minify ON; DEBUG-SIGNED — for TESTING only, NOT for Play (the Play artifact is signed with Mo's release keystore, Phase 4)." >> $GITHUB_STEP_SUMMARY
+          echo "Install on a real phone WITHOUT Android Studio: download, unzip, copy app-release-smoke.apk to the phone, tap it in Files, allow install-from-this-source (or: adb install -r app-release-smoke.apk)." >> $GITHUB_STEP_SUMMARY
+          echo "Then run the H1-H4 checklist: docs/PHONE_TEST.md. Artifact retention is 7 days — re-run the release job from the Actions tab to regenerate it." >> $GITHUB_STEP_SUMMARY
+
       # V-035 P0: bundletool measurement lives HERE (was a separate `size` job racing the
       # release-outputs artifact). Pinned jar + sha verification + in-job debug keystore
       # (never committed). ≤80 MB target warn, >85 MB hard fail. Prints to the step summary.
