@@ -58,103 +58,104 @@ class MicAndPipelineInstrumentedTest {
     }
 
     @Test
-    fun pipeline_endToEnd_fixture_realVadSegmenterRecognizerTracker(): Unit = runBlocking {
-        val ctx = InstrumentationRegistry.getInstrumentation().targetContext
-        val fixture = repoAsset("eval/fixtures/fixture.wav")
-        org.junit.Assume.assumeTrue(
-            "SKIPPED (loudly): fixture absent — CI copies the committed 54:10 clip into androidTest assets",
-            fixture != null,
-        )
-
-        // expected words: al-Qamar 54:10 from the committed Tanzil asset
-        val ayahs = QuranText.load().filter { it.surah == SURAH_QAMAR && it.ayah == AYAH_10 }
-        val entries = ExpectedWords.forRange(ayahs, SURAH_QAMAR, AYAH_10, AYAH_10)
-        assertTrue("54:10 must resolve to words", entries.isNotEmpty())
-        val expected =
-            entries.mapIndexed { i, e ->
-                ExpectedWord(i, e.surah, e.ayah, e.text, e.optionalPrefix)
-            }
-
-        val recognizer =
-            SherpaOnnxRecognizer(
-                context = ctx,
-                info =
-                    ModelInfo(
-                        id = "quran-asr-small",
-                        revision = "0c2744b9d70aaf45ba574c30c5d318c575258e66",
-                        sha256 = "88f9df290d57b8890275d79187b77515aeeb12626a42bc76cbd0f8bfcaff00f0",
-                    ),
+    fun pipeline_endToEnd_fixture_realVadSegmenterRecognizerTracker(): Unit =
+        runBlocking {
+            val ctx = InstrumentationRegistry.getInstrumentation().targetContext
+            val fixture = repoAsset("eval/fixtures/fixture.wav")
+            org.junit.Assume.assumeTrue(
+                "SKIPPED (loudly): fixture absent — CI copies the committed 54:10 clip into androidTest assets",
+                fixture != null,
             )
-        recognizer.load()
-        try {
-            val tracker = RecitationTrackerImpl().apply { reset(expected, TrackerConfig()) }
-            val session = ReciteSession(recognizer, tracker)
-            val vad =
-                Vad(
-                    assetManager = ctx.assets,
-                    config =
-                        VadModelConfig().apply {
-                            sampleRate = SAMPLE_RATE
-                            sileroVadModelConfig.model = VAD_ASSET
-                        },
-                )
-            val engine =
-                PipelineEngine(
-                    sampleRate = SAMPLE_RATE,
-                    vad = { samples -> vad.compute(samples) > VAD_SPEECH_THRESHOLD },
-                    segmenter = Segmenter(),
-                    session = session,
-                )
 
-            val pcm = readMono16kPcm(fixture!!)
-            // feed in 100 ms chunks (the AudioCapture cadence), then 1 s of trailing silence
-            // so the segmenter emits the pause-final over the whole clip
-            var i = 0
-            while (i < pcm.size) {
-                val end = minOf(i + CHUNK_SAMPLES, pcm.size)
-                engine.onChunk(pcm.copyOfRange(i, end))
-                i = end
-            }
-            repeat(TRAILING_SILENCE_CHUNKS) { engine.onChunk(FloatArray(CHUNK_SAMPLES)) }
-
-            val states = tracker.snapshot().states
-            val stateString =
-                expected.indices.joinToString("") { idx ->
-                    when (states[idx]) {
-                        WordState.CORRECT -> "C"
-                        WordState.CLOSE -> "L"
-                        WordState.WRONG -> "W"
-                        WordState.MISSED -> "M"
-                        WordState.HINTED -> "H"
-                        else -> "."
-                    }
+            // expected words: al-Qamar 54:10 from the committed Tanzil asset
+            val ayahs = QuranText.load().filter { it.surah == SURAH_QAMAR && it.ayah == AYAH_10 }
+            val entries = ExpectedWords.forRange(ayahs, SURAH_QAMAR, AYAH_10, AYAH_10)
+            assertTrue("54:10 must resolve to words", entries.isNotEmpty())
+            val expected =
+                entries.mapIndexed { i, e ->
+                    ExpectedWord(i, e.surah, e.ayah, e.text, e.optionalPrefix)
                 }
-            println("[E2E-54-10] states=$stateString summary=${tracker.summary().headline}")
-            android.util.Log.i("IqraaE2E", "states=$stateString summary=${tracker.summary().headline}")
 
-            assertEquals(
-                "54:10 fixture words must all reach CORRECT/CLOSE (states=$stateString)",
-                expected.size,
-                states.count { it.value == WordState.CORRECT || it.value == WordState.CLOSE },
-            )
-            assertEquals(
-                "no MISSED on the clean studio fixture (states=$stateString)",
-                0,
-                tracker.summary().missed,
-            )
-            assertEquals(
-                "no WRONG on the clean studio fixture (states=$stateString)",
-                0,
-                tracker.summary().wrong,
-            )
-            assertTrue(
-                "the §9.6 headline must exist (got ${tracker.summary().headline})",
-                tracker.summary().headline.contains("صحيحة"),
-            )
-        } finally {
-            recognizer.close()
+            val recognizer =
+                SherpaOnnxRecognizer(
+                    context = ctx,
+                    info =
+                        ModelInfo(
+                            id = "quran-asr-small",
+                            revision = "0c2744b9d70aaf45ba574c30c5d318c575258e66",
+                            sha256 = "88f9df290d57b8890275d79187b77515aeeb12626a42bc76cbd0f8bfcaff00f0",
+                        ),
+                )
+            recognizer.load()
+            try {
+                val tracker = RecitationTrackerImpl().apply { reset(expected, TrackerConfig()) }
+                val session = ReciteSession(recognizer, tracker)
+                val vad =
+                    Vad(
+                        assetManager = ctx.assets,
+                        config =
+                            VadModelConfig().apply {
+                                sampleRate = SAMPLE_RATE
+                                sileroVadModelConfig.model = VAD_ASSET
+                            },
+                    )
+                val engine =
+                    PipelineEngine(
+                        sampleRate = SAMPLE_RATE,
+                        vad = { samples -> vad.compute(samples) > VAD_SPEECH_THRESHOLD },
+                        segmenter = Segmenter(),
+                        session = session,
+                    )
+
+                val pcm = readMono16kPcm(fixture!!)
+                // feed in 100 ms chunks (the AudioCapture cadence), then 1 s of trailing silence
+                // so the segmenter emits the pause-final over the whole clip
+                var i = 0
+                while (i < pcm.size) {
+                    val end = minOf(i + CHUNK_SAMPLES, pcm.size)
+                    engine.onChunk(pcm.copyOfRange(i, end))
+                    i = end
+                }
+                repeat(TRAILING_SILENCE_CHUNKS) { engine.onChunk(FloatArray(CHUNK_SAMPLES)) }
+
+                val states = tracker.snapshot().states
+                val stateString =
+                    expected.indices.joinToString("") { idx ->
+                        when (states[idx]) {
+                            WordState.CORRECT -> "C"
+                            WordState.CLOSE -> "L"
+                            WordState.WRONG -> "W"
+                            WordState.MISSED -> "M"
+                            WordState.HINTED -> "H"
+                            else -> "."
+                        }
+                    }
+                println("[E2E-54-10] states=$stateString summary=${tracker.summary().headline}")
+                android.util.Log.i("IqraaE2E", "states=$stateString summary=${tracker.summary().headline}")
+
+                assertEquals(
+                    "54:10 fixture words must all reach CORRECT/CLOSE (states=$stateString)",
+                    expected.size,
+                    states.count { it.value == WordState.CORRECT || it.value == WordState.CLOSE },
+                )
+                assertEquals(
+                    "no MISSED on the clean studio fixture (states=$stateString)",
+                    0,
+                    tracker.summary().missed,
+                )
+                assertEquals(
+                    "no WRONG on the clean studio fixture (states=$stateString)",
+                    0,
+                    tracker.summary().wrong,
+                )
+                assertTrue(
+                    "the §9.6 headline must exist (got ${tracker.summary().headline})",
+                    tracker.summary().headline.contains("صحيحة"),
+                )
+            } finally {
+                recognizer.close()
+            }
         }
-    }
     // NOTE: the silero Vad instance is per-test and released by its own finalize(); keep the
     // test self-contained (V-042 evidence: EMULATOR numbers, not a phone).
 
