@@ -55,6 +55,17 @@ android {
                 "proguard-rules.pro",
             )
         }
+        // T10 (V-045): releaseSmoke proves the R8-KEPT build decodes on device — inherits
+        // release EXACTLY (minify + shrink + the SAME proguard files) but is debug-signed
+        // so the emulator can install it. connectedReleaseSmokeAndroidTest runs a minimal
+        // decode assertion on the committed 54:10 fixture; if R8 strips a JNI entry point
+        // or a serialization shape the recognizer needs, this fails LOUDLY. Never disable
+        // minify to make it pass — fix the keep rules.
+        create("releaseSmoke") {
+            initWith(getByName("release"))
+            matchingFallbacks += listOf("release")
+            signingConfig = signingConfigs.getByName("debug")
+        }
     }
 
     buildFeatures {

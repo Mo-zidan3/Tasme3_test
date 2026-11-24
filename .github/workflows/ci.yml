@@ -454,6 +454,14 @@ jobs:
           script: |
             adb shell settings put global window_animation_scale 0
             ./gradlew :app:connectedDebugAndroidTest || { echo "instrumented run failed"; exit 1; }
+            # T10 (V-045): the R8-MINIFIED build must decode on device — releaseSmoke
+            # (inherits release: minify+shrink+same proguard files, debug-signed) runs ONE
+            # decode assertion on the committed 54:10 fixture. R8 keep-rule breakage fails
+            # loudly here; minify is NEVER disabled to pass.
+            ./gradlew :app:connectedReleaseSmokeAndroidTest \
+              -Pandroid.testInstrumentationRunnerArguments.class=com.iqraa.app.ReleaseSmokeInstrumentedTest \
+              || { echo "releaseSmoke FAILED — R8 keep rules (see V-045); do NOT disable minify"; exit 1; }
+            adb logcat -d -s IqraaReleaseSmoke | tail -3 || true
             # T5: perf-smoke numbers into the job log (INDICATIVE — emulator, not a phone)
             adb logcat -d -s IqraaPerfSmoke | tail -5 || true
             # T9: EXECUTE the manual script's emulator subset; evidence lands in the job log
