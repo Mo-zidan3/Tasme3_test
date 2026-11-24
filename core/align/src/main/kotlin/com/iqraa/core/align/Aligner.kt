@@ -191,10 +191,13 @@ object Aligner {
     private const val OBSERVED_CONSUMED_SCALE = 1_000L
 
     /**
-     * A1 tie-break key for an end candidate (i, j): forward spans (end index j at/after the
-     * pointer hint) rank by distance ahead; behind spans rank after ALL forward ones, by
-     * distance behind. Secondary: more observed consumed (larger i) wins — fewer free
-     * trailing extras. hint < 0 (no hint): pure furthest-forward (largest j), then larger i.
+     * A1 tie-break key for an end candidate (i, j): FORWARD spans (end index j at/after the
+     * pointer hint) rank nearest-forward; BEHIND spans rank after ALL forward ones,
+     * earliest-first (V-031/§9.4: re-covered audio behind the pointer re-matches its own
+     * earliest copy or surfaces as EXTRA — never pulls a phantom span toward the pointer;
+     * this also keeps a sim-0.5 stale repeat EXTRA, `repeated word before pointer minus
+     * backWords` regression). Secondary: more observed consumed (larger i) wins.
+     * hint < 0 (no hint): pure furthest-forward (largest j), then larger i.
      */
     private fun tieBreakKey(i: Int, j: Int, hint: Int, m: Int): Long {
         val forward: Long = if (hint < 0) {
@@ -202,7 +205,7 @@ object Aligner {
         } else if (j >= hint) {
             (j - hint).toLong()
         } else {
-            BEHIND_PENALTY + (hint - j).toLong()
+            BEHIND_PENALTY + j.toLong()
         }
         return forward * OBSERVED_CONSUMED_SCALE + (m - i).coerceAtLeast(0).toLong()
     }
