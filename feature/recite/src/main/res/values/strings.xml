@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- T8 recite-scoped strings (EN default; ar is PRIMARY in values-ar). UNREVIEWED until Mo signs off. -->
+    <string name="summary_title">Session summary</string>
+    <string name="summary_close_fmt">Close to the text: %1$d</string>
+    <string name="summary_missed_fmt">Not recited: %1$d</string>
+    <string name="summary_wrong_fmt">Please review: %1$d</string>
+    <string name="summary_hinted_fmt">Hinted: %1$d</string>
+    <string name="summary_extra_fmt">Extra words: %1$d</string>
+    <string name="resync_title">Start from a specific ayah</string>
+    <string name="model_load_error">The recognition engine failed to load. Retry?</string>
+    <string name="retry">Retry</string>
+    <string name="try_other_model">Use the other bundled model</string>
+    <string name="lost_tracking_banner">Lost tracking of the recitation. Tap to start from a specific ayah.</string>
+    <string name="session_paused">Session paused</string>
+    <string name="resume_following">Return to following</string>
+    <string name="resume_countdown_fmt">Resuming in %1$d…</string>
+    <string name="light_mode_badge">Light mode</string>
+    <string name="hint_button">Hint</string>
+    <string name="resync_cancel">Close</string>
+</resources>

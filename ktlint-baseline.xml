@@ -72,9 +72,6 @@
         <error line="70" column="52" source="standard:argument-list-wrapping" />
         <error line="70" column="69" source="standard:argument-list-wrapping" />
     </file>
-    <file name="app/src/main/kotlin/com/iqraa/tasmee/MainActivity.kt">
-        <error line="29" column="57" source="standard:chain-method-continuation" />
-    </file>
     <file name="core/align/src/main/kotlin/com/iqraa/core/align/Aligner.kt">
         <error line="9" column="22" source="standard:class-signature" />
         <error line="9" column="46" source="standard:class-signature" />

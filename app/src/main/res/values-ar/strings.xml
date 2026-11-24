@@ -12,7 +12,6 @@
     <string name="session_paused">الجلسة متوقفة</string>
     <string name="mic_unavailable">تعذّر الوصول إلى المايك</string>
     <string name="resume_countdown_fmt">استئناف خلال %1$d…</string>
-    <string name="summary_title">ملخص الجلسة</string>
     <string name="correct_count_fmt">صحيحة: %1$d من %2$d</string>
     <string name="close_count_fmt">قريبة من النص: %1$d</string>
     <string name="previous_session_summary">ملخص الجلسة السابقة</string>
@@ -26,4 +25,10 @@
     <string name="hint_button">تلميح</string>
     <string name="not_recited">لم تُقرأ</string>
     <string name="delete_all_history">حذف كل السجل</string>
+    <string name="onboarding_allow_mic">السماح بالمايكروفون والمتابعة</string>
+    <string name="onboarding_later">لاحقًا</string>
+    <string name="about_title">حول التطبيق</string>
+    <string name="about_licenses_title">التراخيص</string>
+    <string name="about_tanzil_attribution">نص القرآن: تنزيل (tanzil.net) — CC-BY 3.0</string>
+    <string name="about_font_attribution">خط المصحف: أميري قرآن (OFL)</string>
 </resources>
