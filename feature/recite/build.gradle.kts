@@ -30,6 +30,10 @@ android {
 
 dependencies {
     implementation(project(":core:designsystem"))
+    implementation(project(":core:session"))
+    implementation(project(":core:audio"))
+    implementation(project(":core:align"))
+    implementation(project(":core:asr"))
     implementation(libs.coroutines.core)
     implementation(libs.coroutines.android)
     implementation(project(":core:quran"))
