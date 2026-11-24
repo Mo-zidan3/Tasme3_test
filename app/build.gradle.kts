@@ -67,8 +67,9 @@ android {
             signingConfig = signingConfigs.getByName("debug")
             // V-045: the androidTest APK's R8 pass reads testProguardFiles (proguardFiles
             // only feed the APP apk — run 45368930517 proved the app-side file did not
-            // reach it). Suppresses the errorprone/javax.lang.model missing classes.
-            testProguardFiles += "smoke-test-proguard.pro"
+            // reach it). AGP 9 exposes a val MutableList<File> — elements must be Files
+            // (run 45369846137: 'val cannot be reassigned' on the String +=).
+            testProguardFiles += file("smoke-test-proguard.pro")
         }
     }
 
