@@ -144,7 +144,15 @@ jobs:
       # job is PR-skipped, and 45339976550/45340839779 proved androidTest compiles ONLY on
       # main otherwise. Cheap compile gate, no emulator needed.
       - name: ReleaseSmoke compile gate (androidTest compiles on PRs)
-        run: ./gradlew :app:compileReleaseSmokeAndroidTestKotlin
+        run: |
+          # discovery: what releaseSmoke tasks does AGP actually create? (the guessed
+          # compileReleaseSmokeAndroidTestKotlin was NOT found — run 45360827210)
+          ./gradlew -q :app:tasks --all | grep -iE "smoke" | sort > smoke-tasks.txt || true
+          cat smoke-tasks.txt
+          if ! grep -q "compileReleaseSmokeAndroidTestKotlin" smoke-tasks.txt; then
+            echo "FAIL: releaseSmoke androidTest variant not created — the connectedReleaseSmokeAndroidTest step on main would fail too (T10 design flaw, not a flake)"; exit 1
+          fi
+          ./gradlew :app:compileReleaseSmokeAndroidTestKotlin
 
       # V-036 P2: ktlint 1.8.0 CLI pinned by sha256 — standalone runner, no plugin-classpath risk.
       # Gate semantics: (a) parse errors ("Not a valid Kotlin file") FAIL unconditionally;
