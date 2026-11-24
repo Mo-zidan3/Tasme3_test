@@ -1032,3 +1032,19 @@ when that file exists and is pasted back.
 
 **T4 prune:** minSdk 27 (ratified, runtime-proven, D-022) and AAB 55.9 MB (budget MET,
 D-023) removed from Needs-from-Mo — 6 genuinely open items remain.
+
+### V-047b CLOSED on main — all five jobs green; the 429 detour, honestly recorded (2026-11-24)
+Main run **45459779954** (merge commit ceb3907): build, secrets-scan, instrumented 27/35
+ALL GREEN (releaseSmoke decoded 5 words on both APIs) — but the **release job failed on
+`error_prone_annotations` resolution: "Received status code 429" from repo.maven.apache.org**
+(the V-006/V-012 transient class; the same deps resolved fine in PR runs 45458565154/
+45459650777). The PAT cannot re-run jobs (403) — so the fix landed as 51cd8d4: the
+releaseSmoke APK assembly step now carries the same 60/120/240/480 s backoff the pinned
+asset fetches already use (retry, never skip, still hard-fails loudly).
+
+**Main run 45461715778 (51cd8d4): ALL FIVE JOBS GREEN** — build 138685760838, release
+138685761527, secrets-scan 138685761318, instrumented-27 138685761437, instrumented-35
+138685761363. Decode proof re-confirmed on device: `IqraaReleaseSmoke: decoded 5 words
+(R8 build)` in both instrumented job logs. The T11 replay totals match V-045b identically
+(zero tracker-level regression). The phone-kit artifact `app-release-smoke.apk`
+(id 14953945423, ~58 MB: app + androidTest APKs + README) is on this run.
