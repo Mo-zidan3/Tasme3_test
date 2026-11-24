@@ -1,0 +1,28 @@
+### T11 app-shaped vs whole-clip — Mo's 6 clips, quran-asr-small (model space N())
+### LABEL: INDICATIVE — 3 speakers × STUDIO recitations; §13 phone gate NOT met
+
+clip                     mode           WER     CER      words
+ezz_elawami_39_42        whole       25.0%  19.9%    33/40
+                         app        367.5% 346.0%   182/40
+                         windows    partials=58 finals=12
+riadmostaf_19_4_7        whole        4.3%   1.7%    46/47
+                         app        351.1% 333.9%   211/47
+                         windows    partials=58 finals=11
+riadmostaf_5_23          whole        0.0%   1.0%    21/21
+                         app        147.6% 102.0%    33/21
+                         windows    partials=7 finals=11
+riadmostaf_54_10_12      whole        5.3%   2.4%    19/19
+                         app        384.2% 316.7%    89/19
+                         windows    partials=35 finals=7
+riadmostaf_25_27_31      whole        8.3%   5.7%    46/48
+                         app        325.0% 280.6%   199/48
+                         windows    partials=56 finals=12
+yasser_2_200_201         whole       42.1%  34.4%    27/38
+                         app        284.2% 214.6%   129/38
+                         windows    partials=33 finals=5
+
+macro WER whole-clip 14.2% vs app-shaped 309.9%
+macro CER whole-clip 10.8% vs app-shaped 265.6%
+
+NOTE: app-shaped decodes each window's audio INDEPENDENTLY (the shipped path); window dedup is (text, startMs/40) — the tracker's EXTRA-dedup law (V-031).
+INDICATIVE — studio audio, not phone mics; the §13 phone gate stays NOT met.

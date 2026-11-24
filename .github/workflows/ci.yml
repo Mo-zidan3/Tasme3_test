@@ -135,6 +135,11 @@ jobs:
       - name: Coverage gate (core:quran + core:align ≥85% lines, from JaCoCo XML)
         run: python3 scripts/ci_coverage_gate.py 85
 
+      # T11 (B5): app-shaped vs whole-clip replay through the REAL tracker — the §13
+      # harness measures the SHIPPED pipeline. INDICATIVE labels in the report.
+      - name: T11 eval replay (tools:eval over committed hypotheses)
+        run: bash scripts/t11_replay.sh
+
       # V-036 P2: ktlint 1.8.0 CLI pinned by sha256 — standalone runner, no plugin-classpath risk.
       # Gate semantics: (a) parse errors ("Not a valid Kotlin file") FAIL unconditionally;
       # (b) the committed ktlint-baseline.xml (V-036: ktlint's OWN baseline format, generated

@@ -821,3 +821,50 @@ SegmenterSimulator; basmala recited/omitted — OPTIONAL_PREFIX never penalized)
 ALL results SYNTHETIC (simulator streams, not real audio); the §13 phone-mic gate
 (≥60 held-out correct clips, ≥3 speakers, phone mic, FA ≤5%) remains NOT met — WRONG still
 renders as CLOSE in the app.
+
+### V-042 Stage B (T7/T8/T9) — PRs #4/#5/#6, stacked (2026-11-24)
+CI is the verifier (§0: local Gradle stays 429-blocked). Merge order T7 → T8 → T9; each PR
+run tests the cumulative tree. Evidence quoted from the runs' logs; anything still in flight
+at report time is labeled PENDING, never claimed green.
+- **T7 (PR #4, feat/t7-pipeline)**: real AudioCapture (AudioRecord 16k mono PCM16→float,
+  VOICE_RECOGNITION, MIC_UNAVAILABLE on mic-taken/revoked — never crash); host-testable
+  PipelineEngine (VAD predicate → real Segmenter → 12s session ring → ReciteSession) + 2
+  host tests (fake recognizer kept); ReciteViewModel on the §10.4 lifecycle (pause releases
+  the mic immediately; resume after 1 s countdown; resync → session.reanchor). Instrumented:
+  micCapture_smoke + pipeline_endToEnd_fixture (54:10 clip through REAL silero VAD +
+  Segmenter + SherpaOnnxRecognizer + tracker). Defects caught by CI runs and fixed:
+  missing viewModelScope import (45297626868/45298125430), JUnit5 assertion argument order
+  (45299033107). Final state: run with head 20b382f PENDING at report time.
+- **T8 (PR #5, feat/t8-mvp-features, rebased onto T7)**: F7 OnboardingScreen (rationale +
+  riwaya + limitations + denied-permanently deep link), F8 AboutScreen (shipped notices
+  rendered from assets, Tanzil attribution + tanzil.net via browser intent, Amiri OFL),
+  §9.6 SummaryScreen (tappable flagged list, §10.2 encoding), §10.6 ResyncPickerDialog
+  (ayah picker within range), §11 ModelLoadErrorCard, §10.5 DegradedBadge; onboarding-first
+  NavHost. Defect caught: branched off main without T7's unmerged deps (45298201476) →
+  rebased onto T7's tip.
+- **T9 (PR #6, feat/t9-ui-tests, stacked on T8)**: ReciteUiTest (tasmee-only hint §10.3,
+  pause banner, glyph-assertable §10.2 encoding), MainActivityUiTest (F7 grant flow,
+  rotation survival, 2.0× font scale), WCAG AA ContrastTest COMPUTED for the §10.2 palette
+  on light AND dark surfaces (measured failures 4.42/4.24 fixed via darkened light shades +
+  new theme-adapted dark variants through FeedbackEncoding.adapted: light 5.9–6.6:1, dark
+  8.1–11.0:1); manual script M1–M5 EXECUTED in CI (scripts/manual_ui_script.sh after the
+  instrumented tests; evidence in the instrumented-api* artifact); H1–H4 hardware steps
+  honestly OPEN in docs/TESTING.md — **Phase 3 NOT claimed DONE until Mo executes them**.
+
+### V-043 Stage B (T11) — app-shaped §13 harness (PR #7, stacked on T9) (2026-11-24)
+- scripts/t11_app_shaped_eval.py: silero VAD (the SHIPPED silero_vad.onnx weights driven
+  via onnxruntime directly — the pip sherpa-onnx 2.0.2 python VoiceActivityDetector
+  produced ZERO speech segments on every feed pattern tried (whole/chunked/512-aligned,
+  with flush; 4 attempts, documented in the script)) → the Kotlin Segmenter law (partials
+  1000/2500 ms, pause-final 500 ms, force-cut 8 s + 1 s overlap, VAD pad 300 ms) → EACH
+  WINDOW'S AUDIO decoded separately → session-global timings.
+- 12 hypothesis files (6 clips × whole-clip/app-shaped) + 6 expected files committed as
+  DERIVED TEXT (word lists + timings; no audio, nothing gated — the V-038 authorization
+  covers evaluation use).
+- Scoring metric: the REAL RecitationTracker's per-word states via tools:eval replay in CI
+  (scripts/t11_replay.sh). An initial local word-union WER (309% "app-shaped") was a
+  SCORING BUG (overlapping partials re-cover audio by design — the tracker's per-word
+  evidence handles that) and is explicitly NOT the metric; recorded here so the number
+  never gets quoted.
+- Whole-clip baseline (V-038, unchanged): macro WER 14.2% / CER 10.2%.
+- ALL labels INDICATIVE: studio clips; §13 phone gate NOT met; WRONG renders CLOSE.

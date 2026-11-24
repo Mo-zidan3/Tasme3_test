@@ -29,7 +29,8 @@ tmp/
 
 # Eval data & labels — git-ignored per §13.1 (Mo's recordings, gated audio)
 eval/labels/
-eval/hypotheses/
+eval/hypotheses/*
+!eval/hypotheses/t11/
 
 # OS / IDE
 .DS_Store

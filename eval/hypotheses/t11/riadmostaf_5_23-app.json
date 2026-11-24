@@ -1,0 +1,299 @@
+{
+ "clips": [
+  {
+   "clipId": "riadmostaf_5_23",
+   "observations": [
+    {
+     "words": [
+      [
+       "طه",
+       199,
+       759
+      ]
+     ],
+     "windowStartMs": 0,
+     "windowEndMs": 876,
+     "isFinal": true
+    },
+    {
+     "words": [
+      [
+       "وخافون",
+       3924,
+       5243
+      ]
+     ],
+     "windowStartMs": 3924,
+     "windowEndMs": 5292,
+     "isFinal": true
+    },
+    {
+     "words": [
+      [
+       "مل",
+       8052,
+       8131
+      ]
+     ],
+     "windowStartMs": 8052,
+     "windowEndMs": 8844,
+     "isFinal": true
+    },
+    {
+     "words": [
+      [
+       "ودخو",
+       12091,
+       13091
+      ]
+     ],
+     "windowStartMs": 11892,
+     "windowEndMs": 13492,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "ودخلوع",
+       12091,
+       13331
+      ]
+     ],
+     "windowStartMs": 11892,
+     "windowEndMs": 13740,
+     "isFinal": true
+    },
+    {
+     "words": [
+      [
+       "فاذا",
+       18220,
+       18819
+      ],
+      [
+       "تقر",
+       19099,
+       19419
+      ]
+     ],
+     "windowStartMs": 17940,
+     "windowEndMs": 19540,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "فاذا",
+       18220,
+       18819
+      ],
+      [
+       "دخلتم",
+       19099,
+       20139
+      ]
+     ],
+     "windowStartMs": 17940,
+     "windowEndMs": 20540,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "اذا",
+       18599,
+       18879
+      ],
+      [
+       "دخلتموه",
+       19120,
+       20720
+      ],
+      [
+       "فا",
+       20999,
+       21480
+      ]
+     ],
+     "windowStartMs": 18440,
+     "windowEndMs": 21540,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "فاذا",
+       18220,
+       18819
+      ],
+      [
+       "دخلتموه",
+       19099,
+       20739
+      ],
+      [
+       "فاموزمون",
+       21019,
+       22219
+      ]
+     ],
+     "windowStartMs": 17940,
+     "windowEndMs": 22284,
+     "isFinal": true
+    },
+    {
+     "words": [
+      [
+       "لم",
+       22395,
+       22875
+      ]
+     ],
+     "windowStartMs": 22356,
+     "windowEndMs": 23532,
+     "isFinal": true
+    },
+    {
+     "words": [
+      [
+       "لم",
+       23547,
+       23627
+      ],
+      [
+       "يلدولم",
+       23707,
+       24067
+      ],
+      [
+       "يولد",
+       24147,
+       24387
+      ]
+     ],
+     "windowStartMs": 23508,
+     "windowEndMs": 24492,
+     "isFinal": true
+    },
+    {
+     "words": [
+      [
+       "كيف",
+       28251,
+       28611
+      ],
+      [
+       "فتعبر",
+       28691,
+       29691
+      ]
+     ],
+     "windowStartMs": 28212,
+     "windowEndMs": 29812,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "ب",
+       28212,
+       28252
+      ],
+      [
+       "بيف",
+       28492,
+       28691
+      ],
+      [
+       "فتعكلون",
+       28772,
+       30411
+      ]
+     ],
+     "windowStartMs": 28212,
+     "windowEndMs": 30444,
+     "isFinal": true
+    },
+    {
+     "words": [
+      [
+       "وعاثا",
+       31227,
+       31867
+      ]
+     ],
+     "windowStartMs": 31188,
+     "windowEndMs": 32172,
+     "isFinal": true
+    },
+    {
+     "words": [
+      [
+       "وما",
+       32340,
+       32459
+      ],
+      [
+       "اللهفتع",
+       32539,
+       33419
+      ]
+     ],
+     "windowStartMs": 32340,
+     "windowEndMs": 33940,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "علي",
+       32340,
+       32539
+      ],
+      [
+       "الله",
+       32620,
+       32899
+      ],
+      [
+       "فتوكلون",
+       32979,
+       34899
+      ]
+     ],
+     "windowStartMs": 32340,
+     "windowEndMs": 34940,
+     "isFinal": false
+    },
+    {
+     "words": [
+      [
+       "وعلي",
+       32340,
+       32539
+      ],
+      [
+       "بالله",
+       32620,
+       32899
+      ],
+      [
+       "فتوكلون",
+       32979,
+       35019
+      ]
+     ],
+     "windowStartMs": 32340,
+     "windowEndMs": 35052,
+     "isFinal": true
+    },
+    {
+     "words": [],
+     "windowStartMs": 36468,
+     "windowEndMs": 37164,
+     "isFinal": true
+    }
+   ]
+  }
+ ]
+}
