@@ -469,15 +469,13 @@ jobs:
             # (inherits release: minify+shrink+same proguard files, debug-signed) runs ONE
             # decode assertion on the committed 54:10 fixture. R8 keep-rule breakage fails
             # loudly here; minify is NEVER disabled to pass.
-            # connectedAndroidTest = the variant-agnostic LIFECYCLE task: with
-            # testBuildType=releaseSmoke it runs the releaseSmoke androidTest (the
-            # suffixed name 'connectedReleaseSmokeAndroidTest' did not exist even with the
-            # property — run 45365479136, while compileReleaseSmokeAndroidTestKotlin DID
-            # (run 45363749101); the lifecycle name sidesteps the AGP naming question).
-            ./gradlew :app:connectedAndroidTest \
-              -PiqraaTestBuildType=releaseSmoke \
-              -Pandroid.testInstrumentationRunnerArguments.class=com.iqraa.app.ReleaseSmokeInstrumentedTest \
-              || { echo "releaseSmoke FAILED — R8 keep rules (see V-045); do NOT disable minify"; exit 1; }
+            # connectedAndroidTest = the variant-agnostic LIFECYCLE task (with
+            # testBuildType=releaseSmoke it runs the releaseSmoke androidTest). SINGLE
+            # LINE: the emulator-runner action does not honor backslash continuations —
+            # run 45366457648 got "Task '\\' not found" (the continuation became a
+            # literal argument; the single-line connectedDebugAndroidTest call above works
+            # for exactly this reason).
+            ./gradlew :app:connectedAndroidTest -PiqraaTestBuildType=releaseSmoke -Pandroid.testInstrumentationRunnerArguments.class=com.iqraa.app.ReleaseSmokeInstrumentedTest || { echo "releaseSmoke FAILED — R8 keep rules (see V-045); do NOT disable minify"; exit 1; }
             adb logcat -d -s IqraaReleaseSmoke | tail -3 || true
             # T5: perf-smoke numbers into the job log (INDICATIVE — emulator, not a phone)
             adb logcat -d -s IqraaPerfSmoke | tail -5 || true
