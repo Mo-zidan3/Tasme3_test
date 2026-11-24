@@ -7,16 +7,15 @@ import com.iqraa.core.align.model.Observation
 internal data class WordEvidence(
     val expectedIndex: Int,
     val bestSim: Double = 0.0,
-    val bestInteriorSim: Double = 0.0,       // best sim among interior observations
-    val interiorIndependentCount: Int = 0,   // # INDEPENDENT observations with interior evidence
-    val interiorFinalCount: Int = 0,          // # FINAL interior observations (Balanced preset)
-    val absenceIndependentCount: Int = 0,    // # INDEPENDENT observations that SKIPPED the word (MISSED-only)
+    val bestInteriorSim: Double = 0.0, // best sim among interior observations
+    val interiorIndependentCount: Int = 0, // # INDEPENDENT observations with interior evidence
+    val interiorFinalCount: Int = 0, // # FINAL interior observations (Balanced preset)
+    val absenceIndependentCount: Int = 0, // # INDEPENDENT observations that SKIPPED the word (MISSED-only)
     val seen: Boolean = false,
 )
 
 /** Implementation of the normative RecitationTracker (§9). */
 class RecitationTrackerImpl : RecitationTracker {
-
     private var expected: List<ExpectedWord> = emptyList()
     private var config: TrackerConfig = TrackerConfig()
     private val states = HashMap<Int, WordState>()
@@ -25,6 +24,7 @@ class RecitationTrackerImpl : RecitationTracker {
     private val observations = ArrayList<Observation>()
     private var pointer: Int = 0
     private val extras = LinkedHashMap<Pair<String, Long>, AsrWord>() // EXTRA dedup (text, startMs/40)
+
     /** (text, startMs/40) keys that were MATCHED (not extra) — re-observed matched audio is
      *  never EXTRA (V-031: partials legitimately re-cover audio the pointer passed). */
     private val matchedPositions = HashSet<Pair<String, Long>>()
@@ -49,7 +49,10 @@ class RecitationTrackerImpl : RecitationTracker {
      */
     private val countedWindows = HashMap<Int, MutableList<Observation>>()
 
-    override fun reset(expected: List<ExpectedWord>, config: TrackerConfig) {
+    override fun reset(
+        expected: List<ExpectedWord>,
+        config: TrackerConfig,
+    ) {
         this.expected = expected
         this.config = config
         states.clear()
@@ -99,8 +102,7 @@ class RecitationTrackerImpl : RecitationTracker {
     }
 
     /** Last expected index anchored (first-matched) at or before [ws]; −1 when none. */
-    private fun lastAnchorIdxAtOrBefore(ws: Long): Int =
-        anchors.entries.filter { it.value <= ws }.maxOfOrNull { it.key } ?: -1
+    private fun lastAnchorIdxAtOrBefore(ws: Long): Int = anchors.entries.filter { it.value <= ws }.maxOfOrNull { it.key } ?: -1
 
     /**
      * Aligns obs to the expected window; returns null when unusable.
@@ -111,11 +113,12 @@ class RecitationTrackerImpl : RecitationTracker {
      * to the pointer (A1b) — never the earliest occurrence (refrain false-alarm fix). */
     private fun alignWindow(obs: Observation): Pair<Alignment?, Boolean> {
         if (obs.words.isEmpty() || expected.isEmpty()) return null to false
-        val lo = if (obs.isFinal) {
-            (lastAnchorIdxAtOrBefore(obs.windowStartMs) - config.backWords).coerceAtLeast(0)
-        } else {
-            (pointer - config.backWords).coerceAtLeast(0)
-        }
+        val lo =
+            if (obs.isFinal) {
+                (lastAnchorIdxAtOrBefore(obs.windowStartMs) - config.backWords).coerceAtLeast(0)
+            } else {
+                (pointer - config.backWords).coerceAtLeast(0)
+            }
         val hi = (pointer + config.lookaheadWords).coerceAtMost(expected.size - 1)
         if (lo > hi) return null to false
         val alignment = Aligner.align(obs.words, expected, lo, hi, config, pointerHint = pointer)
@@ -125,19 +128,23 @@ class RecitationTrackerImpl : RecitationTracker {
         val ok = matchedCount > 0
         if (!ok) return alignment to false
         // advance pointer beyond the highest matched expected index (monotonic §9.4)
-        val maxIdx = alignment.moves.maxOfOrNull {
-            when (it) {
-                is Move.Match -> it.expectedIndex
-                is Move.Merge -> it.expectedIndex
-                is Move.Extra -> -1
-            }
-        } ?: pointer
+        val maxIdx =
+            alignment.moves.maxOfOrNull {
+                when (it) {
+                    is Move.Match -> it.expectedIndex
+                    is Move.Merge -> it.expectedIndex
+                    is Move.Extra -> -1
+                }
+            } ?: pointer
         if (maxIdx >= pointer) pointer = (maxIdx + 1).coerceAtMost(expected.size)
         return alignment to true
     }
 
     /** §9.2 interiority (timed mode): word fully inside window minus boundary. */
-    private fun isInterior(w: AsrWord, obs: Observation): Boolean {
+    private fun isInterior(
+        w: AsrWord,
+        obs: Observation,
+    ): Boolean {
         val hasTiming = w.startMs != null && w.endMs != null
         return if (hasTiming) {
             w.startMs!! >= obs.windowStartMs + config.boundaryMs &&
@@ -148,19 +155,24 @@ class RecitationTrackerImpl : RecitationTracker {
     }
 
     /** §9.2 null-timing interiority in token-index space: exclude first/last kEdgeTokens of hypothesis. */
-    private fun isInteriorByTokenIndex(observedIndex: Int, wordCount: Int): Boolean {
+    private fun isInteriorByTokenIndex(
+        observedIndex: Int,
+        wordCount: Int,
+    ): Boolean {
         if (config.boundaryMs > 0 && hasAnyTiming()) return true // timed mode preferred
         return observedIndex >= config.kEdgeTokens && observedIndex < wordCount - config.kEdgeTokens
     }
 
-    private fun hasAnyTiming(): Boolean =
-        observations.any { o -> o.words.any { it.startMs != null } }
+    private fun hasAnyTiming(): Boolean = observations.any { o -> o.words.any { it.startMs != null } }
 
     /**
      * A2 (V-041): a vote for [idx] counts as independent only if [obs] is independent of
      * EVERY window already counted for that word; counted windows are kept per word.
      */
-    private fun countsAsIndependent(idx: Int, obs: Observation): Boolean {
+    private fun countsAsIndependent(
+        idx: Int,
+        obs: Observation,
+    ): Boolean {
         val list = countedWindows.getOrPut(idx) { mutableListOf() }
         val ok = list.all { independent(it, obs, config.strictOverlapIndependence) }
         if (ok) list.add(obs)
@@ -173,13 +185,14 @@ class RecitationTrackerImpl : RecitationTracker {
         absenceAllowed: Boolean,
     ) {
         val wordCount = obs.words.size
-        val matchedIndices = alignment.moves.mapNotNull {
-            when (it) {
-                is Move.Match -> it.expectedIndex
-                is Move.Merge -> it.expectedIndex
-                is Move.Extra -> null
+        val matchedIndices =
+            alignment.moves.mapNotNull {
+                when (it) {
+                    is Move.Match -> it.expectedIndex
+                    is Move.Merge -> it.expectedIndex
+                    is Move.Extra -> null
+                }
             }
-        }
         if (matchedIndices.isNotEmpty()) {
             val spanMin = matchedIndices.min()
             val spanMax = matchedIndices.max()
@@ -194,11 +207,13 @@ class RecitationTrackerImpl : RecitationTracker {
                             matchedPositions.add(move.observed.text to (move.observed.startMs!! / 40))
                         }
                     }
+
                     is Move.Merge -> {
                         if (move.expectedIndex !in anchors && move.first.startMs != null) {
                             anchors[move.expectedIndex] = move.first.startMs!!
                         }
                     }
+
                     else -> {}
                 }
             }
@@ -239,26 +254,36 @@ class RecitationTrackerImpl : RecitationTracker {
         for (move in alignment.moves) {
             when (move) {
                 is Move.Match -> {
-                    val interior = if (move.observed.startMs != null) {
-                        isInterior(move.observed, obs)
-                    } else {
-                        val oi = obs.words.indexOf(move.observed)
-                        isInteriorByTokenIndex(oi, wordCount)
-                    }
-                    addEvidence(move.expectedIndex, move.sim, interior && (obs.isFinal || !isAtNaturalCutBoundary(move.observed, obs)), obs.isFinal, obs)
+                    val interior =
+                        if (move.observed.startMs != null) {
+                            isInterior(move.observed, obs)
+                        } else {
+                            val oi = obs.words.indexOf(move.observed)
+                            isInteriorByTokenIndex(oi, wordCount)
+                        }
+                    addEvidence(
+                        move.expectedIndex,
+                        move.sim,
+                        interior && (obs.isFinal || !isAtNaturalCutBoundary(move.observed, obs)),
+                        obs.isFinal,
+                        obs,
+                    )
                     if (!interior && obs.isFinal && isAtNaturalCutBoundary(move.observed, obs)) {
                         // natural pause-final: boundary exclusion does NOT apply (§9.2)
                         addEvidence(move.expectedIndex, move.sim, true, obs.isFinal, obs)
                     }
                 }
+
                 is Move.Merge -> {
-                    val interior = move.first.startMs?.let {
-                        move.second.endMs?.let { e ->
-                            it >= obs.windowStartMs + config.boundaryMs && e <= obs.windowEndMs - config.boundaryMs
-                        }
-                    } ?: true
+                    val interior =
+                        move.first.startMs?.let {
+                            move.second.endMs?.let { e ->
+                                it >= obs.windowStartMs + config.boundaryMs && e <= obs.windowEndMs - config.boundaryMs
+                            }
+                        } ?: true
                     addEvidence(move.expectedIndex, move.sim, interior, obs.isFinal, obs)
                 }
+
                 is Move.Extra -> {
                     // §9.4 EXTRA dedup (V-031): key = (text, wordStartMs/40) when timing exists —
                     // the same spoken word has the SAME session-global startMs in every window
@@ -280,15 +305,20 @@ class RecitationTrackerImpl : RecitationTracker {
     }
 
     /** CORRECT and HINTED are settled states — absence votes against them are pointless. */
-    private fun isSettled(k: Int): Boolean =
-        (states[k] == WordState.CORRECT || states[k] == WordState.HINTED)
+    private fun isSettled(k: Int): Boolean = (states[k] == WordState.CORRECT || states[k] == WordState.HINTED)
 
-    private fun addAbsence(k: Int, obs: Observation) {
+    private fun addAbsence(
+        k: Int,
+        obs: Observation,
+    ) {
         addEvidence(k, 0.0, interior = false, isFinal = obs.isFinal, obs, absence = true)
     }
 
     /** §9.4: EXTRA stats are recorded even when nothing matched (repeats behind window, ta'awwudh). */
-    private fun recordExtrasOnly(obs: Observation, alignment: Alignment) {
+    private fun recordExtrasOnly(
+        obs: Observation,
+        alignment: Alignment,
+    ) {
         for (move in alignment.moves) {
             if (move is Move.Extra) {
                 if (move.observed.startMs != null) {
@@ -302,7 +332,10 @@ class RecitationTrackerImpl : RecitationTracker {
         }
     }
 
-    private fun isAtNaturalCutBoundary(w: AsrWord, obs: Observation): Boolean {
+    private fun isAtNaturalCutBoundary(
+        w: AsrWord,
+        obs: Observation,
+    ): Boolean {
         // natural pause-final: window end is speech end (no forced cut marker in Observation; a
         // pause-final is the only final without timing cut characteristics — approximate: any final)
         return obs.isFinal
@@ -320,23 +353,24 @@ class RecitationTrackerImpl : RecitationTracker {
         // A2: independence is PER WORD — a vote counts only when this window is independent
         // of every window ALREADY COUNTED for that word; only windows whose vote counted
         // enter the list (non-interior / non-independent additions never pollute it).
-        val updated = if (absence) {
-            // Absence evidence (§9.3 MISSED only): never feeds WRONG (a skipped word is not a misrecitation).
-            val counted = countsAsIndependent(idx, obs)
-            e.copy(
-                seen = true,
-                absenceIndependentCount = e.absenceIndependentCount + (if (counted) 1 else 0),
-            )
-        } else {
-            val counted = if (interior) countsAsIndependent(idx, obs) else false
-            e.copy(
-                seen = true,
-                bestSim = maxOf(e.bestSim, s),
-                bestInteriorSim = if (interior) maxOf(e.bestInteriorSim, s) else e.bestInteriorSim,
-                interiorIndependentCount = e.interiorIndependentCount + (if (interior && counted) 1 else 0),
-                interiorFinalCount = e.interiorFinalCount + (if (interior && isFinal) 1 else 0),
-            )
-        }
+        val updated =
+            if (absence) {
+                // Absence evidence (§9.3 MISSED only): never feeds WRONG (a skipped word is not a misrecitation).
+                val counted = countsAsIndependent(idx, obs)
+                e.copy(
+                    seen = true,
+                    absenceIndependentCount = e.absenceIndependentCount + (if (counted) 1 else 0),
+                )
+            } else {
+                val counted = if (interior) countsAsIndependent(idx, obs) else false
+                e.copy(
+                    seen = true,
+                    bestSim = maxOf(e.bestSim, s),
+                    bestInteriorSim = if (interior) maxOf(e.bestInteriorSim, s) else e.bestInteriorSim,
+                    interiorIndependentCount = e.interiorIndependentCount + (if (interior && counted) 1 else 0),
+                    interiorFinalCount = e.interiorFinalCount + (if (interior && isFinal) 1 else 0),
+                )
+            }
         evidence[idx] = updated
     }
 
@@ -347,17 +381,25 @@ class RecitationTrackerImpl : RecitationTracker {
             if (current == WordState.HINTED) continue // terminal
             val optional = expected[i].optionalPrefix
             val e = evidence[i]
-            val next = when {
-                e != null && e.bestInteriorSim >= config.tauCorrect -> WordState.CORRECT
-                current == WordState.CORRECT -> WordState.CORRECT // never downgraded
-                // §7.6 optional-prefix words (basmala): absorbing is the only "positive" path;
-                // omitting them is NEVER penalized → no MISSED/WRONG, only PENDING (or CORRECT).
-                optional -> WordState.PENDING
-                e != null && isMissedConfirmed(i, e) -> WordState.MISSED
-                e != null && isWrongConfirmed(i, e) -> WordState.WRONG
-                e != null && e.seen -> WordState.CLOSE
-                else -> WordState.PENDING
-            }
+            val next =
+                when {
+                    e != null && e.bestInteriorSim >= config.tauCorrect -> WordState.CORRECT
+
+                    current == WordState.CORRECT -> WordState.CORRECT
+
+                    // never downgraded
+                    // §7.6 optional-prefix words (basmala): absorbing is the only "positive" path;
+                    // omitting them is NEVER penalized → no MISSED/WRONG, only PENDING (or CORRECT).
+                    optional -> WordState.PENDING
+
+                    e != null && isMissedConfirmed(i, e) -> WordState.MISSED
+
+                    e != null && isWrongConfirmed(i, e) -> WordState.WRONG
+
+                    e != null && e.seen -> WordState.CLOSE
+
+                    else -> WordState.PENDING
+                }
             // self-correction: MISSED/WRONG/CLOSE → CORRECT handled by the CORRECT branch above
             if (next == WordState.PENDING && current != WordState.PENDING && e == null) {
                 states[i] = current
@@ -374,7 +416,10 @@ class RecitationTrackerImpl : RecitationTracker {
         }
     }
 
-    private fun isMissedConfirmed(i: Int, e: WordEvidence): Boolean {
+    private fun isMissedConfirmed(
+        i: Int,
+        e: WordEvidence,
+    ): Boolean {
         // §9.3 rule 3: skipped by alignment AND pointer ≥3 beyond AND confirmed in ≥2 independent
         // observations (absence evidence), and no real match evidence above tauWrong.
         return pointer >= i + 3 &&
@@ -382,16 +427,24 @@ class RecitationTrackerImpl : RecitationTracker {
             e.bestInteriorSim < config.tauWrong
     }
 
-    private fun isWrongConfirmed(i: Int, e: WordEvidence): Boolean = when (config.preset) {
-        TrackerConfig.Preset.CONSERVATIVE -> {
-            e.interiorIndependentCount >= 2 && e.bestInteriorSim < config.tauWrong
-        }
-        TrackerConfig.Preset.BALANCED -> {
-            e.interiorFinalCount >= 1 && e.bestSim < config.tauWrong
-        }
-    }
+    private fun isWrongConfirmed(
+        i: Int,
+        e: WordEvidence,
+    ): Boolean =
+        when (config.preset) {
+            TrackerConfig.Preset.CONSERVATIVE -> {
+                e.interiorIndependentCount >= 2 && e.bestInteriorSim < config.tauWrong
+            }
 
-    private fun advanceLostTimer(obs: Observation, hadSpeech: Boolean) {
+            TrackerConfig.Preset.BALANCED -> {
+                e.interiorFinalCount >= 1 && e.bestSim < config.tauWrong
+            }
+        }
+
+    private fun advanceLostTimer(
+        obs: Observation,
+        hadSpeech: Boolean,
+    ) {
         // §9.4: lost timer advances ONLY while VAD reports speech with no usable alignment.
         if (hadSpeech && !lastWasUsable) {
             lostSpeechMs += (obs.windowEndMs - maxOf(obs.windowStartMs, lastAlignedEndMs)).coerceAtLeast(0)
@@ -406,6 +459,10 @@ class RecitationTrackerImpl : RecitationTracker {
         if (obs.words.isEmpty() || expected.isEmpty()) return
         val alignment = Aligner.align(obs.words, expected, 0, expected.size - 1, config)
         val matches = alignment.moves.filterIsInstance<Move.Match>().sortedBy { it.expectedIndex }
+        // V-044: a global re-anchor alignment may produce ZERO match moves (all
+        // merges/extras — e.g. the E2E fixture stream, run 45336537914: crashes on
+        // matches.last() below). No matches ⇒ no re-anchor possible.
+        if (matches.isEmpty()) return
         var run = 1
         var bestRunStart = -1
         var bestRun = 0
@@ -415,11 +472,17 @@ class RecitationTrackerImpl : RecitationTracker {
             ) {
                 run++
             } else {
-                if (run > bestRun) { bestRun = run; bestRunStart = matches[k - 1].expectedIndex - run + 1 }
+                if (run > bestRun) {
+                    bestRun = run
+                    bestRunStart = matches[k - 1].expectedIndex - run + 1
+                }
                 run = 1
             }
         }
-        if (run > bestRun) { bestRun = run; bestRunStart = matches.last().expectedIndex - run + 1 }
+        if (run > bestRun) {
+            bestRun = run
+            bestRunStart = matches.last().expectedIndex - run + 1
+        }
         if (bestRun >= config.minReanchorRun && bestRunStart >= 0) {
             // strong match: re-anchor pointer; words between old pointer and anchor stay MISSED candidates
             pointer = (bestRunStart + bestRun).coerceAtMost(expected.size)
@@ -434,8 +497,9 @@ class RecitationTrackerImpl : RecitationTracker {
 
     override fun hint(): TrackerUpdate {
         if (expected.isEmpty()) return snapshot()
-        val idx = (0 until expected.size).firstOrNull { (states[it] ?: WordState.PENDING) == WordState.PENDING }
-            ?: return snapshot()
+        val idx =
+            (0 until expected.size).firstOrNull { (states[it] ?: WordState.PENDING) == WordState.PENDING }
+                ?: return snapshot()
         states[idx] = WordState.HINTED // terminal (§9.3 priority 1)
         pointer = (idx + 1).coerceAtMost(expected.size)
         return snapshot()
@@ -451,9 +515,10 @@ class RecitationTrackerImpl : RecitationTracker {
     }
 
     /** Test introspection: raw evidence map (debug string form). */
-    fun dumpEvidence(): String = evidence.entries.sortedBy { it.key }.joinToString { (k, v) ->
-        "$k(best=${v.bestSim}, interiorBest=${v.bestInteriorSim}, indep=${v.interiorIndependentCount}, finals=${v.interiorFinalCount}, seen=${v.seen})"
-    }
+    fun dumpEvidence(): String =
+        evidence.entries.sortedBy { it.key }.joinToString { (k, v) ->
+            "$k(best=${v.bestSim}, interiorBest=${v.bestInteriorSim}, indep=${v.interiorIndependentCount}, finals=${v.interiorFinalCount}, seen=${v.seen})"
+        }
 
     /** Test hooks (V-041/A2): per-word independent counts for stream-level assertions. */
     fun interiorIndependentCount(idx: Int): Int = evidence[idx]?.interiorIndependentCount ?: 0
@@ -468,21 +533,43 @@ class RecitationTrackerImpl : RecitationTracker {
     /** Test hook: current pointer (§9.4 monotonic). */
     fun pointerPublic(): Int = pointer
 
-    fun snapshot(): TrackerUpdate =
-        TrackerUpdate(states = states.toMap(), pointer = pointer, extras = extras.values.toList())
+    fun snapshot(): TrackerUpdate = TrackerUpdate(states = states.toMap(), pointer = pointer, extras = extras.values.toList())
 
     /** Tasmee' summary (§9.6): X = CORRECT only; Y = expected − HINTED − optional-prefix;
      *  CLOSE separate. Optional-prefix words (§7.6) never count in Y. */
     fun summary(): TasmeeSummary {
-        var correct = 0; var close = 0; var wrong = 0; var missed = 0; var hinted = 0; var optional = 0
+        var correct = 0
+        var close = 0
+        var wrong = 0
+        var missed = 0
+        var hinted = 0
+        var optional = 0
         for ((i, s) in states) {
             when (s) {
-                WordState.CORRECT -> correct++
-                WordState.CLOSE -> close++
-                WordState.WRONG -> wrong++
-                WordState.MISSED -> missed++
-                WordState.HINTED -> hinted++
-                WordState.PENDING -> if (expected.getOrNull(i)?.optionalPrefix == true) optional++
+                WordState.CORRECT -> {
+                    correct++
+                }
+
+                WordState.CLOSE -> {
+                    close++
+                }
+
+                WordState.WRONG -> {
+                    wrong++
+                }
+
+                WordState.MISSED -> {
+                    missed++
+                }
+
+                WordState.HINTED -> {
+                    hinted++
+                }
+
+                WordState.PENDING -> {
+                    if (expected.getOrNull(i)?.optionalPrefix == true) optional++
+                }
+
                 WordState.EXTRA -> {}
             }
         }

@@ -8,18 +8,26 @@ import org.junit.jupiter.api.Test
 
 /** Table-driven + property-based tests for the §9 tracker. */
 
-private fun word(text: String, start: Long? = null, end: Long? = null) =
-    AsrWord(text = text, startMs = start, endMs = end)
+private fun word(
+    text: String,
+    start: Long? = null,
+    end: Long? = null,
+) = AsrWord(text = text, startMs = start, endMs = end)
 
-private fun obs(words: List<AsrWord>, start: Long, end: Long, isFinal: Boolean = false, rev: String = "r1") =
-    Observation(words = words, windowStartMs = start, windowEndMs = end, isFinal = isFinal, modelRev = rev)
+private fun obs(
+    words: List<AsrWord>,
+    start: Long,
+    end: Long,
+    isFinal: Boolean = false,
+    rev: String = "r1",
+) = Observation(words = words, windowStartMs = start, windowEndMs = end, isFinal = isFinal, modelRev = rev)
 
-private fun expected(vararg texts: String) = texts.mapIndexed { i, t ->
-    ExpectedWord(index = i, surah = 1, ayah = 1, text = t)
-}
+private fun expected(vararg texts: String) =
+    texts.mapIndexed { i, t ->
+        ExpectedWord(index = i, surah = 1, ayah = 1, text = t)
+    }
 
 class AlignerTest {
-
     @Test
     fun `sim basic properties`() {
         assertEquals(1.0, sim("قل", "قل"))
@@ -64,7 +72,11 @@ class AlignerTest {
         // reciter skips الله (clearly different neighbor words, no high-sim substitute available)
         val words = listOf(word("قل"), word("هو"), word("احد"))
         val a = Aligner.align(words, exp, 0, 3, TrackerConfig())
-        val matches = a.moves.filterIsInstance<Move.Match>().map { it.expectedIndex }.sorted()
+        val matches =
+            a.moves
+                .filterIsInstance<Move.Match>()
+                .map { it.expectedIndex }
+                .sorted()
         assertEquals(listOf(0, 1, 3), matches)
     }
 
@@ -92,9 +104,10 @@ class AlignerTest {
 }
 
 class TrackerTest {
-
-    private fun tracker(exp: List<ExpectedWord>, config: TrackerConfig = TrackerConfig()) =
-        RecitationTrackerImpl().apply { reset(exp, config) }
+    private fun tracker(
+        exp: List<ExpectedWord>,
+        config: TrackerConfig = TrackerConfig(),
+    ) = RecitationTrackerImpl().apply { reset(exp, config) }
 
     @Test
     fun `correct words become CORRECT on interior evidence`() {
@@ -130,7 +143,7 @@ class TrackerTest {
         // الصمد substitutes for الله with context anchoring قل هو
         val w = listOf(word("قل", 0, 300), word("هو", 300, 600), word("الصمد", 600, 900))
         val u1 = t.onObservation(obs(w, 0, 1000, isFinal = true))
-        assertEquals(WordState.CORRECT, u1.states[0])  // context anchors; الصمد interior vs الله: CLOSE
+        assertEquals(WordState.CORRECT, u1.states[0]) // context anchors; الصمد interior vs الله: CLOSE
         assertEquals(WordState.CLOSE, u1.states[2])
         // second INDEPENDENT window (overlap 400 < 50% of shorter 1000)
         val u2 = t.onObservation(obs(w, 600, 1600))
@@ -198,7 +211,10 @@ class TrackerTest {
         // state not yet MISSED (pointer=4 < 2+3=5)
         assertEquals(WordState.CLOSE, t.snapshot().states[2])
         // final: recite through w5 → pointer=6 ≥ 5
-        val u3 = t.onObservation(obs(listOf(word("w3", 1200, 1400), word("w4", 1400, 1600), word("w5", 1600, 1800)), 1200, 1800, isFinal = true))
+        val u3 =
+            t.onObservation(
+                obs(listOf(word("w3", 1200, 1400), word("w4", 1400, 1600), word("w5", 1600, 1800)), 1200, 1800, isFinal = true),
+            )
         assertEquals(WordState.MISSED, u3.states[2])
     }
 
@@ -236,9 +252,16 @@ class TrackerTest {
         val exp = expected("بسم", "الله", "الرحمن", "الرحيم", "مالك", "يوم", "الدين")
         val t = tracker(exp, TrackerConfig())
         // no timings at all; kEdgeTokens=2 → words 0..1 and 5..6 are edges
-        val ws = listOf(
-            word("بسم"), word("الله"), word("الرحمن"), word("الرحيم"), word("مالك"), word("يوم"), word("الدين"),
-        )
+        val ws =
+            listOf(
+                word("بسم"),
+                word("الله"),
+                word("الرحمن"),
+                word("الرحيم"),
+                word("مالك"),
+                word("يوم"),
+                word("الدين"),
+            )
         val u = t.onObservation(obs(ws, 0, 7000, isFinal = true))
         // interior words 2..4 are CORRECT-capable; edges rely on final
         assertEquals(WordState.CORRECT, u.states[2])
@@ -272,9 +295,10 @@ class TrackerTest {
 
     @Test
     fun `reanchor sets pointer to ayah start`() {
-        val exp = (0 until 10).map { i ->
-            ExpectedWord(i, surah = 1, ayah = if (i < 5) 1 else 2, text = "w$i")
-        }
+        val exp =
+            (0 until 10).map { i ->
+                ExpectedWord(i, surah = 1, ayah = if (i < 5) 1 else 2, text = "w$i")
+            }
         val t = tracker(exp)
         t.reanchor(2)
         assertEquals(5, t.snapshot().pointer)
@@ -286,7 +310,14 @@ class TrackerTest {
         val t = tracker(exp)
         // Realistic window: 4 words over 2.4 s; هو interior (CORRECT); substitutions stay CLOSE;
         // قل at the start edge is NOT interior → CLOSE until the hint makes it HINTED.
-        t.onObservation(obs(listOf(word("قل", 0, 600), word("هو", 600, 1200), word("الصمد", 1200, 1800), word("قلب", 1800, 2400)), 0, 2400, isFinal = true))
+        t.onObservation(
+            obs(
+                listOf(word("قل", 0, 600), word("هو", 600, 1200), word("الصمد", 1200, 1800), word("قلب", 1800, 2400)),
+                0,
+                2400,
+                isFinal = true,
+            ),
+        )
         // §9.2: boundary exclusion does NOT apply to natural pause-finals → the edge word قل
         // is also CORRECT on this pause-final.
         val before = t.snapshot()
@@ -316,20 +347,24 @@ class TrackerTest {
 }
 
 class OptionalPrefixTest {
-
-    private fun obsWith(words: List<AsrWord>, s: Long, e: Long, fin: Boolean = true) =
-        Observation(words = words, windowStartMs = s, windowEndMs = e, isFinal = fin, modelRev = "r")
+    private fun obsWith(
+        words: List<AsrWord>,
+        s: Long,
+        e: Long,
+        fin: Boolean = true,
+    ) = Observation(words = words, windowStartMs = s, windowEndMs = e, isFinal = fin, modelRev = "r")
 
     @Test
     fun `recited optional basmala is absorbed and never penalized when omitted`() {
         // Baqarah 1:1: optional basmala(4) + mandatory الٓمٓ (1)
-        val exp = listOf(
-            ExpectedWord(0, 2, 1, "بسم", optionalPrefix = true),
-            ExpectedWord(1, 2, 1, "الله", optionalPrefix = true),
-            ExpectedWord(2, 2, 1, "الرحمن", optionalPrefix = true),
-            ExpectedWord(3, 2, 1, "الرحيم", optionalPrefix = true),
-            ExpectedWord(4, 2, 1, "الم"),
-        )
+        val exp =
+            listOf(
+                ExpectedWord(0, 2, 1, "بسم", optionalPrefix = true),
+                ExpectedWord(1, 2, 1, "الله", optionalPrefix = true),
+                ExpectedWord(2, 2, 1, "الرحمن", optionalPrefix = true),
+                ExpectedWord(3, 2, 1, "الرحيم", optionalPrefix = true),
+                ExpectedWord(4, 2, 1, "الم"),
+            )
         val t = RecitationTrackerImpl().apply { reset(exp, TrackerConfig()) }
 
         // path A: reciter SKIPS the basmala entirely, recites only الم
@@ -348,11 +383,14 @@ class OptionalPrefixTest {
         t2.onObservation(
             obsWith(
                 listOf(
-                    word("بسم", 300, 900), word("الله", 900, 1500),
-                    word("الرحمن", 1500, 2100), word("الرحيم", 2100, 2700),
+                    word("بسم", 300, 900),
+                    word("الله", 900, 1500),
+                    word("الرحمن", 1500, 2100),
+                    word("الرحيم", 2100, 2700),
                     word("الم", 2700, 3300),
                 ),
-                0, 3600,
+                0,
+                3600,
             ),
         )
         val s2 = t2.snapshot()
@@ -363,14 +401,59 @@ class OptionalPrefixTest {
 
     @Test
     fun `fatihah basmala is mandatory and can be MISSED`() {
-        val exp = (0 until 8).map { i ->
-            ExpectedWord(i, 1, if (i < 4) 1 else 2, "f$i", optionalPrefix = false)
-        }
+        val exp =
+            (0 until 8).map { i ->
+                ExpectedWord(i, 1, if (i < 4) 1 else 2, "f$i", optionalPrefix = false)
+            }
         val t = RecitationTrackerImpl().apply { reset(exp, TrackerConfig()) }
         // reciter skips f2 (mandatory) with partial bracketing + final
         t.onObservation(obsWith(listOf(word("f0", 0, 200), word("f1", 200, 400), word("f3", 400, 600)), 0, 600, fin = false))
         t.onObservation(obsWith(listOf(word("f1", 700, 900), word("f3", 900, 1100)), 700, 1100, fin = false))
-        val u3 = t.onObservation(obsWith(listOf(word("f3", 1200, 1400), word("f4", 1400, 1600), word("f5", 1600, 1800), word("f6", 1800, 2000), word("f7", 2000, 2200)), 1200, 2200))
+        val u3 =
+            t.onObservation(
+                obsWith(
+                    listOf(
+                        word("f3", 1200, 1400),
+                        word("f4", 1400, 1600),
+                        word("f5", 1600, 1800),
+                        word("f6", 1800, 2000),
+                        word("f7", 2000, 2200),
+                    ),
+                    1200,
+                    2200,
+                ),
+            )
         assertEquals(WordState.MISSED, u3.states[2], "mandatory skipped word becomes MISSED")
+    }
+}
+
+class ReanchorEmptyMatchTest {
+    /** V-044: the E2E fixture stream (run 45336537914) crashed tryReanchorRangeWide with
+     *  NoSuchElementException — an observation whose GLOBAL alignment yields ZERO match
+     *  moves (words present, nothing matchable) must simply not re-anchor. */
+    @Test
+    fun `reanchor with zero matches does not crash and does not move the pointer`() {
+        val exp = expected("بسم", "الله", "الرحمن", "الرحيم")
+        val t = RecitationTrackerImpl().apply { reset(exp, TrackerConfig()) }
+        // advance the pointer past everything with a good final
+        val words =
+            listOf(
+                word("بسم", 0, 300),
+                word("الله", 300, 600),
+                word("الرحمن", 600, 900),
+                word("الرحيم", 900, 1200),
+            )
+        t.onObservation(obs(words, 0, 1200, isFinal = true))
+        val pointerBefore = t.pointerPublic()
+        // now: speech windows with UNMATCHABLE words, long enough to trip the lost timer
+        // (lostAfterMs default 6000) and force tryReanchorRangeWide with zero matches
+        var time = 2000L
+        repeat(8) {
+            t.onObservation(obs(listOf(word("طنجين", time, time + 900)), time, time + 1000))
+            time += 1000
+        }
+        assertEquals(pointerBefore, t.pointerPublic(), "no re-anchor without matches")
+        val s = t.snapshot().states
+        assertEquals(4, s.count { it.value == WordState.CORRECT }, "prior states untouched")
     }
 }
