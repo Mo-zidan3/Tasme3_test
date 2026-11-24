@@ -41,6 +41,35 @@ jobs:
             echo "REMOTE LEAK — credential in git config"; exit 1
           fi
           echo "clean: no credential-shaped strings in tracked files or git config"
+      - name: Env-file hygiene (V-041/A3 — tracked .env* is a blocker)
+        run: |
+          # .env* must NEVER be tracked; .env.example (placeholders only) is the sole exception.
+          bad=$(git ls-files | grep -E '^\.env' | grep -v '^\.env\.example$' || true)
+          if [ -n "$bad" ]; then
+            echo "FAIL: tracked env file(s): $bad — git rm --cached them; secrets never live in git"; exit 1
+          fi
+          if git ls-files --error-unmatch .env >/dev/null 2>&1; then
+            echo "FAIL: .env is tracked"; exit 1
+          fi
+          echo "clean: no tracked .env* (only .env.example allowed)"
+      - name: Generic secret patterns (V-041/A3)
+        run: |
+          # private-key headers + assignment-shaped secrets with NON-placeholder values.
+          # git grep prefixes matches with 'file:line:' — the placeholder pattern accounts for it.
+          # Placeholder value = empty, 'changeme', 'xxx', '<...>', '\${...}', 'placeholder'.
+          PLACEHOLDER='^[^:]+:[0-9]+:[[:space:]]*[A-Za-z_]*(API_KEY|SECRET|PASSWORD|TOKEN|DATABASE_URL)[A-Za-z_]*[[:space:]]*=[[:space:]]*($|changeme[[:space:]]*(#.*)?$|xxx+[[:space:]]*(#.*)?$|<[^>]+>|\$\{[^}]+\}[[:space:]]*(#.*)?$|placeholder[[:space:]]*(#.*)?$)'
+          if git grep -nE -e '-----BEGIN (RSA |EC |OPENSSH |PGP )?PRIVATE KEY-----' -- .; then
+            echo "LEAK — STOP: private-key material committed"; exit 1
+          fi
+          # non-placeholder secret assignments (skip this workflow's own scanner literals)
+          hits=$(git grep -nE '(API_KEY|SECRET|PASSWORD|DATABASE_URL)[[:space:]]*=[[:space:]]*..' -- . \
+            | grep -v '^\.github/workflows/' || true)
+          if [ -n "$hits" ]; then
+            while IFS= read -r line; do
+              echo "$line" | grep -qE "$PLACEHOLDER" || { echo "LEAK — STOP: $line"; exit 1; }
+            done <<< "$hits"
+          fi
+          echo "clean: no generic secret-shaped assignments outside placeholders"
       - name: Notices placeholder check (no '…' in any notice)
         run: |
           bad=$(grep -rl '…' THIRD_PARTY_NOTICES.md app/src/main/assets/notices/ 2>/dev/null || true)

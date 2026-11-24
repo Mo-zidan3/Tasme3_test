@@ -51,6 +51,11 @@ internal fun levenshtein(a: String, b: String): Int {
  * expected window [lo, hi]; leading/trailing observed speech is FREE.
  * Moves: match/substitute (cost 1−sim), skip-expected (gapMissed, MISSED candidate),
  * extra-observed (gapExtra, EXTRA), 1↔2 merge/split via observed-pair ↔ expected concat.
+ *
+ * A1 tie-break (V-041): among EQUAL-score end candidates, prefer the span nearest the
+ * pointer hint, FORWARD first (a behind span only wins when no forward span ties) —
+ * never "the earliest occurrence in the surah", which made refrain-only finals match the
+ * FIRST copy of a repeated ayah and starve the actually-recited copy.
  */
 object Aligner {
 
@@ -60,6 +65,7 @@ object Aligner {
         lo: Int,
         hi: Int,
         config: TrackerConfig,
+        pointerHint: Int = -1,
     ): Alignment {
         if (observed.isEmpty() || lo > hi) return Alignment(emptyList(), 0.0)
         val exp = expected.subList(lo, hi + 1).map { it.text }
@@ -102,15 +108,42 @@ object Aligner {
                 }
             }
         }
-        // semi-global: best end = max over dp[n][*] and dp[*][m] (trailing observed free)
+        // semi-global: best end = max over dp[n][*] and dp[*][m] (trailing observed free).
+        // A1 tie-break: equal-score candidates are ranked FORWARD-nearest to the pointer
+        // hint first, behind-earliest second; never simply the earliest j (the refrain
+        // false-alarm root cause). When bestScore <= 0 there is NO positive match
+        // evidence — a sim-0.5 match contributes exactly 0.0 and must not be claimed as an
+        // alignment (`repeated word … is EXTRA` regression): pick the EMPTY alignment
+        // (n, 0) so every observed word surfaces as a free extra.
         var bestScore = NEG
-        var bi = n
-        var bj = m
         for (j in 0..m) {
-            if (dp[n][j] > bestScore) { bestScore = dp[n][j]; bi = n; bj = j }
+            if (dp[n][j] > bestScore) bestScore = dp[n][j]
         }
         for (i in 0..n) {
-            if (dp[i][m] > bestScore) { bestScore = dp[i][m]; bi = i; bj = m }
+            if (dp[i][m] > bestScore) bestScore = dp[i][m]
+        }
+        val bi: Int
+        val bj: Int
+        if (bestScore <= 0.0) {
+            bi = n
+            bj = 0
+        } else {
+            val candidates = ArrayList<Triple<Int, Int, Double>>() // (i, j, score)
+            for (j in 0..m) {
+                if (dp[n][j] == bestScore) candidates.add(Triple(n, j, bestScore))
+            }
+            for (i in 0..n) {
+                if (dp[i][m] == bestScore) candidates.add(Triple(i, m, bestScore))
+            }
+            if (candidates.isEmpty()) {
+                bi = n
+                bj = m
+            } else {
+                // j is window-relative (window cell j = expected index lo+j−1); the hint is ABSOLUTE.
+                val chosen = candidates.minByOrNull { (i, j, _) -> tieBreakKey(i, lo + j - 1, pointerHint, m) }!!
+                bi = chosen.first
+                bj = chosen.second
+            }
         }
         // backtrack
         val moves = ArrayList<Move>()
@@ -159,4 +192,30 @@ object Aligner {
     }
 
     private enum class Op { MATCH, SKIP_EXPECTED, EXTRA, MERGE }
+
+    /** behind-span tie-break penalty: any forward candidate outranks any behind one. */
+    private const val BEHIND_PENALTY = 1_000_000L
+
+    /** secondary-key scale: more observed consumed (larger i) wins after the forward rank. */
+    private const val OBSERVED_CONSUMED_SCALE = 1_000L
+
+    /**
+     * A1 tie-break key for an end candidate (i, j): FORWARD spans (end index j at/after the
+     * pointer hint) rank nearest-forward; BEHIND spans rank after ALL forward ones,
+     * earliest-first (V-031/§9.4: re-covered audio behind the pointer re-matches its own
+     * earliest copy or surfaces as EXTRA — never pulls a phantom span toward the pointer;
+     * this also keeps a sim-0.5 stale repeat EXTRA, `repeated word before pointer minus
+     * backWords` regression). Secondary: more observed consumed (larger i) wins.
+     * hint < 0 (no hint): pure furthest-forward (largest j), then larger i.
+     */
+    private fun tieBreakKey(i: Int, j: Int, hint: Int, m: Int): Long {
+        val forward: Long = if (hint < 0) {
+            (m - j).toLong() // no hint: furthest forward (largest j) first
+        } else if (j >= hint) {
+            (j - hint).toLong()
+        } else {
+            BEHIND_PENALTY + j.toLong()
+        }
+        return forward * OBSERVED_CONSUMED_SCALE + (m - i).coerceAtLeast(0).toLong()
+    }
 }

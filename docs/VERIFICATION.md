@@ -788,3 +788,36 @@ Phase-3 first slice on CI, all jobs green:
   host tests, full §10/§11 strings ar+en (Arabic UNREVIEWED until Mo signs off), screens
   F1 reader / F2-F3 recite (auto-scroll pause chip + tasmee-only hint) / F5 history / F6
   settings, MainActivity + NavHost routes.
+
+### V-041 PR-1 — refrain anchoring + per-word independence + .env hygiene (2026-11-23)
+Branch fix/align-v041. Evidence: the CI PR run (build+release+secrets-scan per the T3a PR
+policy; instrumented re-runs on main after merge) — numbers recorded from the run logs, not
+from local execution (sandbox 429 blocks Gradle; CI is the verifier).
+
+Defects fixed (all three of Mo's verified defects):
+1. **Refrain/repeated-ayah false alarms:** FINALs aligned lo=0 with an EARLIEST-end tie-break,
+   so a refrain-only pause-final matched the FIRST copy of the refrain (identical after N());
+   the actually-recited copy starved, and unguarded leading-skip absence then flooded the
+   PENDING words — Mo's measured repro string CCCCCCMMMMCMMMMCLLLLCLL.. (25 words).
+   Fix: D-020 items 1+2. AFTER (CI test `T1 refrain-only pause-finals - all 25 words CORRECT`):
+   all 25 CORRECT, missed=wrong=close=0, pointer=25.
+2. **Observation-level independence:** `any { independent(...) }` accepted a vote independent
+   of ANY previous window, so mutually-overlapping partials each re-voted. Fix: D-020 item 5.
+   AFTER (CI tests T2a/T2b): systematic misdecode stays CLOSE with independent count = 1 in
+   BOTH flag modes; a genuinely independent window still reaches WRONG (count = 2) in both
+   modes. Single-window recognizer deletion stays CORRECT (T2c).
+3. **Secret hygiene:** `.env` was tracked from the initial commit (299b869) despite the
+   `.env*` ignore. Untracked (git rm --cached; contents never printed anywhere); `.env.example`
+   placeholders added; CI now blocks tracked `.env*` and generic secret shapes; scanner
+   verified happy+negative locally before push. Rotation advice to Mo in the PR text.
+
+Invariants preserved (existing tests, unmodified): I1 = V-025
+`TRAILING-EXTRA question settled` (19/19 CORRECT) and `MISSED fires` — green in the PR run;
+I2 = V-031 `segment-initial skip still produces MISSED` — green; I3 = V-031
+`WRONG fires under default rule and is suppressed under strict overlap` (1/0) — green.
+New tests: RefrainOnlyFinalTest (T1/T1b), SystematicMisdecodeTest (T2a/b/c),
+PerfectRecitationSurahTest (T3: surahs 1, 55 [31 refrains], 77 [10], 112 through the REAL
+SegmenterSimulator; basmala recited/omitted — OPTIONAL_PREFIX never penalized).
+ALL results SYNTHETIC (simulator streams, not real audio); the §13 phone-mic gate
+(≥60 held-out correct clips, ≥3 speakers, phone mic, FA ≤5%) remains NOT met — WRONG still
+renders as CLOSE in the app.

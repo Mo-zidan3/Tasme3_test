@@ -15,6 +15,8 @@ kotlin {
 }
 
 dependencies {
+    // V-041/T3: property tests read the committed Tanzil asset (surah 55/77 refrain sweeps)
+    testImplementation(project(":core:quran"))
     testImplementation(libs.junit.jupiter)
     testImplementation(libs.kotlin.test)
     testImplementation(libs.truth)
