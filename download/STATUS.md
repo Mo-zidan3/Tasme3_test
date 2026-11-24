@@ -1,6 +1,14 @@
 # STATUS — per phase
 
-Last updated: 2026-11-22 (V-040: T1-T5 CLOSED — identity com.iqraa.tasmee on green CI;
+Last updated: 2026-11-24 (Stage B in flight as STACKED PRs — T7 real pipeline #4,
+T8 MVP features #5, T9 UI tests + WCAG AA + manual script #6, T11 app-shaped harness #7;
+merge order T7→T8→T9→T11; CI per-PR, numbers in V-042/V-043; Phase 3 NOT DONE until Mo
+executes manual steps H1–H4 on hardware. V-041 history follows:) Mo's three verified aligner defects fixed —
+refrain anchoring + forward tie-break, per-word SET independence, .env hygiene; NO threshold
+or default changed (D-020 documents two deviations where the prompt's literal rule could not
+keep the frozen V-025/V-031 tests green); all new results SYNTHETIC (simulator), the §13
+phone-mic gate (≥60 clips/≥3 speakers/phone mic/FA≤5%) remains NOT met, WRONG still renders
+CLOSE). V-040 history follows:) T1-T5 CLOSED — identity com.iqraa.tasmee on green CI;
 docs swept (T2); detekt ON MAIN via PR with ratchet ceiling = the measured 200 findings
 (T3, D-017 closed — Mo ratchets from here); Mo's clips committed as authorization-of-record
 + ONE 10.05 s 54:10 CI fixture + PROVENANCE (T4: accuracy test now PASSES on-device both
