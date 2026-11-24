@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- T8 recite-scoped strings (ar PRIMARY). UNREVIEWED until Mo signs off. -->
+    <string name="summary_title">ملخص الجلسة</string>
+    <string name="summary_close_fmt">قريبة من النص: %1$d</string>
+    <string name="summary_missed_fmt">لم تُقرأ: %1$d</string>
+    <string name="summary_wrong_fmt">راجع هذه الكلمة: %1$d</string>
+    <string name="summary_hinted_fmt">تلميح: %1$d</string>
+    <string name="summary_extra_fmt">كلمات زائدة: %1$d</string>
+    <string name="resync_title">البدء من آية محددة</string>
+    <string name="model_load_error">تعذّر تحميل محرّك التعرّف. إعادة المحاولة؟</string>
+    <string name="retry">إعادة المحاولة</string>
+    <string name="try_other_model">استخدام النموذج الآخر</string>
+    <string name="lost_tracking_banner">تعذّر تتبّع التلاوة. اضغط للبدء من آية محددة.</string>
+    <string name="session_paused">الجلسة متوقفة</string>
+    <string name="resume_following">العودة للمتابعة</string>
+    <string name="resume_countdown_fmt">استئناف خلال %1$d…</string>
+    <string name="light_mode_badge">الوضع الخفيف</string>
+    <string name="hint_button">تلميح</string>
+    <string name="resync_cancel">إغلاق</string>
+</resources>

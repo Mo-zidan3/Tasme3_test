@@ -13,6 +13,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.iqraa.core.designsystem.FeedbackEncoding
 import com.iqraa.core.designsystem.QuranText
@@ -46,7 +47,7 @@ fun ReciteScreen(
         if (autoScrollPaused) {
             AssistChip(
                 onClick = { autoScrollPaused = false },
-                label = { Text("العودة للمتابعة") },
+                label = { Text(stringResource(R.string.resume_following)) },
                 modifier = Modifier.padding(bottom = 8.dp),
             )
         }
@@ -62,7 +63,7 @@ fun ReciteScreen(
             // §10.2: hint button ONLY in tasmee' mode
             AssistChip(
                 onClick = onHint,
-                label = { Text("تلميح") },
+                label = { Text(stringResource(R.string.hint_button)) },
             )
         }
     }
