@@ -110,31 +110,38 @@ object Aligner {
         }
         // semi-global: best end = max over dp[n][*] and dp[*][m] (trailing observed free).
         // A1 tie-break: equal-score candidates are ranked FORWARD-nearest to the pointer
-        // hint first (j >= hint → key j−hint), then behind-nearest (hint−j penalized);
-        // never the earliest j (the refrain false-alarm root cause).
+        // hint first, behind-earliest second; never simply the earliest j (the refrain
+        // false-alarm root cause). When bestScore <= 0 there is NO positive match
+        // evidence — a sim-0.5 match contributes exactly 0.0 and must not be claimed as an
+        // alignment (`repeated word … is EXTRA` regression): pick the EMPTY alignment
+        // (n, 0) so every observed word surfaces as a free extra.
         var bestScore = NEG
-        val candidates = ArrayList<Triple<Int, Int, Double>>() // (i, j, score)
         for (j in 0..m) {
             if (dp[n][j] > bestScore) bestScore = dp[n][j]
         }
         for (i in 0..n) {
             if (dp[i][m] > bestScore) bestScore = dp[i][m]
         }
-        for (j in 0..m) {
-            if (dp[n][j] == bestScore) candidates.add(Triple(n, j, bestScore))
-        }
-        for (i in 0..n) {
-            if (dp[i][m] == bestScore) candidates.add(Triple(i, m, bestScore))
-        }
         val bi: Int
         val bj: Int
-        if (candidates.isEmpty()) {
-            bi = n; bj = m
+        if (bestScore <= 0.0) {
+            bi = n; bj = 0
         } else {
-            // j is window-relative; the pointer hint is an ABSOLUTE expected index.
-            val chosen = candidates.minByOrNull { (i, j, _) -> tieBreakKey(i, lo + j, pointerHint, m) }!!
-            bi = chosen.first
-            bj = chosen.second
+            val candidates = ArrayList<Triple<Int, Int, Double>>() // (i, j, score)
+            for (j in 0..m) {
+                if (dp[n][j] == bestScore) candidates.add(Triple(n, j, bestScore))
+            }
+            for (i in 0..n) {
+                if (dp[i][m] == bestScore) candidates.add(Triple(i, m, bestScore))
+            }
+            if (candidates.isEmpty()) {
+                bi = n; bj = m
+            } else {
+                // j is window-relative (window cell j = expected index lo+j−1); the hint is ABSOLUTE.
+                val chosen = candidates.minByOrNull { (i, j, _) -> tieBreakKey(i, lo + j - 1, pointerHint, m) }!!
+                bi = chosen.first
+                bj = chosen.second
+            }
         }
         // backtrack
         val moves = ArrayList<Move>()
