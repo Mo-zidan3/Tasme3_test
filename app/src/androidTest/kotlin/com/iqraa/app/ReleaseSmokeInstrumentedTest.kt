@@ -21,36 +21,37 @@ import java.io.InputStream
 @RunWith(AndroidJUnit4::class)
 class ReleaseSmokeInstrumentedTest {
     @Test
-    fun releaseSmoke_minifiedBuild_decodes_fixture(): Unit = kotlinx.coroutines.runBlocking {
-        val ctx = InstrumentationRegistry.getInstrumentation().targetContext
-        val fixture = repoAsset("eval/fixtures/fixture.wav")
-        assumeTrue(
-            "SKIPPED (loudly): fixture absent — CI copies the committed 54:10 clip into androidTest assets",
-            fixture != null,
-        )
-        val recognizer =
-            SherpaOnnxRecognizer(
-                context = ctx,
-                info =
-                    ModelInfo(
-                        id = "quran-asr-small",
-                        revision = "0c2744b9d70aaf45ba574c30c5d318c575258e66",
-                        sha256 = "88f9df290d57b8890275d79187b77515aeeb12626a42bc76cbd0f8bfcaff00f0",
-                    ),
+    fun releaseSmoke_minifiedBuild_decodes_fixture(): Unit =
+        kotlinx.coroutines.runBlocking {
+            val ctx = InstrumentationRegistry.getInstrumentation().targetContext
+            val fixture = repoAsset("eval/fixtures/fixture.wav")
+            assumeTrue(
+                "SKIPPED (loudly): fixture absent — CI copies the committed 54:10 clip into androidTest assets",
+                fixture != null,
             )
-        recognizer.load()
-        try {
-            val pcm = readMono16kPcm(fixture!!)
-            val result = recognizer.decode(pcm, segmentStartMs = 0)
-            assertTrue(
-                "the MINIFIED build must decode ≥1 word on the clean fixture (got '${result.text.take(40)}')",
-                result.words.isNotEmpty(),
-            )
-            android.util.Log.i("IqraaReleaseSmoke", "decoded ${result.words.size} words (R8 build)")
-        } finally {
-            recognizer.close()
+            val recognizer =
+                SherpaOnnxRecognizer(
+                    context = ctx,
+                    info =
+                        ModelInfo(
+                            id = "quran-asr-small",
+                            revision = "0c2744b9d70aaf45ba574c30c5d318c575258e66",
+                            sha256 = "88f9df290d57b8890275d79187b77515aeeb12626a42bc76cbd0f8bfcaff00f0",
+                        ),
+                )
+            recognizer.load()
+            try {
+                val pcm = readMono16kPcm(fixture!!)
+                val result = recognizer.decode(pcm, segmentStartMs = 0)
+                assertTrue(
+                    "the MINIFIED build must decode ≥1 word on the clean fixture (got '${result.text.take(40)}')",
+                    result.words.isNotEmpty(),
+                )
+                android.util.Log.i("IqraaReleaseSmoke", "decoded ${result.words.size} words (R8 build)")
+            } finally {
+                recognizer.close()
+            }
         }
-    }
 
     private fun repoAsset(rel: String): File? {
         val instrumentation = InstrumentationRegistry.getInstrumentation()
