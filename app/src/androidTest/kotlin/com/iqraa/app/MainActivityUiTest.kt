@@ -7,6 +7,7 @@ import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.rule.GrantPermissionRule
 import androidx.test.uiautomator.UiDevice
 import com.iqraa.core.designsystem.FeedbackEncoding
+import com.iqraa.tasmee.MainActivity
 import com.iqraa.feature.recite.ReciteScreen
 import org.junit.Rule
 import org.junit.Test
