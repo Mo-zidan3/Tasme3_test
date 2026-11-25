@@ -34,6 +34,15 @@ class SessionLifecycleTest {
     }
 
     @Test
+    fun start_transitions_a_fresh_sessions_ended_to_active() {
+        // V-048: the session-begin transition — without it the capture loop (guards on
+        // Active) could never run from the initial state (issue #11)
+        val m = SessionLifecycle(LifecycleState.Ended)
+        m.event(SessionEvent.START)
+        assertEquals(LifecycleState.Active, m.state.value)
+    }
+
+    @Test
     fun ended_is_terminal() {
         val m = SessionLifecycle(LifecycleState.Ended)
         m.event(SessionEvent.RESUME)
