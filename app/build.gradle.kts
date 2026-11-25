@@ -11,6 +11,9 @@ android {
     compileSdkMinor = 1
 
     defaultConfig {
+        // V-048: Hilt test runner — @BindValue tests (ReaderErrorState…) replace bindings
+        // under HiltTestApplication; non-Hilt tests are unaffected (same classpath).
+        testInstrumentationRunner = "com.iqraa.app.IqraaTestRunner"
         applicationId = "com.iqraa.tasmee"
         // D-012/D-013: 26 → 27. Measured floor (V-016): the pinned onnxruntime
         // libonnxruntime.so carries .note.android.ident api_level 0x1b (27). Loading it on
@@ -143,6 +146,17 @@ dependencies {
     implementation(libs.compose.ui.tooling.preview)
 
     androidTestImplementation(project(":core:data"))
+    androidTestImplementation(project(":feature:reader"))
+    androidTestImplementation(project(":feature:recite"))
+
+    // V-048: Hilt instrumented-test injection (@BindValue failing/empty sources, the real
+    // RecognizerProvider + RecitePipelineFactory in the fixture test)
+    androidTestImplementation(libs.hilt.android.testing)
+    kspAndroidTest(libs.hilt.compiler)
+
+    // V-048: unit tests (MainViewModel computed startDestination) — JUnit 5 like the core modules
+    testImplementation(libs.junit.jupiter)
+    testImplementation(libs.coroutines.test)
     androidTestImplementation(libs.androidx.test.junit)
     androidTestImplementation(libs.androidx.test.runner)
     androidTestImplementation(libs.androidx.test.core)
@@ -154,4 +168,8 @@ dependencies {
     androidTestImplementation(libs.compose.ui.test.junit4)
     debugImplementation(platform(libs.compose.bom))
     debugImplementation(libs.compose.ui.test.manifest)
+}
+
+tasks.withType<Test> {
+    useJUnitPlatform()
 }
