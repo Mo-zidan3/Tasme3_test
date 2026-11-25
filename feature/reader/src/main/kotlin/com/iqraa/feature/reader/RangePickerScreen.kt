@@ -46,11 +46,11 @@ fun RangePickerScreen(
             modifier
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
-                .padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(14.dp),
+                .padding(all = 16.dp),
+        verticalArrangement = Arrangement.spacedBy(space = 14.dp),
     ) {
         Text(stringResource(R.string.range_picker_title), style = MaterialTheme.typography.headlineMedium)
-        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(space = 10.dp)) {
             Text(surah.name, style = MaterialTheme.typography.titleLarge)
             Text(stringResource(R.string.range_ayahs_fmt, surah.ayahCount), style = MaterialTheme.typography.bodyMedium)
         }
@@ -66,7 +66,7 @@ fun RangePickerScreen(
             onDec = { to = (to - 1).coerceAtLeast(from) },
             onInc = { to = (to + 1).coerceAtMost(surah.ayahCount) },
         )
-        Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+        Row(horizontalArrangement = Arrangement.spacedBy(space = 10.dp)) {
             FilterChip(
                 selected = !tasmee,
                 onClick = { tasmee = false },
@@ -78,7 +78,7 @@ fun RangePickerScreen(
                 label = { Text(stringResource(R.string.mode_tasmee)) },
             )
         }
-        Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+        Row(horizontalArrangement = Arrangement.spacedBy(space = 10.dp)) {
             Button(
                 onClick = { onStart(from, to, tasmee) },
                 modifier = Modifier.weight(1f),

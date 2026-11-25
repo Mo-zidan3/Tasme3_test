@@ -36,7 +36,7 @@ fun ReaderScreen(
         modifier =
             modifier
                 .fillMaxSize()
-                .padding(16.dp),
+                .padding(all = 16.dp),
     ) {
         Text(
             text = stringResource(R.string.reader_title),
@@ -64,7 +64,7 @@ fun ReaderScreen(
             }
 
             is ReaderState.Loaded -> {
-                LazyColumn(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                LazyColumn(verticalArrangement = Arrangement.spacedBy(space = 4.dp)) {
                     items(state.surahs, key = { it.number }) { surah ->
                         Text(
                             text = "${surah.number}. ${surah.name}",
