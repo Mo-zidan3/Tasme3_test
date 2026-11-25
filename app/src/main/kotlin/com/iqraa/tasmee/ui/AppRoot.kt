@@ -237,7 +237,7 @@ private fun ReciteRoute(
             ModelLoadErrorCard(
                 onRetry = viewModel::retryModel,
                 onTryOtherModel = viewModel::tryOtherModel,
-                modifier = Modifier.padding(16.dp),
+                modifier = Modifier.padding(all = 16.dp),
             )
         }
 
@@ -266,7 +266,7 @@ private fun ReciteRoute(
                 )
                 Button(
                     onClick = viewModel::endSession,
-                    modifier = Modifier.padding(16.dp),
+                    modifier = Modifier.padding(all = 16.dp),
                 ) {
                     Text(stringResource(R.string.end_session))
                 }
@@ -322,7 +322,7 @@ private fun SummaryRoute(
                 )
                 Button(
                     onClick = { nav.navigate("reader") { popUpTo("reader") { inclusive = true } } },
-                    modifier = Modifier.padding(16.dp),
+                    modifier = Modifier.padding(all = 16.dp),
                 ) {
                     Text(stringResource(R.string.summary_done))
                 }

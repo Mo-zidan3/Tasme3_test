@@ -48,7 +48,7 @@ class MainActivityUiTest {
         if (nodes.isNotEmpty()) {
             activityRule.onNodeWithText("Allow microphone and continue").performClick()
         }
-        activityRule.waitUntil(30_000) {
+        activityRule.waitUntil(timeoutMillis = 30_000) {
             activityRule.onAllNodesWithText("1. الفاتحة").fetchSemanticsNodes().isNotEmpty()
         }
         activityRule.onNodeWithText("1. الفاتحة").assertExists()
@@ -60,7 +60,7 @@ class MainActivityUiTest {
         // V-048: with the grant, the START screen is the reader (onboarding-once) — its
         // content must survive rotation. (The original test asserted the onboarding card
         // survives; the fixed behavior intentionally skips it when granted — issue #11.)
-        activityRule.waitUntil(30_000) {
+        activityRule.waitUntil(timeoutMillis = 30_000) {
             activityRule.onAllNodesWithText("1. الفاتحة").fetchSemanticsNodes().isNotEmpty()
         }
         val device = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation())
