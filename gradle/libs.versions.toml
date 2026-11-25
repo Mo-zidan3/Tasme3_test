@@ -1,5 +1,5 @@
-# Toolchain — pinned from primary sources on 2026-11-21 (see docs/VERIFICATION.md).
 [versions]
+# Toolchain — pinned from primary sources on 2026-11-21 (see docs/VERIFICATION.md).
 agp = "9.5.2"                 # latest stable AGP; requires Gradle >= 9.6.0, JDK 17, Build Tools 36.0.0
 kotlin = "2.4.21"              # latest stable Kotlin with stable KSP/compose plugin pairing
 ksp = "2.3.14"                  # latest stable KSP (KSP2)
@@ -42,6 +42,7 @@ compose-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-mani
 compose-ui-text = { group = "androidx.compose.ui", name = "ui-text" }
 compose-foundation = { group = "androidx.compose.foundation", name = "foundation" }
 compose-material3 = { group = "androidx.compose.material3", name = "material3" }
+compose-material-icons-core = { group = "androidx.compose.material", name = "material-icons-core" }
 compose-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview" }
 compose-ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling" }
 
