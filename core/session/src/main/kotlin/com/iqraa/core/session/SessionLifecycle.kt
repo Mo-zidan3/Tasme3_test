@@ -27,7 +27,9 @@ sealed interface LifecycleState {
     data object Ended : LifecycleState
 }
 
-enum class PauseReason(val bannerAr: String) {
+enum class PauseReason(
+    val bannerAr: String,
+) {
     SCREEN_OFF("الجلسة متوقفة"),
     APP_SWITCH("الجلسة متوقفة"),
     AUDIO_FOCUS_LOSS("الجلسة متوقفة"),
@@ -49,42 +51,90 @@ class SessionLifecycle(
 
     fun event(e: SessionEvent) {
         when (val s = _state.value) {
-            is LifecycleState.Active -> when (e) {
-                is SessionEvent.PAUSE -> _state.value = pausedFor(e) ?: s
-                SessionEvent.END -> _state.value = LifecycleState.Ended
-                else -> Unit
-            }
-            is LifecycleState.Paused -> when (e) {
-                SessionEvent.RESUME -> _state.value =
-                    LifecycleState.ResumeCountdown(countdownSeconds)
-                SessionEvent.END -> _state.value = LifecycleState.Ended
-                else -> Unit
-            }
-            is LifecycleState.ResumeCountdown -> when (e) {
-                is SessionEvent.TICK -> {
-                    val next = e.seconds ?: (s.remainingSeconds - 1)
-                    _state.value =
-                        if (next <= 0) LifecycleState.Active
-                        else LifecycleState.ResumeCountdown(next)
+            is LifecycleState.Active -> {
+                when (e) {
+                    is SessionEvent.PAUSE -> _state.value = pausedFor(e) ?: s
+                    SessionEvent.END -> _state.value = LifecycleState.Ended
+                    else -> Unit
                 }
-                is SessionEvent.PAUSE -> _state.value = pausedFor(e) ?: s
-                SessionEvent.END -> _state.value = LifecycleState.Ended
-                else -> Unit
             }
-            LifecycleState.Ended -> Unit // terminal; a NEW session object starts fresh
+
+            is LifecycleState.Paused -> {
+                when (e) {
+                    SessionEvent.RESUME -> {
+                        _state.value =
+                            LifecycleState.ResumeCountdown(countdownSeconds)
+                    }
+
+                    SessionEvent.END -> {
+                        _state.value = LifecycleState.Ended
+                    }
+
+                    else -> {
+                        Unit
+                    }
+                }
+            }
+
+            is LifecycleState.ResumeCountdown -> {
+                when (e) {
+                    is SessionEvent.TICK -> {
+                        val next = e.seconds ?: (s.remainingSeconds - 1)
+                        _state.value =
+                            if (next <= 0) {
+                                LifecycleState.Active
+                            } else {
+                                LifecycleState.ResumeCountdown(next)
+                            }
+                    }
+
+                    is SessionEvent.PAUSE -> {
+                        _state.value = pausedFor(e) ?: s
+                    }
+
+                    SessionEvent.END -> {
+                        _state.value = LifecycleState.Ended
+                    }
+
+                    else -> {
+                        Unit
+                    }
+                }
+            }
+
+            // V-048: START transitions a fresh session's terminal Ended into Active —
+            // without it ReciteViewModel's capture loop (which guards on Active) could
+            // never run from the initial state (dead-at-birth wiring, issue #11).
+            LifecycleState.Ended -> {
+                when (e) {
+                    SessionEvent.START -> _state.value = LifecycleState.Active
+                    else -> Unit // terminal for END/PAUSE/RESUME/TICK; a NEW session starts fresh
+                }
+            }
         }
     }
 
-    private fun pausedFor(e: SessionEvent): LifecycleState.Paused? = when (e) {
-        is SessionEvent.PAUSE -> LifecycleState.Paused(e.reason, e.reason.bannerAr)
-        else -> null
-    }
+    private fun pausedFor(e: SessionEvent): LifecycleState.Paused? =
+        when (e) {
+            is SessionEvent.PAUSE -> LifecycleState.Paused(e.reason, e.reason.bannerAr)
+            else -> null
+        }
 }
 
-/** Events fed by Android surfaces (Activity callbacks, audio-focus listener). */
+/** Events fed by Android surfaces (Activity lifecycle callbacks, audio-focus listener). */
 sealed interface SessionEvent {
-    data class PAUSE(val reason: PauseReason) : SessionEvent
+    /** V-048: the user pressed Start — a fresh session goes Active (capture begins). */
+    data object START : SessionEvent
+
+    data class PAUSE(
+        val reason: PauseReason,
+    ) : SessionEvent
+
     data object RESUME : SessionEvent
-    data class TICK(val seconds: Int?) : SessionEvent
+
+    data class TICK(
+        val seconds: Int?,
+    ) : SessionEvent
+
     data object END : SessionEvent
 }
