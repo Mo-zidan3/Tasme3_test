@@ -49,25 +49,25 @@ fun SummaryScreen(
         modifier =
             modifier
                 .fillMaxSize()
-                .padding(20.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp),
+                .padding(all = 20.dp),
+        verticalArrangement = Arrangement.spacedBy(space = 12.dp),
     ) {
         Text(
             text = stringResource(R.string.summary_headline_fmt, correct, y),
             style = MaterialTheme.typography.headlineMedium,
         )
-        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+        Row(horizontalArrangement = Arrangement.spacedBy(space = 12.dp)) {
             Text(stringResource(R.string.summary_close_fmt, close), style = MaterialTheme.typography.bodyLarge)
             Text(stringResource(R.string.summary_missed_fmt, missed), style = MaterialTheme.typography.bodyLarge)
             Text(stringResource(R.string.summary_wrong_fmt, wrong), style = MaterialTheme.typography.bodyLarge)
         }
-        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+        Row(horizontalArrangement = Arrangement.spacedBy(space = 12.dp)) {
             Text(stringResource(R.string.summary_hinted_fmt, hinted), style = MaterialTheme.typography.bodyLarge)
             Text(stringResource(R.string.summary_extra_fmt, extra), style = MaterialTheme.typography.bodyLarge)
         }
         HorizontalDivider()
         Text(stringResource(R.string.summary_title), style = MaterialTheme.typography.titleMedium)
-        LazyColumn(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+        LazyColumn(verticalArrangement = Arrangement.spacedBy(space = 6.dp)) {
             items(flaggedWords) { w ->
                 val enc = w.encoding()
                 Card(
@@ -76,7 +76,7 @@ fun SummaryScreen(
                             .fillMaxWidth()
                             .clickable { expanded[w.ayah] = !(expanded[w.ayah] ?: false) },
                 ) {
-                    Column(Modifier.padding(12.dp)) {
+                    Column(Modifier.padding(all = 12.dp)) {
                         Row(
                             Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceBetween,

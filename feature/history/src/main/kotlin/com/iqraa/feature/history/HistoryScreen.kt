@@ -29,7 +29,7 @@ fun HistoryScreen(
     onDeleteAll: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    Column(modifier = modifier.fillMaxSize().padding(16.dp)) {
+    Column(modifier = modifier.fillMaxSize().padding(all = 16.dp)) {
         Text(stringResource(R.string.history_title), style = MaterialTheme.typography.headlineMedium)
         if (entries.isEmpty()) {
             Text(
@@ -41,7 +41,7 @@ fun HistoryScreen(
             Button(onClick = onDeleteAll, modifier = Modifier.padding(vertical = 8.dp)) {
                 Text(stringResource(R.string.delete_all_history))
             }
-            LazyColumn(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+            LazyColumn(verticalArrangement = Arrangement.spacedBy(space = 6.dp)) {
                 items(entries, key = { it.id }) { e ->
                     Column(
                         modifier =

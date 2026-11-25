@@ -26,7 +26,7 @@ fun SettingsScreen(
     onModelSelected: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    Column(modifier = modifier.fillMaxSize().padding(16.dp)) {
+    Column(modifier = modifier.fillMaxSize().padding(all = 16.dp)) {
         Text(stringResource(R.string.settings_title), style = MaterialTheme.typography.headlineMedium)
         Text(
             stringResource(R.string.preset_title),

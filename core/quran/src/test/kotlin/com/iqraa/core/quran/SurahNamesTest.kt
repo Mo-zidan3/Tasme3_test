@@ -10,10 +10,15 @@ import org.junit.jupiter.api.Test
  * Tanzil — per-surah counts must agree exactly; totals 6,236).
  */
 class SurahNamesTest {
+    private companion object {
+        const val SURAHS = 114
+        const val TOTAL_AYAHS = 6_236
+    }
+
     @Test
     fun `114 surahs with contiguous numbering`() {
         val surahs = SurahNames.load()
-        assertEquals(114, surahs.size)
+        assertEquals(SURAHS, surahs.size)
         assertEquals((1..114).toList(), surahs.map { it.number })
     }
 
@@ -28,14 +33,14 @@ class SurahNamesTest {
 
     @Test
     fun `ayah counts sum to 6236`() {
-        assertEquals(6_236, SurahNames.load().sumOf { it.ayahCount })
+        assertEquals(TOTAL_AYAHS, SurahNames.load().sumOf { it.ayahCount })
     }
 
     @Test
     fun `per-surah ayah counts match the committed ayah asset exactly`() {
         val counts = QuranText.load().groupingBy { it.surah }.eachCount()
         val surahs = SurahNames.load()
-        assertEquals(114, counts.size)
+        assertEquals(SURAHS, counts.size)
         surahs.forEach { s ->
             assertEquals(
                 s.ayahCount,
