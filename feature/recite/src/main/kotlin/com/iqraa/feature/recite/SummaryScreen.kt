@@ -14,6 +14,8 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateMapOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -21,9 +23,11 @@ import com.iqraa.core.align.WordState
 import com.iqraa.core.designsystem.FeedbackEncoding
 
 /**
- * T8: the §9.6 Summary — «صحيحة: X من Y» headline (X = CORRECT only; Y = expected −
+ * T8/V-048: the §9.6 Summary — «صحيحة: X من Y» headline (X = CORRECT only; Y = expected −
  * HINTED − optional basmala, computed by the caller), CLOSE reported separately,
  * per-state counts, and the TAPPABLE flagged-words list (§3 F5, §15 WordFlagEntity rows).
+ * V-048: the headline is a resource (was hardcoded Arabic); tapping a flagged word
+ * reveals its ayah + state (minimal functioning §9.6 "jumps to word").
  * No audio, no transcripts — counts and flags only.
  */
 @Suppress("FunctionName") // Compose convention: composables are PascalCase
@@ -37,9 +41,10 @@ fun SummaryScreen(
     hinted: Int,
     extra: Int,
     flaggedWords: List<FlaggedWord>,
-    onWordTapped: (FlaggedWord) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val expanded = remember { mutableStateMapOf<Int, Boolean>() }
+
     Column(
         modifier =
             modifier
@@ -48,7 +53,7 @@ fun SummaryScreen(
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         Text(
-            text = "صحيحة: $correct من $y",
+            text = stringResource(R.string.summary_headline_fmt, correct, y),
             style = MaterialTheme.typography.headlineMedium,
         )
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -69,17 +74,25 @@ fun SummaryScreen(
                     modifier =
                         Modifier
                             .fillMaxWidth()
-                            .clickable { onWordTapped(w) },
+                            .clickable { expanded[w.ayah] = !(expanded[w.ayah] ?: false) },
                 ) {
-                    Row(
-                        Modifier.padding(12.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                    ) {
-                        Text("${w.surah}:${w.ayah} — ${w.text}")
-                        Text(
-                            text = "${enc.glyph} ${enc.labelAr}",
-                            color = enc.color,
-                        )
+                    Column(Modifier.padding(12.dp)) {
+                        Row(
+                            Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                        ) {
+                            Text("${w.surah}:${w.ayah}")
+                            Text(
+                                text = "${enc.glyph} ${enc.labelEn}",
+                                color = enc.color,
+                            )
+                        }
+                        if (expanded[w.ayah] == true) {
+                            Text(
+                                text = stringResource(R.string.flagged_ayah_fmt, w.ayah),
+                                style = MaterialTheme.typography.bodyMedium,
+                            )
+                        }
                     }
                 }
             }
