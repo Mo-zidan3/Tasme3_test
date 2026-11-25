@@ -3,7 +3,7 @@
 agp = "9.5.2"                 # latest stable AGP; requires Gradle >= 9.6.0, JDK 17, Build Tools 36.0.0
 kotlin = "2.4.21"              # latest stable Kotlin with stable KSP/compose plugin pairing
 ksp = "2.3.14"                  # latest stable KSP (KSP2)
-hilt = "2.60.1"                 # latest stable Dagger/Hilt
+hilt = "22.60.1"                 # latest stable Dagger/Hilt
 gradleWrapper = "9.9.2"         # satisfies AGP 9.5 Gradle >= 9.6.0 (current Gradle at pin time)
 
 # AndroidX (latest stable at pin time)
@@ -42,6 +42,7 @@ compose-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-mani
 compose-ui-text = { group = "androidx.compose.ui", name = "ui-text" }
 compose-foundation = { group = "androidx.compose.foundation", name = "foundation" }
 compose-material3 = { group = "androidx.compose.material3", name = "material3" }
+compose-material-icons-core = { group = "androidx.compose.material", name = "material-icons-core" }
 compose-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview" }
 compose-ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling" }
 
@@ -67,6 +68,7 @@ datastore-preferences = { group = "androidx.datastore", name = "datastore-prefer
 hilt-android = { group = "com.google.dagger", name = "hilt-android", version.ref = "hilt" }
 hilt-compiler = { group = "com.google.dagger", name = "hilt-android-compiler", version.ref = "hilt" }
 hilt-navigation-compose = { group = "androidx.hilt", name = "hilt-navigation-compose", version.ref = "hiltNavigationCompose" }
+hilt-android-testing = { group = "com.google.dagger", name = "hilt-android-testing", version.ref = "hilt" }
 
 # Coroutines
 coroutines-core = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-core", version.ref = "coroutines" }
