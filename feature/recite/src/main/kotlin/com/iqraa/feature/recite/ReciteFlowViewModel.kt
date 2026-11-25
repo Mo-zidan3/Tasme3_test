@@ -4,6 +4,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.iqraa.core.align.ExpectedWord
+import com.iqraa.core.align.TasmeeSummary
 import com.iqraa.core.align.TrackerConfig
 import com.iqraa.core.align.TrackerUpdate
 import com.iqraa.core.align.WordState
@@ -15,7 +16,6 @@ import com.iqraa.core.quran.ExpectedWords
 import com.iqraa.core.quran.QuranText
 import com.iqraa.core.session.LifecycleState
 import com.iqraa.core.session.PauseReason
-import com.iqraa.core.session.TasmeeSummary
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
