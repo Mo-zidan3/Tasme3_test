@@ -2,12 +2,15 @@ package com.iqraa.core.session
 
 import com.iqraa.core.align.ExpectedWord
 import com.iqraa.core.align.RecitationTracker
+import com.iqraa.core.align.TasmeeSummary
 import com.iqraa.core.align.TrackerUpdate
 import com.iqraa.core.align.model.Observation
 import com.iqraa.core.asr.AsrResult
 import com.iqraa.core.asr.AsrWord
 import com.iqraa.core.asr.RecitationRecognizer
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 
 /**
@@ -35,6 +38,10 @@ class ReciteSession(
     private val _checkpoints = ArrayList<Checkpoint>()
     val checkpoints: List<Checkpoint> get() = _checkpoints
 
+    /** V-048: checkpoint events as a flow — the ViewModel persists §11 rows per FINAL. */
+    private val _checkpointEvents = MutableSharedFlow<Checkpoint>(extraBufferCapacity = 64)
+    val checkpointEvents: SharedFlow<Checkpoint> = _checkpointEvents
+
     private var finalCount = 0
 
     /** §10.6 resync: re-anchor the tracker to an ayah the user picked inside the range. */
@@ -43,6 +50,16 @@ class ReciteSession(
         _updates.value = update
         return update
     }
+
+    /** §9.6/§10.3: the tasmee' hint — reveals the next expected word (HINTED, terminal). */
+    fun hint(): TrackerUpdate {
+        val update = tracker.hint()
+        _updates.value = update
+        return update
+    }
+
+    /** §9.6 summary semantics for the UI («صحيحة: X من Y», X = CORRECT only). */
+    fun summary(): TasmeeSummary = tracker.summary()
 
     /**
      * Decode one window (the audio layer supplies the request cadence per §8.4).
@@ -79,7 +96,9 @@ class ReciteSession(
         _updates.value = update
         if (isFinal) {
             finalCount++
-            _checkpoints.add(Checkpoint(finalCount, windowEndMs, update))
+            val cp = Checkpoint(finalCount, windowEndMs, update)
+            _checkpoints.add(cp)
+            _checkpointEvents.tryEmit(cp)
         }
         return update
     }
