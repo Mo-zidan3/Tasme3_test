@@ -3,7 +3,7 @@
 agp = "9.5.2"                 # latest stable AGP; requires Gradle >= 9.6.0, JDK 17, Build Tools 36.0.0
 kotlin = "2.4.21"              # latest stable Kotlin with stable KSP/compose plugin pairing
 ksp = "2.3.14"                  # latest stable KSP (KSP2)
-hilt = "22.60.1"                 # latest stable Dagger/Hilt
+hilt = "2.60.1"                 # latest stable Dagger/Hilt
 gradleWrapper = "9.9.2"         # satisfies AGP 9.5 Gradle >= 9.6.0 (current Gradle at pin time)
 
 # AndroidX (latest stable at pin time)
