@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- V-048 settings strings — EN default; Arabic PRIMARY in values-ar. UNREVIEWED until Mo signs off. -->
+    <string name="settings_title">Settings</string>
+    <string name="preset_title">Wrong-word detection preset</string>
+    <string name="preset_conservative">Conservative</string>
+    <string name="preset_balanced">Balanced</string>
+    <string name="model_title">Recognition model</string>
+    <string name="model_small">Accurate</string>
+    <string name="model_tiny">Light mode</string>
+    <string name="settings_language_note">The app language follows your device language (Arabic when your device is Arabic). Forcing Arabic regardless of device language is a pending product decision.</string>
+</resources>
