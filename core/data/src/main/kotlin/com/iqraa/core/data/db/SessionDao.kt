@@ -80,10 +80,11 @@ interface SessionDao {
 
     /** Atomic checkpoint: session counts + flagged words in one transaction. */
     @Transaction
-    suspend fun checkpoint(session: SessionEntity, flags: List<WordFlagEntity>) {
+    suspend fun checkpoint(session: SessionEntity, flags: List<WordFlagEntity>): Long {
         val id = upsertSession(session)
         val withId = flags.map { it.copy(sessionId = if (it.sessionId == 0L) id else it.sessionId) }
         clearWordFlags(id)
         upsertWordFlags(withId)
+        return id
     }
 }
