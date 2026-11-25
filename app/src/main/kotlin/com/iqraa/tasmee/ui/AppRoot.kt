@@ -5,9 +5,9 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
@@ -149,7 +149,7 @@ private fun IqraaNavBar(nav: NavHostController) {
             NavigationBarItem(
                 selected = route == "history",
                 onClick = { nav.navigateTopLevel("history") },
-                icon = { Icon(Icons.Filled.List, contentDescription = null) },
+                icon = { Icon(Icons.AutoMirrored.Filled.List, contentDescription = null) },
                 label = { Text(stringResource(R.string.nav_history)) },
             )
             NavigationBarItem(
