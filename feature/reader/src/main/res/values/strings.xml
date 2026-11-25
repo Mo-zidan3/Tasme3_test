@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- V-048 reader strings — EN default; Arabic is PRIMARY in values-ar. UNREVIEWED until Mo signs off. -->
+    <string name="reader_title">Read</string>
+    <string name="reader_error">The surah list failed to load. Retry?</string>
+    <string name="retry">Retry</string>
+    <string name="range_picker_title">Choose the ayah range</string>
+    <string name="range_ayahs_fmt">%1$d ayahs</string>
+    <string name="range_from">From ayah</string>
+    <string name="range_to">To ayah</string>
+    <string name="mode_follow">Follow along</string>
+    <string name="mode_tasmee">Tasmee\'</string>
+    <string name="start_recitation">Start recitation</string>
+    <string name="cancel">Back</string>
+</resources>
