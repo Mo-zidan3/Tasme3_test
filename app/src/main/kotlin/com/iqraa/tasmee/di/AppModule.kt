@@ -1,0 +1,89 @@
+package com.iqraa.tasmee.di
+
+import android.content.Context
+import android.content.pm.PackageManager
+import androidx.core.content.ContextCompat
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.PreferenceDataStoreFactory
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.preferencesDataStoreFile
+import androidx.room.Room
+import com.iqraa.core.data.SessionRepository
+import com.iqraa.core.data.db.IqraaDatabase
+import com.iqraa.core.data.settings.DataStoreKeys
+import com.iqraa.core.data.settings.SettingsRepository
+import com.iqraa.feature.reader.SurahListSource
+import com.iqraa.feature.reader.TanzilSurahListSource
+import com.iqraa.feature.recite.ChunkSourceProvider
+import com.iqraa.feature.recite.MicChunkSourceProvider
+import com.iqraa.tasmee.OnboardingGate
+import com.iqraa.tasmee.PermissionChecker
+import dagger.Module
+import dagger.Provides
+import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
+import dagger.hilt.components.SingletonComponent
+import javax.inject.Singleton
+
+/**
+ * V-048 (issue #11): the app's Hilt graph — the wiring Phase 3 deferred ("full Hilt graph
+ * lands with B2 DI wiring"). Everything the NavHost routes need: DataStore + Room +
+ * repositories, the reader's surah source, the capture-source provider, and the
+ * onboarding/permission seams.
+ */
+@Module
+@InstallIn(SingletonComponent::class)
+object AppModule {
+    @Provides
+    @Singleton
+    fun dataStore(
+        @ApplicationContext context: Context,
+    ): DataStore<Preferences> = PreferenceDataStoreFactory.create { context.preferencesDataStoreFile(DataStoreKeys.FILE) }
+
+    @Provides
+    @Singleton
+    fun settingsRepository(dataStore: DataStore<Preferences>): SettingsRepository = SettingsRepository(dataStore)
+
+    @Provides
+    @Singleton
+    fun database(
+        @ApplicationContext context: Context,
+    ): IqraaDatabase =
+        Room
+            .databaseBuilder(context, IqraaDatabase::class.java, IqraaDatabase.NAME)
+            .addMigrations(*IqraaDatabase.MIGRATIONS)
+            .build()
+
+    @Provides
+    @Singleton
+    fun sessionRepository(db: IqraaDatabase): SessionRepository = SessionRepository(db)
+
+    @Provides
+    @Singleton
+    fun surahListSource(): SurahListSource = TanzilSurahListSource()
+
+    @Provides
+    @Singleton
+    fun chunkSourceProvider(): ChunkSourceProvider = MicChunkSourceProvider()
+
+    @Provides
+    @Singleton
+    fun onboardingGate(settings: SettingsRepository): OnboardingGate =
+        object : OnboardingGate {
+            override suspend fun wasCompleted(): Boolean = settings.onboardingCompletedNow()
+
+            override suspend fun complete() = settings.setOnboardingCompleted()
+        }
+
+    @Provides
+    @Singleton
+    fun permissionChecker(
+        @ApplicationContext context: Context,
+    ): PermissionChecker =
+        PermissionChecker {
+            ContextCompat.checkSelfPermission(
+                context,
+                android.Manifest.permission.RECORD_AUDIO,
+            ) == PackageManager.PERMISSION_GRANTED
+        }
+}
