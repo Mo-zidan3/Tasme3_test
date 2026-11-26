@@ -14,8 +14,6 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateMapOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -23,11 +21,9 @@ import com.iqraa.core.align.WordState
 import com.iqraa.core.designsystem.FeedbackEncoding
 
 /**
- * T8/V-048: the §9.6 Summary — «صحيحة: X من Y» headline (X = CORRECT only; Y = expected −
+ * T8: the §9.6 Summary — «صحيحة: X من Y» headline (X = CORRECT only; Y = expected −
  * HINTED − optional basmala, computed by the caller), CLOSE reported separately,
  * per-state counts, and the TAPPABLE flagged-words list (§3 F5, §15 WordFlagEntity rows).
- * V-048: the headline is a resource (was hardcoded Arabic); tapping a flagged word
- * reveals its ayah + state (minimal functioning §9.6 "jumps to word").
  * No audio, no transcripts — counts and flags only.
  */
 @Suppress("FunctionName") // Compose convention: composables are PascalCase
@@ -41,58 +37,49 @@ fun SummaryScreen(
     hinted: Int,
     extra: Int,
     flaggedWords: List<FlaggedWord>,
+    onWordTapped: (FlaggedWord) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val expanded = remember { mutableStateMapOf<Int, Boolean>() }
-
     Column(
         modifier =
             modifier
                 .fillMaxSize()
-                .padding(all = 20.dp),
-        verticalArrangement = Arrangement.spacedBy(space = 12.dp),
+                .padding(20.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         Text(
-            text = stringResource(R.string.summary_headline_fmt, correct, y),
+            text = "صحيحة: $correct من $y",
             style = MaterialTheme.typography.headlineMedium,
         )
-        Row(horizontalArrangement = Arrangement.spacedBy(space = 12.dp)) {
+        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             Text(stringResource(R.string.summary_close_fmt, close), style = MaterialTheme.typography.bodyLarge)
             Text(stringResource(R.string.summary_missed_fmt, missed), style = MaterialTheme.typography.bodyLarge)
             Text(stringResource(R.string.summary_wrong_fmt, wrong), style = MaterialTheme.typography.bodyLarge)
         }
-        Row(horizontalArrangement = Arrangement.spacedBy(space = 12.dp)) {
+        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             Text(stringResource(R.string.summary_hinted_fmt, hinted), style = MaterialTheme.typography.bodyLarge)
             Text(stringResource(R.string.summary_extra_fmt, extra), style = MaterialTheme.typography.bodyLarge)
         }
         HorizontalDivider()
         Text(stringResource(R.string.summary_title), style = MaterialTheme.typography.titleMedium)
-        LazyColumn(verticalArrangement = Arrangement.spacedBy(space = 6.dp)) {
+        LazyColumn(verticalArrangement = Arrangement.spacedBy(6.dp)) {
             items(flaggedWords) { w ->
                 val enc = w.encoding()
                 Card(
                     modifier =
                         Modifier
                             .fillMaxWidth()
-                            .clickable { expanded[w.ayah] = !(expanded[w.ayah] ?: false) },
+                            .clickable { onWordTapped(w) },
                 ) {
-                    Column(Modifier.padding(all = 12.dp)) {
-                        Row(
-                            Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                        ) {
-                            Text("${w.surah}:${w.ayah}")
-                            Text(
-                                text = "${enc.glyph} ${enc.labelEn}",
-                                color = enc.color,
-                            )
-                        }
-                        if (expanded[w.ayah] == true) {
-                            Text(
-                                text = stringResource(R.string.flagged_ayah_fmt, w.ayah),
-                                style = MaterialTheme.typography.bodyMedium,
-                            )
-                        }
+                    Row(
+                        Modifier.padding(12.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                    ) {
+                        Text("${w.surah}:${w.ayah} — ${w.text}")
+                        Text(
+                            text = "${enc.glyph} ${enc.labelAr}",
+                            color = enc.color,
+                        )
                     }
                 }
             }
