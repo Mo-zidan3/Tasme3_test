@@ -60,12 +60,19 @@ class RecitationFlowInstrumentedTest {
     /** Fixture PCM replaces the mic for this class's sessions. */
     @BindValue
     @JvmField
-    val chunkSources: ChunkSourceProvider =
-        object : ChunkSourceProvider {
-            var fixture: FixtureChunkSource? = null
+    val chunkSources: TestChunkSources = TestChunkSources()
 
-            override fun newSource(): ChunkSource = fixture ?: MicChunkSource()
-        }
+    /**
+     * Named class (V-048: run 45777086097) — `fixture` must live on the DECLARED type,
+     * not an anonymous object: the binding's static type is the ChunkSourceProvider
+     * interface, so `chunkSources.fixture = …` did not resolve on it. Same shape as the
+     * interface's mic default: hand out the fixture once set, the mic otherwise.
+     */
+    class TestChunkSources : ChunkSourceProvider {
+        var fixture: FixtureChunkSource? = null
+
+        override fun newSource(): ChunkSource = fixture ?: MicChunkSource()
+    }
 
     @Test
     fun recitation_fixtureThroughRealAssembly_wordsChangeState_andHistoryIsWritten() {

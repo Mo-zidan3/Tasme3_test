@@ -128,7 +128,9 @@ jobs:
         run: ./gradlew assembleDebug
 
       - name: Unit tests + coverage (jacoco reports are HARD evidence for the gate)
-        run: ./gradlew test :core:audio:testDebugUnitTest :core:asr:testDebugUnitTest :core:session:testDebugUnitTest :feature:recite:testDebugUnitTest :core:quran:test :core:align:test :core:quran:jacocoTestReport :core:align:jacocoTestReport
+        # V-048 (run 45777086097): --continue surfaces EVERY module's failure in ONE run
+        # instead of stopping at the first — one cycle, the complete error picture.
+        run: ./gradlew --continue test :core:audio:testDebugUnitTest :core:asr:testDebugUnitTest :core:session:testDebugUnitTest :feature:recite:testDebugUnitTest :core:quran:test :core:align:test :core:quran:jacocoTestReport :core:align:jacocoTestReport
 
       # V-035 P2: coverage gate is REAL — parses the produced JaCoCo XML, prints the measured
       # numbers, fails below 85% line coverage on core:quran / core:align. No || true.
@@ -324,11 +326,22 @@ jobs:
           # classpath (error_prone via espresso) with Maven 429 — the V-006/V-012 transient
           # class the fetch steps already back off against. Same treatment here: retry,
           # never skip; a hard failure after 4 attempts still fails the job loudly.
+          # V-048 (run 45777086097): retry ONLY the rate-limit class — the old wrapper
+          # retried EVERY failure with a "Maven 429" label, masking a compile error as
+          # 3 instant "429" retries. Any other failure now fails IMMEDIATELY with the
+          # real error text (stdout/stderr kept via tee; exit code preserved).
           ok=0
-          for delay in 60 120 240 480; do
-            if ./gradlew :app:assembleReleaseSmoke :app:assembleReleaseSmokeAndroidTest -PiqraaTestBuildType=releaseSmoke; then ok=1; break; fi
-            echo "releaseSmoke APK assembly failed (Maven 429 class, V-006/V-012); backoff ${delay}s"
-            sleep $delay
+          for delay in 0 60 120 240; do
+            [ "$delay" = 0 ] || sleep "$delay"
+            if ./gradlew :app:assembleReleaseSmoke :app:assembleReleaseSmokeAndroidTest -PiqraaTestBuildType=releaseSmoke 2>&1 | tee /tmp/releaseSmoke.log; then
+              ok=1; break
+            fi
+            rc=${PIPESTATUS[0]}
+            if ! grep -qE '429|Could not resolve' /tmp/releaseSmoke.log; then
+              echo "FAIL: releaseSmoke APK assembly failed (NOT a Maven 429/resolve transient — no retry); exit $rc"
+              exit 1
+            fi
+            echo "releaseSmoke APK assembly failed with a Maven 429/resolve transient (V-006/V-012); exit $rc, retrying"
           done
           [ "$ok" = 1 ] || { echo "FAIL: releaseSmoke APK assembly failed after 3 retries"; exit 1; }
           APP_APK=$(find app/build/outputs/apk/releaseSmoke -name "*.apk" | head -1)

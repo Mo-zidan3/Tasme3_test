@@ -157,6 +157,9 @@ dependencies {
 
     // V-048: unit tests (MainViewModel computed startDestination) — JUnit 5 like the core modules
     testImplementation(libs.junit.jupiter)
+    // V-044 (run 45763077195, same class as designsystem): the JUnit Platform needs the
+    // launcher on the test runtime classpath — "Failed to load JUnit Platform" without it.
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher:1.13.4")
     testImplementation(libs.coroutines.test)
     androidTestImplementation(libs.androidx.test.junit)
     androidTestImplementation(libs.androidx.test.runner)
