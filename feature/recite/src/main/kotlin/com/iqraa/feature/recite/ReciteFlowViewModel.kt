@@ -12,6 +12,7 @@ import com.iqraa.core.data.SessionRepository
 import com.iqraa.core.data.db.SessionEntity
 import com.iqraa.core.data.db.WordFlagEntity
 import com.iqraa.core.data.settings.SettingsRepository
+import com.iqraa.core.quran.ExpectedWordEntry
 import com.iqraa.core.quran.ExpectedWords
 import com.iqraa.core.quran.QuranText
 import com.iqraa.core.session.LifecycleState
@@ -94,6 +95,11 @@ class ReciteFlowViewModel
         private var pipeline: RecitePipelineFactory.RecitePipeline? = null
         private var recite: ReciteViewModel? = null
         private var expected: List<ExpectedWord> = emptyList()
+
+        /** §7.4 Uthmani display source — the SAME entries list [expected] is built from
+         *  (single source of truth: `expectedEntries[i].display` is the display of
+         *  `expected[i]`; asserted in [deriveDisplayWords] on every read). */
+        private var expectedEntries: List<ExpectedWordEntry> = emptyList()
         private var modelIdInUse = RecognizerProvider.SMALL_ID
         private var modelRevInUse = ""
         private var presetInUse = SettingsRepository.PRESET_CONSERVATIVE
@@ -249,11 +255,13 @@ class ReciteFlowViewModel
          * render as uniform neutral placeholders — no letter/length hints (§10.3).
          */
         private fun displayWords(): List<String> =
-            if (!tasmeeMode) {
-                expected.map { it.display }
-            } else {
-                expected.map { e -> if (revealed(e)) e.display else PLACEHOLDER }
-            }
+            deriveDisplayWords(
+                entries = expectedEntries,
+                expected = expected,
+                tasmeeMode = tasmeeMode,
+                revealed = ::revealed,
+                placeholder = PLACEHOLDER,
+            )
 
         private fun revealed(e: ExpectedWord): Boolean {
             val update = pipeline?.session?.updates?.value ?: return false
@@ -273,9 +281,9 @@ class ReciteFlowViewModel
         private suspend fun expectedWords(): List<ExpectedWord> =
             withContext(Dispatchers.Default) {
                 val ayahs = QuranText.load().filter { it.surah == surah && it.ayah in fromAyah..toAyah }
-                ExpectedWords
-                    .forRange(ayahs, surah, fromAyah, toAyah)
-                    .mapIndexed { i, e -> ExpectedWord(i, e.surah, e.ayah, e.text, e.optionalPrefix) }
+                val entries = ExpectedWords.forRange(ayahs, surah, fromAyah, toAyah)
+                expectedEntries = entries
+                toExpectedWords(entries)
             }
 
         private fun sessionEntity(
@@ -332,3 +340,41 @@ class ReciteFlowViewModel
             const val PLACEHOLDER = "•••"
         }
     }
+
+/**
+ * The tracker's §6.2 word list, built from the SAME [ExpectedWords.forRange] entries list
+ * the display text comes from (single source of truth): `word.index` is the 0-based
+ * position in that list, so `entries[i]` is everything `expected[i]` knows — including
+ * the Uthmani `display` form that core:align's [ExpectedWord] deliberately does not carry.
+ */
+internal fun toExpectedWords(entries: List<ExpectedWordEntry>): List<ExpectedWord> =
+    entries.mapIndexed { i, e -> ExpectedWord(i, e.surah, e.ayah, e.text, e.optionalPrefix) }
+
+/**
+ * §10.3 display words (Uthmani) derived from the same entries list [expected] was built
+ * from. Tasmee' mode reveals only words the caller's [revealed] predicate accepts (§9.6:
+ * CORRECT/CLOSE); everything else renders as [placeholder] — no letter/length hints.
+ *
+ * Size and index agreement between the two lists is asserted on EVERY call: a mismatch is
+ * a wiring bug and fails LOUDLY — never a silent fallback, because rendering a wrong
+ * Quranic word (§7.1 verbatim text) is the one error this screen must not hide.
+ */
+internal fun deriveDisplayWords(
+    entries: List<ExpectedWordEntry>,
+    expected: List<ExpectedWord>,
+    tasmeeMode: Boolean,
+    revealed: (ExpectedWord) -> Boolean,
+    placeholder: String,
+): List<String> {
+    check(entries.size == expected.size) {
+        "display source desynchronized: ${expected.size} tracker words vs ${entries.size} Quran entries"
+    }
+    expected.forEachIndexed { i, w ->
+        check(w.index == i) { "expected[$i].index=${w.index} — display source is no longer positional" }
+    }
+    return if (!tasmeeMode) {
+        entries.map { it.display }
+    } else {
+        expected.map { w -> if (revealed(w)) entries[w.index].display else placeholder }
+    }
+}

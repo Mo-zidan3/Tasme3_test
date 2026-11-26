@@ -126,9 +126,9 @@ verified against the value published by services.gradle.org for 9.9.2 (docs/VERI
     reciting الرحيم yields CLOSE for the first + CORRECT for the second); the tracker prefers
     whatever maximizes total alignment score — no special-casing.
   - Absence evidence (expected skipped inside a matched span) counts ONLY toward MISSED
-    (≥2 independent), never toward WRONG — a skip is not a misrecitation (bug fixed, V-021).
+  (≥2 independent), never toward WRONG — a skip is not a misrecitation (bug fixed, V-021).
   - An all-EXTRA observation (repeat behind window / ta'awwudh) records EXTRA stats and feeds the
-    lost timer (not discarded) (bug fixed, V-021).
+  lost timer (not discarded) (bug fixed, V-021).
   - Boundary exclusion: pause-FINALs relax interiority per §9.2 (verified by test); partials keep it.
 - Wrong-word and missed-skip tests require CONTEXT words: an isolated single wrong word is
   legitimately discarded by the semi-global free-edge (score ≤ 0 → pure EXTRA). Recorded as

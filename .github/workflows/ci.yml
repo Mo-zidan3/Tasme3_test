@@ -128,7 +128,7 @@ jobs:
         run: ./gradlew assembleDebug
 
       - name: Unit tests + coverage (jacoco reports are HARD evidence for the gate)
-        run: ./gradlew test :core:audio:testDebugUnitTest :core:asr:testDebugUnitTest :core:session:testDebugUnitTest :core:quran:test :core:align:test :core:quran:jacocoTestReport :core:align:jacocoTestReport
+        run: ./gradlew test :core:audio:testDebugUnitTest :core:asr:testDebugUnitTest :core:session:testDebugUnitTest :feature:recite:testDebugUnitTest :core:quran:test :core:align:test :core:quran:jacocoTestReport :core:align:jacocoTestReport
 
       # V-035 P2: coverage gate is REAL — parses the produced JaCoCo XML, prints the measured
       # numbers, fails below 85% line coverage on core:quran / core:align. No || true.
