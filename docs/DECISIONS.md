@@ -126,9 +126,9 @@ verified against the value published by services.gradle.org for 9.9.2 (docs/VERI
     reciting الرحيم yields CLOSE for the first + CORRECT for the second); the tracker prefers
     whatever maximizes total alignment score — no special-casing.
   - Absence evidence (expected skipped inside a matched span) counts ONLY toward MISSED
-  (≥2 independent), never toward WRONG — a skip is not a misrecitation (bug fixed, V-021).
+    (≥2 independent), never toward WRONG — a skip is not a misrecitation (bug fixed, V-021).
   - An all-EXTRA observation (repeat behind window / ta'awwudh) records EXTRA stats and feeds the
-  lost timer (not discarded) (bug fixed, V-021).
+    lost timer (not discarded) (bug fixed, V-021).
   - Boundary exclusion: pause-FINALs relax interiority per §9.2 (verified by test); partials keep it.
 - Wrong-word and missed-skip tests require CONTEXT words: an isolated single wrong word is
   legitimately discarded by the semi-global free-edge (score ≤ 0 → pure EXTRA). Recorded as
@@ -285,3 +285,11 @@ decode over the SAME width partials already do, no wider.
   emulator floor across every instrumented run. The old "declared 26" open item is CLOSED.
 - **D-023 (V-047): AAB size CLOSED** — 55.9 MB measured (bundletool), budget ≤80 MB target
   MET with headroom; V-018's PAD/drop-tiny/accept question is moot. No ADR-bypass needed.
+
+## D-024 — Default UI locale: Arabic, independent of device locale (2026-11-26) [RATIFIED Mo]
+- The default UI locale is **Arabic regardless of the device locale** — the app's core content
+  is Arabic; a non-Arabic device locale must not switch the UI to English by itself.
+- **English stays fully available** via the F6 Settings ar/en toggle; the user's explicit
+  choice overrides the default and persists via DataStore (package-independent file names, D-019).
+- **This commit RECORDS the decision only** — the AppCompatDelegate-based locale application
+  code lands in a later commit on fix/phase3-wiring (PR #12).
