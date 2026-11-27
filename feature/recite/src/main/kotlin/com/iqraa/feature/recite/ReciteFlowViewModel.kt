@@ -68,7 +68,7 @@ interface ChunkSourceProvider {
     fun newSource(): ChunkSource
 }
 
-/** The app's mic-backed provider (tests override via @BindValue with a fixture source). */
+/** The app's mic-backed provider (tests construct the VM directly with a fixture source). */
 class MicChunkSourceProvider : ChunkSourceProvider {
     override fun newSource(): ChunkSource = MicChunkSource()
 }

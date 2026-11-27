@@ -13,7 +13,6 @@ import com.iqraa.feature.recite.ReciteFlowViewModel
 import com.iqraa.feature.recite.RecitePipelineFactory
 import com.iqraa.feature.recite.ReciteUiState
 import com.iqraa.feature.recite.RecognizerProvider
-import dagger.hilt.android.testing.BindValue
 import dagger.hilt.android.testing.HiltAndroidRule
 import dagger.hilt.android.testing.HiltAndroidTest
 import kotlinx.coroutines.delay
@@ -57,26 +56,22 @@ class RecitationFlowInstrumentedTest {
     @Inject
     lateinit var sessions: SessionRepository
 
-    /** The concrete holder this test sets the fixture on; [provider] binds it as the interface. */
-    private val testSources = TestChunkSources()
-
     /**
-     * Fixture PCM replaces the mic for this class's sessions — bound as the INTERFACE
-     * (V-048, run 45827051581): ReciteFlowViewModel's constructor injects
-     * ChunkSourceProvider, and AppModule provides the mic-backed one — a binding typed
-     * to the concrete TestChunkSources would bind a type nothing injects and leave the
-     * mic binding live. Test bindings replace the module binding (same shape as
-     * ReaderErrorStateInstrumentedTest's SurahListSource seam).
+     * Fixture PCM replaces the mic for this class's sessions — with NO graph binding
+     * (V-048, run 45963636991): the ViewModel is constructed DIRECTLY with this holder
+     * (the provider is a plain ctor param — Hilt is not required for this seam).
+     * @BindValue ADDS a binding on top of AppModule's mic-backed ChunkSourceProvider —
+     * [Dagger/DuplicateBindings] — and uninstalling AppModule wholesale would strip the
+     * DataStore/Room/repositories this test injects. The mic binding stays installed
+     * for the rest of the graph; the VM under test cannot reach it.
      */
-    @BindValue
-    @JvmField
-    val provider: ChunkSourceProvider = testSources
+    private val testSources = TestChunkSources()
 
     /**
      * Named class (V-048: run 45777086097) — `fixture` must live on a concrete type the
      * test holds a reference to (members of an anonymous object are invisible through
-     * the ChunkSourceProvider-typed binding). Same shape as the interface's mic default:
-     * hand out the fixture once set, the mic otherwise.
+     * the ChunkSourceProvider-typed reference). Same shape as the interface's mic
+     * default: hand out the fixture once set, the mic otherwise.
      */
     class TestChunkSources : ChunkSourceProvider {
         var fixture: FixtureChunkSource? = null

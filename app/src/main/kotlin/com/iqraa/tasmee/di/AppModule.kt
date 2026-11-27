@@ -28,8 +28,9 @@ import javax.inject.Singleton
 /**
  * V-048 (issue #11): the app's Hilt graph — the wiring Phase 3 deferred ("full Hilt graph
  * lands with B2 DI wiring"). Everything the NavHost routes need: DataStore + Room +
- * repositories, the reader's surah source, the capture-source provider, and the
- * onboarding/permission seams.
+ * repositories, the capture-source provider, and the onboarding/permission seams. The
+ * reader's surah source lives in [SurahSourceModule] — its own module so instrumented
+ * tests can uninstall exactly that seam (run 45963636991).
  */
 @Module
 @InstallIn(SingletonComponent::class)
@@ -60,10 +61,6 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun surahListSource(): SurahListSource = TanzilSurahListSource()
-
-    @Provides
-    @Singleton
     fun chunkSourceProvider(): ChunkSourceProvider = MicChunkSourceProvider()
 
     @Provides
@@ -86,4 +83,19 @@ object AppModule {
                 android.Manifest.permission.RECORD_AUDIO,
             ) == PackageManager.PERMISSION_GRANTED
         }
+}
+
+/**
+ * The reader's surah source ALONE (V-048, run 45963636991): ReaderErrorState/
+ * ReaderEmptyState replace this seam via @BindValue, which ADDS a binding — alongside
+ * AppModule's @Provides for the same type it is [Dagger/DuplicateBindings]. In its own
+ * module, those tests @UninstallModules exactly this; every other AppModule binding
+ * (DataStore, Room, repositories, capture, onboarding) stays live.
+ */
+@Module
+@InstallIn(SingletonComponent::class)
+object SurahSourceModule {
+    @Provides
+    @Singleton
+    fun surahListSource(): SurahListSource = TanzilSurahListSource()
 }

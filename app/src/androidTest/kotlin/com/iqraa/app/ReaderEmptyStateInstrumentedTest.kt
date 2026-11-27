@@ -7,9 +7,11 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.rule.GrantPermissionRule
 import com.iqraa.feature.reader.SurahListSource
 import com.iqraa.tasmee.MainActivity
+import com.iqraa.tasmee.di.SurahSourceModule
 import dagger.hilt.android.testing.BindValue
 import dagger.hilt.android.testing.HiltAndroidRule
 import dagger.hilt.android.testing.HiltAndroidTest
+import dagger.hilt.android.testing.UninstallModules
 import org.junit.Assert
 import org.junit.Rule
 import org.junit.Test
@@ -18,7 +20,11 @@ import org.junit.runner.RunWith
 /**
  * FIX §2(c) (issue #11): an EMPTY source is an ERROR, never a success — the exact defect
  * class Phase 3 shipped (`surahNames = emptyList()` rendered as a bare empty screen).
+ *
+ * V-048 (run 45963636991): [SurahSourceModule] is uninstalled so the @BindValue below
+ * REPLACES the surah seam — alongside AppModule's @Provides it is DuplicateBindings.
  */
+@UninstallModules(SurahSourceModule::class)
 @HiltAndroidTest
 @RunWith(AndroidJUnit4::class)
 class ReaderEmptyStateInstrumentedTest {
