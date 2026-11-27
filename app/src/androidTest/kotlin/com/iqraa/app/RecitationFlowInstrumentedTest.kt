@@ -57,16 +57,26 @@ class RecitationFlowInstrumentedTest {
     @Inject
     lateinit var sessions: SessionRepository
 
-    /** Fixture PCM replaces the mic for this class's sessions. */
-    @BindValue
-    @JvmField
-    val chunkSources: TestChunkSources = TestChunkSources()
+    /** The concrete holder this test sets the fixture on; [provider] binds it as the interface. */
+    private val testSources = TestChunkSources()
 
     /**
-     * Named class (V-048: run 45777086097) — `fixture` must live on the DECLARED type,
-     * not an anonymous object: the binding's static type is the ChunkSourceProvider
-     * interface, so `chunkSources.fixture = …` did not resolve on it. Same shape as the
-     * interface's mic default: hand out the fixture once set, the mic otherwise.
+     * Fixture PCM replaces the mic for this class's sessions — bound as the INTERFACE
+     * (V-048, run 45827051581): ReciteFlowViewModel's constructor injects
+     * ChunkSourceProvider, and AppModule provides the mic-backed one — a binding typed
+     * to the concrete TestChunkSources would bind a type nothing injects and leave the
+     * mic binding live. Test bindings replace the module binding (same shape as
+     * ReaderErrorStateInstrumentedTest's SurahListSource seam).
+     */
+    @BindValue
+    @JvmField
+    val provider: ChunkSourceProvider = testSources
+
+    /**
+     * Named class (V-048: run 45777086097) — `fixture` must live on a concrete type the
+     * test holds a reference to (members of an anonymous object are invisible through
+     * the ChunkSourceProvider-typed binding). Same shape as the interface's mic default:
+     * hand out the fixture once set, the mic otherwise.
      */
     class TestChunkSources : ChunkSourceProvider {
         var fixture: FixtureChunkSource? = null
@@ -82,7 +92,7 @@ class RecitationFlowInstrumentedTest {
         val fixtureFile = repoAsset("eval/fixtures/fixture.wav")
         assertNotNull("committed 54:10 fixture must ride the androidTest assets", fixtureFile)
         val fixture = FixtureChunkSource(readMono16kPcm(fixtureFile!!), trailingSilenceMs = 1_500)
-        chunkSources.fixture = fixture
+        testSources.fixture = fixture
 
         val vm =
             ReciteFlowViewModel(
@@ -90,7 +100,7 @@ class RecitationFlowInstrumentedTest {
                 pipelineFactory = pipelineFactory,
                 settings = settings,
                 sessions = sessions,
-                chunkSources = chunkSources,
+                chunkSources = testSources,
                 savedStateHandle =
                     SavedStateHandle(
                         mapOf(
@@ -155,8 +165,11 @@ class RecitationFlowInstrumentedTest {
      * Test-seam PCM source (the app's mic equivalent): hands out the fixture chunks in
      * order, then trailing silence (so the segmenter emits the pause-final), then empty —
      * which ends the capture loop exactly like a mic that yields no more data.
+     *
+     * Public (V-048, run 45827051581): TestChunkSources.fixture is a public property and
+     * may not expose a private-in-class type — not internal either (same rule).
      */
-    private class FixtureChunkSource(
+    class FixtureChunkSource(
         pcm: FloatArray,
         trailingSilenceMs: Long,
     ) : ChunkSource {
