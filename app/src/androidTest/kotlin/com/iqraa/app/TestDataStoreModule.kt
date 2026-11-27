@@ -9,8 +9,8 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
-import dagger.hilt.android.testing.TestInstallIn
 import dagger.hilt.components.SingletonComponent
+import dagger.hilt.testing.TestInstallIn
 import java.io.File
 import java.util.UUID
 import javax.inject.Singleton
@@ -20,6 +20,8 @@ import javax.inject.Singleton
  * gets its OWN file under cacheDir — no shared-file "multiple DataStores active" lock
  * against a still-open store from the previous test, and a clean onboarding flag per
  * test (a fixed file would carry the previous test's completed flag across classes).
+ * TestInstallIn lives in dagger.hilt.testing (NOT the legacy android.testing package —
+ * run 46001254779: "Unresolved reference 'TestInstallIn'" on Hilt 2.60.1).
  */
 @Module
 @TestInstallIn(components = [SingletonComponent::class], replaces = [DataStoreModule::class])
