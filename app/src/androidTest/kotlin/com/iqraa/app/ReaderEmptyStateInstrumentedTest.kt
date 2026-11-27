@@ -31,11 +31,13 @@ class ReaderEmptyStateInstrumentedTest {
     @get:Rule(order = 0)
     val hiltRule = HiltAndroidRule(this)
 
+    // grant BEFORE the activity launches (run 45977626337) — MainViewModel reads the
+    // RECORD_AUDIO state in init; the activity must not start before the grant.
     @get:Rule(order = 1)
-    val activityRule = createAndroidComposeRule<MainActivity>()
+    val micPermission: GrantPermissionRule = GrantPermissionRule.grant(android.Manifest.permission.RECORD_AUDIO)
 
     @get:Rule(order = 2)
-    val micPermission: GrantPermissionRule = GrantPermissionRule.grant(android.Manifest.permission.RECORD_AUDIO)
+    val activityRule = createAndroidComposeRule<MainActivity>()
 
     /** Injection: the loader returns an EMPTY list — must surface as §11 error, not success. */
     @BindValue

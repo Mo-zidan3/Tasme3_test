@@ -9,6 +9,9 @@ import org.junit.jupiter.api.extension.ExtendWith
  * V-048 unit tests (issue #11): the computed startDestination — onboarding shows ONLY when
  * the flag is unset AND the permission is not granted. This is the logic the hardcoded
  * `"onboarding"` startDestination got wrong (shown every launch, even with the grant).
+ *
+ * Run 45977626337: a settings failure must never leave _start at Resolving forever — the
+ * catch falls back to the permission-only decision so AppRoot always renders (§11).
  */
 @ExtendWith(MainDispatcherRuleExtension::class)
 class MainViewModelTest {
@@ -23,6 +26,13 @@ class MainViewModelTest {
             completeCalls++
             completed = true
         }
+    }
+
+    /** A gate whose settings read ALWAYS throws (run 45977626337 failure shape). */
+    private class ThrowingGate : OnboardingGate {
+        override suspend fun wasCompleted(): Boolean = throw IllegalStateException("multiple DataStores active (test)")
+
+        override suspend fun complete() = Unit
     }
 
     @Test
@@ -47,6 +57,22 @@ class MainViewModelTest {
         val vm = MainViewModel(gate, PermissionChecker { false })
         val resolved = vm.start.value
         assertTrue(resolved is StartState.Resolved && !resolved.startOnboarding)
+    }
+
+    /** Run 45977626337: a throwing settings read must still resolve — granted → reader. */
+    @Test
+    fun `settings failure with grant - resolves to the reader`() {
+        val vm = MainViewModel(ThrowingGate(), PermissionChecker { true })
+        val resolved = vm.start.value
+        assertTrue(resolved is StartState.Resolved && !resolved.startOnboarding)
+    }
+
+    /** Run 45977626337: a throwing settings read must still resolve — denied → onboarding. */
+    @Test
+    fun `settings failure without grant - resolves to onboarding`() {
+        val vm = MainViewModel(ThrowingGate(), PermissionChecker { false })
+        val resolved = vm.start.value
+        assertTrue(resolved is StartState.Resolved && resolved.startOnboarding)
     }
 
     @Test

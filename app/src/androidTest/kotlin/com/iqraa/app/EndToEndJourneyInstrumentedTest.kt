@@ -32,11 +32,14 @@ class EndToEndJourneyInstrumentedTest {
     @get:Rule(order = 0)
     val hiltRule = HiltAndroidRule(this)
 
+    // grant BEFORE the activity launches (run 45977626337): MainViewModel reads the
+    // RECORD_AUDIO state in init — with the old order the activity started first and saw
+    // granted=false → onboarding card → the assertDoesNotExist below failed.
     @get:Rule(order = 1)
-    val activityRule = createAndroidComposeRule<MainActivity>()
+    val micPermission: GrantPermissionRule = GrantPermissionRule.grant(android.Manifest.permission.RECORD_AUDIO)
 
     @get:Rule(order = 2)
-    val micPermission: GrantPermissionRule = GrantPermissionRule.grant(android.Manifest.permission.RECORD_AUDIO)
+    val activityRule = createAndroidComposeRule<MainActivity>()
 
     @Inject
     lateinit var sessions: SessionRepository

@@ -101,6 +101,13 @@ android {
     // connectedDebugAndroidTest suite is untouched).
     testBuildType = providers.gradleProperty("iqraaTestBuildType").getOrElse("debug")
 
+    // Run 45977626337: MainViewModel logs the settings-failure fallback via android.util.Log;
+    // host unit tests hit that path (ThrowingGate tests) — return defaults instead of
+    // throwing "Method w in android.util.Log not mocked".
+    testOptions {
+        unitTests.isReturnDefaultValues = true
+    }
+
     buildFeatures {
         compose = true
     }

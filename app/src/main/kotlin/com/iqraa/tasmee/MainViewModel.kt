@@ -1,8 +1,10 @@
 package com.iqraa.tasmee
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -46,15 +48,35 @@ class MainViewModel
 
         init {
             viewModelScope.launch {
-                // skip onboarding when the flag is set OR the permission is already granted
-                val completed = onboardingGate.wasCompleted()
-                val granted = permissionChecker.isRecordAudioGranted()
-                _start.value = StartState.Resolved(startOnboarding = !completed && !granted)
+                // skip onboarding when the flag is set OR the permission is already granted;
+                // a settings failure must NEVER leave _start at Resolving forever (§11) —
+                // fall back to the permission-only decision so AppRoot always renders.
+                _start.value = resolveStart(onboardingGate, permissionChecker)
             }
         }
+
+        @Suppress("TooGenericExceptionCaught") // run 45977626337: ANY settings failure must fall back, never hang
+        private suspend fun resolveStart(
+            onboardingGate: OnboardingGate,
+            permissionChecker: PermissionChecker,
+        ): StartState.Resolved =
+            try {
+                val completed = onboardingGate.wasCompleted()
+                val granted = permissionChecker.isRecordAudioGranted()
+                StartState.Resolved(startOnboarding = !completed && !granted)
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                Log.w(TAG, "settings read failed — permission-only start decision", e)
+                StartState.Resolved(startOnboarding = !permissionChecker.isRecordAudioGranted())
+            }
 
         /** Called on BOTH onboarding exits (granted and continued-without) — shown once, ever. */
         fun markOnboardingDone() {
             viewModelScope.launch { onboardingGate.complete() }
+        }
+
+        private companion object {
+            const val TAG = "IqraaMainViewModel"
         }
     }

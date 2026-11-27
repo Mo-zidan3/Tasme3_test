@@ -33,18 +33,19 @@ class ReaderFlowInstrumentedTest {
     @get:Rule(order = 0)
     val hiltRule = HiltAndroidRule(this)
 
+    // grant BEFORE the activity launches (run 45977626337) — MainViewModel reads the
+    // RECORD_AUDIO state in init; the activity must not start before the grant.
     @get:Rule(order = 1)
-    val activityRule = createAndroidComposeRule<MainActivity>()
-
-    @get:Rule(order = 2)
     val micPermission: GrantPermissionRule =
         GrantPermissionRule.grant(android.Manifest.permission.RECORD_AUDIO)
+
+    @get:Rule(order = 2)
+    val activityRule = createAndroidComposeRule<MainActivity>()
 
     /** (a) the reader shows the real surah list — الفاتحة، البقرة، آل عمران — not an
      *  empty list. */
     @Test
     fun readerScreen_shows114Surahs() {
-        passOnboardingIfPresent()
         activityRule.waitUntil(TIMEOUT_MS) {
             activityRule.onAllNodesWithText(FATIHA_ROW).fetchSemanticsNodes().isNotEmpty()
         }
@@ -56,7 +57,6 @@ class ReaderFlowInstrumentedTest {
     /** (b) §10.1: tapping a surah navigates to the range picker for that surah. */
     @Test
     fun readerScreen_tapSurah_navigates() {
-        passOnboardingIfPresent()
         activityRule.waitUntil(TIMEOUT_MS) {
             activityRule.onAllNodesWithText(FATIHA_ROW).fetchSemanticsNodes().isNotEmpty()
         }
@@ -74,7 +74,6 @@ class ReaderFlowInstrumentedTest {
      */
     @Test
     fun readerScreen_emptyListNeverRendersAsSuccess() {
-        passOnboardingIfPresent()
         activityRule.waitUntil(TIMEOUT_MS) {
             val rowsShown =
                 activityRule
@@ -99,22 +98,6 @@ class ReaderFlowInstrumentedTest {
         activityRule.onNodeWithText(ONBOARDING_ALLOW).assertDoesNotExist()
         activityRule.waitUntil(TIMEOUT_MS) {
             activityRule.onAllNodesWithText(FATIHA_ROW).fetchSemanticsNodes().isNotEmpty()
-        }
-    }
-
-    /**
-     * Main hardcodes startDestination="onboarding" (shows even with the grant); the fixed
-     * build computes it (permission/flag) and skips the card — this prologue serves both.
-     */
-    private fun passOnboardingIfPresent() {
-        val present =
-            activityRule
-                .onAllNodesWithText(ONBOARDING_ALLOW)
-                .fetchSemanticsNodes()
-                .isNotEmpty()
-        if (present) {
-            activityRule.onNodeWithText(ONBOARDING_ALLOW).performClick()
-            activityRule.waitForIdle()
         }
     }
 

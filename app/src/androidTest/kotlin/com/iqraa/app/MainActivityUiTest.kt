@@ -3,7 +3,6 @@ package com.iqraa.app
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithText
-import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.rule.GrantPermissionRule
@@ -31,23 +30,22 @@ class MainActivityUiTest {
     @get:Rule(order = 0)
     val hiltRule = HiltAndroidRule(this)
 
+    // grant BEFORE the activity launches (run 45977626337) — MainViewModel reads the
+    // RECORD_AUDIO state in init; the activity must not start before the grant.
     @get:Rule(order = 1)
-    val activityRule = createAndroidComposeRule<MainActivity>()
-
-    @get:Rule(order = 2)
     val micPermission: GrantPermissionRule =
         GrantPermissionRule.grant(android.Manifest.permission.RECORD_AUDIO)
 
+    @get:Rule(order = 2)
+    val activityRule = createAndroidComposeRule<MainActivity>()
+
     @Test
     fun onboarding_grantFlow_reachesReader() {
-        // F7 renders first on a fresh install without the grant; with the permission
-        // pre-granted (the rule) the fixed app skips straight to the reader — this prologue
-        // serves both. The reader must show REAL CONTENT (the Phase-3 defect was an empty
-        // list behind the hardcoded «اقرأ» title — issue #11).
-        val nodes = activityRule.onAllNodesWithText("Allow microphone and continue").fetchSemanticsNodes()
-        if (nodes.isNotEmpty()) {
-            activityRule.onNodeWithText("Allow microphone and continue").performClick()
-        }
+        // the grant is applied BEFORE the activity launches (rule order 1 < 2) and the
+        // per-test DataStore starts with a clean onboarding flag — MainViewModel computes
+        // startOnboarding = false, so the app goes straight to the reader. The reader must
+        // show REAL CONTENT (the Phase-3 defect was an empty list behind the hardcoded
+        // «اقرأ» title — issue #11).
         activityRule.waitUntil(timeoutMillis = 30_000) {
             activityRule.onAllNodesWithText("1. الفاتحة").fetchSemanticsNodes().isNotEmpty()
         }
