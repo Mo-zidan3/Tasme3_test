@@ -31,4 +31,12 @@
     <string name="about_licenses_title">التراخيص</string>
     <string name="about_tanzil_attribution">نص القرآن: تنزيل (tanzil.net) — CC-BY 3.0</string>
     <string name="about_font_attribution">خط المصحف: أميري قرآن (OFL)</string>
+
+    <!-- V-048 app-shell strings — Arabic PRIMARY. -->
+    <string name="nav_reader">اقرأ</string>
+    <string name="nav_history">السجل</string>
+    <string name="nav_settings">الإعدادات</string>
+    <string name="nav_about">حول التطبيق</string>
+    <string name="end_session">إنهاء الجلسة</string>
+    <string name="summary_done">تم</string>
 </resources>

@@ -537,7 +537,7 @@ class RecitationTrackerImpl : RecitationTracker {
 
     /** Tasmee' summary (§9.6): X = CORRECT only; Y = expected − HINTED − optional-prefix;
      *  CLOSE separate. Optional-prefix words (§7.6) never count in Y. */
-    fun summary(): TasmeeSummary {
+    override fun summary(): TasmeeSummary {
         var correct = 0
         var close = 0
         var wrong = 0

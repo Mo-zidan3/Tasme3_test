@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- V-048 reader strings — Arabic PRIMARY. UNREVIEWED until Mo signs off (recorded in STATUS). -->
+    <string name="reader_title">اقرأ</string>
+    <string name="reader_error">تعذّر تحميل قائمة السور. إعادة المحاولة؟</string>
+    <string name="retry">إعادة المحاولة</string>
+    <string name="range_picker_title">اختر نطاق الآيات</string>
+    <string name="range_ayahs_fmt">%1$d آية</string>
+    <string name="range_from">من الآية</string>
+    <string name="range_to">إلى الآية</string>
+    <string name="mode_follow">متابعة</string>
+    <string name="mode_tasmee">تسميع</string>
+    <string name="start_recitation">ابدأ التلاوة</string>
+    <string name="cancel">رجوع</string>
+</resources>

@@ -20,6 +20,10 @@ object DataStoreKeys {
 
     const val RIWAYA_STATEMENT_SHOWN = "riwaya_statement_shown"
 
+    /** V-048 (issue #11): onboarding completed once — startDestination is computed from
+     * this flag OR the RECORD_AUDIO grant; never hardcoded (§10.1). */
+    const val ONBOARDING_COMPLETED = "onboarding_completed"
+
     /** §10.2/F2: manual scroll pauses auto-follow for this long before resuming. */
     const val AUTO_SCROLL_PAUSE_MS = "auto_scroll_pause_ms"
 }

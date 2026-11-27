@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- V-048 history strings — Arabic PRIMARY. UNREVIEWED until Mo signs off. -->
+    <string name="history_title">السجل</string>
+    <string name="history_empty">لا توجد جلسات بعد. ابدأ بتلاوة شيء أولًا.</string>
+    <string name="history_counts_fmt">صحيحة %1$d من %2$d · قريبة %3$d</string>
+    <string name="delete_all_history">حذف كل السجل</string>
+</resources>

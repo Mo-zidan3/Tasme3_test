@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- V-048 history strings — EN default; Arabic PRIMARY in values-ar. UNREVIEWED until Mo signs off. -->
+    <string name="history_title">History</string>
+    <string name="history_empty">No sessions yet. Recite something first.</string>
+    <string name="history_counts_fmt">Correct %1$d of %2$d · close %3$d</string>
+    <string name="delete_all_history">Delete all history</string>
+</resources>

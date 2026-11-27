@@ -11,6 +11,9 @@ android {
     compileSdkMinor = 1
 
     defaultConfig {
+        // V-048: Hilt test runner — @BindValue tests (ReaderErrorState…) replace bindings
+        // under HiltTestApplication; non-Hilt tests are unaffected (same classpath).
+        testInstrumentationRunner = "com.iqraa.app.IqraaTestRunner"
         applicationId = "com.iqraa.tasmee"
         // D-012/D-013: 26 → 27. Measured floor (V-016): the pinned onnxruntime
         // libonnxruntime.so carries .note.android.ident api_level 0x1b (27). Loading it on
@@ -98,6 +101,13 @@ android {
     // connectedDebugAndroidTest suite is untouched).
     testBuildType = providers.gradleProperty("iqraaTestBuildType").getOrElse("debug")
 
+    // Run 45977626337: MainViewModel logs the settings-failure fallback via android.util.Log;
+    // host unit tests hit that path (ThrowingGate tests) — return defaults instead of
+    // throwing "Method w in android.util.Log not mocked".
+    testOptions {
+        unitTests.isReturnDefaultValues = true
+    }
+
     buildFeatures {
         compose = true
     }
@@ -134,6 +144,7 @@ dependencies {
     implementation(platform(libs.compose.bom))
     implementation(libs.compose.ui)
     implementation(libs.compose.material3)
+    implementation(libs.compose.material.icons.core)
 
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)
@@ -143,6 +154,20 @@ dependencies {
     implementation(libs.compose.ui.tooling.preview)
 
     androidTestImplementation(project(":core:data"))
+    androidTestImplementation(project(":feature:reader"))
+    androidTestImplementation(project(":feature:recite"))
+
+    // V-048: Hilt instrumented-test injection (@BindValue failing/empty sources, the real
+    // RecognizerProvider + RecitePipelineFactory in the fixture test)
+    androidTestImplementation(libs.hilt.android.testing)
+    kspAndroidTest(libs.hilt.compiler)
+
+    // V-048: unit tests (MainViewModel computed startDestination) — JUnit 5 like the core modules
+    testImplementation(libs.junit.jupiter)
+    // V-044 (run 45763077195, same class as designsystem): the JUnit Platform needs the
+    // launcher on the test runtime classpath — "Failed to load JUnit Platform" without it.
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher:1.13.4")
+    testImplementation(libs.coroutines.test)
     androidTestImplementation(libs.androidx.test.junit)
     androidTestImplementation(libs.androidx.test.runner)
     androidTestImplementation(libs.androidx.test.core)
@@ -154,4 +179,8 @@ dependencies {
     androidTestImplementation(libs.compose.ui.test.junit4)
     debugImplementation(platform(libs.compose.bom))
     debugImplementation(libs.compose.ui.test.manifest)
+}
+
+tasks.withType<Test> {
+    useJUnitPlatform()
 }

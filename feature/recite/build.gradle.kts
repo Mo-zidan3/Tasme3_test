@@ -45,4 +45,11 @@ dependencies {
     implementation(libs.hilt.navigation.compose)
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)
+
+    testImplementation(libs.junit.jupiter)
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher:1.13.4")
+}
+
+tasks.withType<Test> {
+    useJUnitPlatform()
 }

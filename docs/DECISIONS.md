@@ -285,3 +285,11 @@ decode over the SAME width partials already do, no wider.
   emulator floor across every instrumented run. The old "declared 26" open item is CLOSED.
 - **D-023 (V-047): AAB size CLOSED** — 55.9 MB measured (bundletool), budget ≤80 MB target
   MET with headroom; V-018's PAD/drop-tiny/accept question is moot. No ADR-bypass needed.
+
+## D-024 — Default UI locale: Arabic, independent of device locale (2026-11-26) [RATIFIED Mo]
+- The default UI locale is **Arabic regardless of the device locale** — the app's core content
+  is Arabic; a non-Arabic device locale must not switch the UI to English by itself.
+- **English stays fully available** via the F6 Settings ar/en toggle; the user's explicit
+  choice overrides the default and persists via DataStore (package-independent file names, D-019).
+- **This commit RECORDS the decision only** — the AppCompatDelegate-based locale application
+  code lands in a later commit on fix/phase3-wiring (PR #12).

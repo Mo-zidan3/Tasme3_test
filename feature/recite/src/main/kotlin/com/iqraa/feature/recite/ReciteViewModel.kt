@@ -18,7 +18,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
 /**
- * T7: the recite screen's ViewModel — the REAL pipeline (AudioCapture → PipelineEngine →
+ * T7: the recite screen's ViewModel — the REAL pipeline (ChunkSource → PipelineEngine →
  * ReciteSession → tracker) behind the §10.4 [SessionLifecycle] machine. Rotation survives
  * (ViewModel); screen-off / app-switch / focus-loss / mic-taken pause capture and RELEASE
  * the mic immediately (§10.4); resume restarts capture after the 1 s countdown.
@@ -26,7 +26,7 @@ import kotlinx.coroutines.launch
 class ReciteViewModel(
     private val session: ReciteSession,
     private val engine: PipelineEngine,
-    private val capture: AudioCapture,
+    private val capture: ChunkSource,
     private val lifecycle: SessionLifecycle = SessionLifecycle(),
 ) : ViewModel() {
     data class UiState(
@@ -56,13 +56,17 @@ class ReciteViewModel(
         }
     }
 
-    /** Starts (or resumes) capture per §10.4 — Active after the resume countdown. */
+    /** Starts (or resumes) capture per §10.4 — Active after the resume countdown.
+     *  V-048: a fresh session (initial Ended) fires START first — the machine's missing
+     *  session-begin transition without which the capture loop (guards on Active) could
+     *  never run (issue #11). */
     fun start() {
         if (lifecycle.state.value is com.iqraa.core.session.LifecycleState.Active) return
         if (lifecycle.state.value is com.iqraa.core.session.LifecycleState.Paused) {
             lifecycle.event(SessionEvent.RESUME)
             viewModelScope.launch { countdownThenStart() }
         } else {
+            lifecycle.event(SessionEvent.START)
             beginSession()
         }
     }
@@ -135,7 +139,7 @@ class ReciteViewModel(
     class Factory(
         private val session: ReciteSession,
         private val engine: PipelineEngine,
-        private val capture: AudioCapture,
+        private val capture: ChunkSource,
     ) : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>): T = ReciteViewModel(session, engine, capture) as T

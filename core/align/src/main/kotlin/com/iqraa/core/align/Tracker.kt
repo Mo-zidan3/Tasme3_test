@@ -19,7 +19,8 @@ data class ExpectedWord(
     val index: Int,
     val surah: Int,
     val ayah: Int,
-    val text: String,      // normalized model-space letters
+    /** normalized model-space letters */
+    val text: String,
     /** §7.6: optional-prefix words (basmala) — absorbable when recited, never MISSED,
      *  excluded from Y (tasmee' summary). */
     val optionalPrefix: Boolean = false,
@@ -67,17 +68,32 @@ data class TrackerUpdate(
 
 /** §6.2 interface — implementation lands in Phase 1 (§16). */
 interface RecitationTracker {
-    fun reset(expected: List<ExpectedWord>, config: TrackerConfig)
+    fun reset(
+        expected: List<ExpectedWord>,
+        config: TrackerConfig,
+    )
+
     fun onObservation(obs: Observation): TrackerUpdate
+
     fun hint(): TrackerUpdate
+
     fun reanchor(ayahIndex: Int): TrackerUpdate
+
+    /** V-048 (issue #11): the §9.6 summary — «صحيحة: X من Y» (X = CORRECT only; Y =
+     *  expected − HINTED − optional basmala). On the interface so session-level consumers
+     *  (ReciteSession) can surface it without depending on the concrete tracker. */
+    fun summary(): TasmeeSummary
 }
 
 /** §9.2 observation identity — (windowStartMs, windowEndMs, isFinal, modelRev). */
 fun Observation.identity(): String = "$windowStartMs:$windowEndMs:$isFinal:$modelRev"
 
 /** §9.2 independence: overlap < 50% of the shorter window, OR one final and the windows differ. */
-fun independent(a: Observation, b: Observation, strictOverlap: Boolean = false): Boolean {
+fun independent(
+    a: Observation,
+    b: Observation,
+    strictOverlap: Boolean = false,
+): Boolean {
     val overlapStart = maxOf(a.windowStartMs, b.windowStartMs)
     val overlapEnd = minOf(a.windowEndMs, b.windowEndMs)
     val overlap = (overlapEnd - overlapStart).coerceAtLeast(0)

@@ -7,3 +7,7 @@
 -dontwarn javax.lang.model.element.Element
 -dontwarn javax.lang.model.element.ElementKind
 -dontwarn javax.lang.model.util.Elements
+-dontwarn com.google.auto.value.AutoValue
+-dontwarn com.google.errorprone.annotations.**
+-dontwarn org.checkerframework.**
+-dontwarn javax.annotation.**
